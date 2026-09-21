@@ -26,11 +26,14 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22"
           cache: "npm"
 
       - name: Installer les dépendances
         run: npm ci
+
+      - name: Générer le client Prisma
+        run: npm run prisma:generate
 
       - name: Lint
         run: npm run lint
@@ -38,16 +41,21 @@ jobs:
       - name: Typecheck
         run: npm run typecheck
 
-      - name: Générer le client Prisma
-        run: npm run prisma:generate
-
       - name: Migrer la base de test
         run: npm run prisma:migrate:deploy
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
 
-      - name: Tests unitaires et d'intégration
+      - name: Vérifier l'alignement du schéma Prisma et de la base migrée
+        run: npm run prisma:drift
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
+
+      - name: Tests unitaires
         run: npm run test -- --coverage
+
+      - name: Tests d'intégration (base PostgreSQL réelle)
+        run: npm run test:integration
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
 

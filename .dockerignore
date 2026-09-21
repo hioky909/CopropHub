@@ -1,0 +1,13 @@
+# Le contexte de build est la racine du dépôt : rien de ce qui est généré
+# ou propre à la machine hôte ne doit entrer dans les images.
+# (Sans cela, les node_modules Windows — binaires bcrypt et moteur Prisma —
+# seraient copiés dans une image Linux.)
+**/node_modules
+**/dist
+**/coverage
+**/*.tsbuildinfo
+.git
+.github
+.env
+**/.env
+docs

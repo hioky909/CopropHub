@@ -1,3 +1,4 @@
+/* eslint-disable no-console -- script CLI : la sortie console est son interface */
 import { PrismaClient } from '@prisma/client';
 
 /**

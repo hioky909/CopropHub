@@ -4,5 +4,6 @@ build/
 .env
 *.log
 coverage/
+*.tsbuildinfo
 .DS_Store
 apps/backend/generated/

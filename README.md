@@ -23,15 +23,21 @@ apps/
 
 ## Démarrage local
 
+Prérequis : Node.js ≥ 22.12, npm, Docker (Compose v2).
+
 ```bash
-cp .env.example .env   # renseigner de vraies valeurs
+cp .env.example .env          # renseigner de vraies valeurs (DB_PASSWORD, SESSION_SECRET)
 npm install
 npm run prisma:generate
-docker compose up
-npm run prisma:seed    # crée l'immeuble unique du MVP + un compte syndic
+docker compose up --build     # base PostgreSQL, migrations, backend, frontend
+npm run prisma:seed           # crée l'immeuble unique du MVP + un compte syndic
 ```
 
-L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démarrage), le frontend sur `http://localhost:5173`.
+`docker compose up` applique les migrations (service `migrate`) avant de démarrer le backend. Si un PostgreSQL local occupe déjà le port 5432, définir `DB_PORT` (ex. `5433`) dans `.env` et adapter le port de `DATABASE_URL`.
+
+Le seed lit `DATABASE_URL` dans le `.env` racine et crée le compte `syndic@coprophub.local` avec un mot de passe par défaut, qui **n'est pas modifiable dans l'application au MVP** (la réinitialisation de mot de passe est prévue en V1) : ne pas utiliser ce compte tel quel en dehors d'un environnement de développement.
+
+L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démarrage), le frontend sur `http://localhost:5173`. Sans Docker, `npm run dev:backend` lance l'API en local (elle lit le `.env` racine) sur une base PostgreSQL déjà migrée (`npm run prisma:migrate:deploy`).
 
 ### Endpoints disponibles à ce stade
 
@@ -45,8 +51,12 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/utilisateurs` | syndic | Créer un copropriétaire (F-03, US-10) |
 | POST | `/utilisateurs/lots` | syndic | Créer un lot (F-02) |
 | POST | `/utilisateurs/lots/rattachement` | syndic | Rattacher un lot à un copropriétaire (US-10) |
+| POST | `/ags` | syndic | Créer une AG (statut « planifiée ») avec ses résolutions typées (F-04, US-07) |
+| POST | `/ags/:idAg/ouverture` | syndic | Ouvrir le vote d'une AG planifiée (T-38, RM-05) |
+| POST | `/ags/:idAg/cloture` | syndic | Clôturer une AG ouverte : calcule et fige le résultat de chaque résolution (T-10, F-06, RM-03, RM-04, US-08) |
+| POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Voter OUI / NON / ABSTENTION sur une résolution d'une AG ouverte (F-05, RM-02, US-02) |
 
-Le reste des routes métier (AG, votes, incidents, charges) arrive avec les tâches T-11 et suivantes du backlog.
+Le reste des routes métier (consultation des résolutions passées, incidents, charges) arrive avec les tâches T-11 et suivantes du backlog.
 
 ## Documentation
 
@@ -57,8 +67,19 @@ La documentation de conception complète vit pour l'instant dans documents de co
 ```bash
 npm run lint
 npm run typecheck
-npm run test
+npm run test               # tests unitaires (dépôts simulés, aucune base requise)
+npm run test:integration   # tests d'intégration sur une VRAIE base PostgreSQL
 npm run build
 ```
 
-La CI (`.github/workflows/ci.yml`) exécute ces étapes plus un audit de dépendances à chaque pull request, et déploie depuis `main` après leur succès.
+Les tests d'intégration exécutent les vraies routes contre PostgreSQL (migration appliquée) : contraintes du MPD, parcours AG → ouverture → votes → clôture, concurrence vote/clôture. Ils **vident les tables** : ils refusent de démarrer si `DATABASE_URL` est absente ou si le nom de la base ne se termine pas par `_test`.
+
+```bash
+# sur n'importe quel PostgreSQL (≥ 16), avec une base dédiée dont le nom finit par _test
+createdb -h localhost -U <utilisateur> coprophub_test
+export DATABASE_URL=postgresql://<utilisateur>:<mot_de_passe>@localhost:5432/coprophub_test   # PowerShell : $env:DATABASE_URL="..."
+npm run prisma:migrate:deploy
+npm run test:integration
+```
+
+La CI (`.github/workflows/ci.yml`) exécute ces étapes (intégration comprise, sur un service PostgreSQL) plus un audit de dépendances à chaque pull request, et déploie depuis `main` après leur succès.
