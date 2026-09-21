@@ -1,5 +1,0 @@
-# Data Access Layer
-Les repositories (UtilisateurRepository, VoteRepository, IncidentRepository…)
-seront ajoutés ici au fil de l'implémentation réelle. Seul ce dossier importe
-@prisma/client — une règle vérifiable par une simple revue de code
-(cf. ADR-001, § Mapping explicite avec l'architecture 3 couches).

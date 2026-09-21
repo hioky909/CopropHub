@@ -28,9 +28,25 @@ cp .env.example .env   # renseigner de vraies valeurs
 npm install
 npm run prisma:generate
 docker compose up
+npm run prisma:seed    # crée l'immeuble unique du MVP + un compte syndic
 ```
 
 L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démarrage), le frontend sur `http://localhost:5173`.
+
+### Endpoints disponibles à ce stade
+
+| Méthode | Route | Rôle | Description |
+|---|---|---|---|
+| POST | `/auth/inscription` | public | Auto-inscription d'un copropriétaire (F-01) |
+| POST | `/auth/connexion` | public | Connexion (F-01), limitée à 5 tentatives / 15 min |
+| POST | `/auth/deconnexion` | authentifié | Invalide le cookie de session |
+| GET | `/auth/moi` | authentifié | Utilisateur courant |
+| GET | `/utilisateurs` | syndic | Liste des copropriétaires |
+| POST | `/utilisateurs` | syndic | Créer un copropriétaire (F-03, US-10) |
+| POST | `/utilisateurs/lots` | syndic | Créer un lot (F-02) |
+| POST | `/utilisateurs/lots/rattachement` | syndic | Rattacher un lot à un copropriétaire (US-10) |
+
+Le reste des routes métier (AG, votes, incidents, charges) arrive avec les tâches T-11 et suivantes du backlog.
 
 ## Documentation
 

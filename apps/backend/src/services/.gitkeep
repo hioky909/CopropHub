@@ -1,5 +1,0 @@
-# Business Layer
-Les services métier (ResolutionService, IncidentService, ResultatCalculateur…)
-seront ajoutés ici au fil de l'implémentation réelle des tâches T-06 et
-suivantes (Doc 9 — Backlog MVP). Aucun accès direct à Prisma depuis ce
-dossier : passer par repositories/.

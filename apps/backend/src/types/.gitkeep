@@ -1,4 +1,0 @@
-# Types partagés
-Types TypeScript partagés entre couches (et potentiellement avec le
-frontend), notamment les enums métier — argument central d'ADR-001
-("un seul langage sur toute la stack").

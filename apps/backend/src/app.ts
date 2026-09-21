@@ -4,6 +4,10 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import { healthRouter } from './controllers/health.controller.js';
+import { authRouter } from './controllers/auth.controller.js';
+import { utilisateursRouter } from './controllers/utilisateurs.controller.js';
+import { sessionMiddleware } from './middleware/session.middleware.js';
+import { asyncHandler } from './middleware/async-handler.js';
 
 /**
  * Assemblage de l'application Express — reste la couche Presentation/API
@@ -37,10 +41,27 @@ export function createApp(): Express {
 
   app.use('/health', healthRouter);
 
-  // Les routeurs métier (auth, ag, incidents, charges…) seront montés ici
-  // au fur et à mesure de l'implémentation réelle des tâches T-06 et suivantes
-  // du backlog (Doc 9) — volontairement absents à ce stade (principe « pas d'anticipation » :
-  // pas de code fictif pour des fonctionnalités non encore implémentées).
+  // sessionMiddleware renseigne req.utilisateur si un cookie de session
+  // valide est présent ; il ne bloque rien lui-même (cf. middleware).
+  app.use(asyncHandler(sessionMiddleware));
+
+  app.use('/auth', authRouter);
+  app.use('/utilisateurs', utilisateursRouter);
+
+  // Les routeurs métier restants (AG, votes, incidents, charges) seront
+  // montés ici au fur et à mesure de l'implémentation réelle des tâches
+  // T-11 et suivantes du backlog (Doc 9) — volontairement absents à ce
+  // stade (principe « pas d'anticipation » : pas de code fictif pour des fonctionnalités non
+  // encore implémentées).
+
+  // Gestionnaire d'erreur générique : jamais de trace de pile ni de détail
+  // technique renvoyé au client (NF-06, Doc 5 § Gestion des erreurs) ; le
+  // détail complet part uniquement dans les logs serveur.
+  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+    // eslint-disable-next-line no-console
+    console.error(err);
+    res.status(500).json({ erreur: 'Une erreur interne est survenue.' });
+  });
 
   return app;
 }
