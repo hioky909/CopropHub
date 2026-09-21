@@ -29,6 +29,11 @@ export const lotService = {
       throw new LotDejaExistantError(donnees.numero);
     }
 
-    return lotRepository.creer(immeuble.id, donnees.numero, donnees.typeLot);
+    const lot = await lotRepository.creer(immeuble.id, donnees.numero, donnees.typeLot);
+    if (!lot) {
+      // Création concurrente du même numéro : la base a tranché.
+      throw new LotDejaExistantError(donnees.numero);
+    }
+    return lot;
   },
 };

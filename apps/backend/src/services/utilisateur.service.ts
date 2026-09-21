@@ -24,6 +24,26 @@ export class LotIntrouvableError extends Error {
   }
 }
 
+export class UtilisateurIntrouvableError extends Error {
+  constructor() {
+    super('Utilisateur introuvable.');
+    this.name = 'UtilisateurIntrouvableError';
+  }
+}
+
+export class RattachementConcurrentError extends Error {
+  constructor() {
+    super("Le lot vient d'être rattaché par une autre requête, réessayez.");
+    this.name = 'RattachementConcurrentError';
+  }
+}
+
+/** `date_debut` est une DATE (sans heure) : on compare des jours calendaires UTC, comme Prisma les écrit. */
+function debuteAvantAujourdhui(dateDebut: Date): boolean {
+  const jour = (date: Date) => date.toISOString().slice(0, 10);
+  return jour(dateDebut) < jour(new Date());
+}
+
 export const utilisateurService = {
   async listerCoproprietaires() {
     return utilisateurRepository.listerCoproprietaires();
@@ -35,12 +55,17 @@ export const utilisateurService = {
       throw new EmailDejaUtiliseError();
     }
     const motDePasseHash = await motDePasseService.hacher(donnees.motDePasseClair);
-    return utilisateurRepository.creer({
+    const utilisateur = await utilisateurRepository.creer({
       nom: donnees.nom,
       email: donnees.email,
       motDePasseHash,
       typeCompte: 'COPROPRIETAIRE',
     });
+    if (!utilisateur) {
+      // Création concurrente avec le même email : la base a tranché.
+      throw new EmailDejaUtiliseError();
+    }
+    return utilisateur;
   },
 
   /**
@@ -57,15 +82,32 @@ export const utilisateurService = {
     if (!lot) {
       throw new LotIntrouvableError();
     }
+    const utilisateur = await utilisateurRepository.parId(idUtilisateur);
+    if (!utilisateur) {
+      throw new UtilisateurIntrouvableError();
+    }
 
     const rattachementActif = await lotRepository.rattachementActif(idLot);
-    if (rattachementActif && rattachementActif.idUtilisateur !== idUtilisateur) {
-      await lotRepository.cloturerRattachement(rattachementActif.id);
-    }
     if (rattachementActif && rattachementActif.idUtilisateur === idUtilisateur) {
       return rattachementActif; // déjà rattaché à cet utilisateur, opération idempotente
     }
 
-    return lotRepository.creerRattachement(idLot, idUtilisateur);
+    // L'ancien rattachement est clôturé (historique conservé). Sauf s'il a
+    // débuté aujourd'hui : le MPD exige date_fin > date_debut, et une durée
+    // nulle n'a rien à historiser, on le supprime alors (correction de saisie).
+    const ancien = rattachementActif
+      ? {
+          id: rattachementActif.id,
+          action: debuteAvantAujourdhui(rattachementActif.dateDebut)
+            ? ('CLOTURER' as const)
+            : ('SUPPRIMER' as const),
+        }
+      : null;
+
+    const cree = await lotRepository.transfererRattachement(idLot, idUtilisateur, ancien);
+    if (!cree) {
+      throw new RattachementConcurrentError();
+    }
+    return cree;
   },
 };

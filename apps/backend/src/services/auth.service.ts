@@ -63,6 +63,10 @@ export const authService = {
       motDePasseHash,
       typeCompte: 'COPROPRIETAIRE',
     });
+    if (!utilisateur) {
+      // Inscription concurrente avec le même email : la base a tranché.
+      throw new EmailDejaUtiliseError();
+    }
 
     const jeton = sessionService.emettreJeton(utilisateur.id);
     return { utilisateur: versUtilisateurAuthentifie(utilisateur), jeton };

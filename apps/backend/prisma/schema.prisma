@@ -3,6 +3,12 @@
 // Certaines contraintes avancées (index unique partiel, CHECK multi-colonnes)
 // ne sont pas exprimables nativement par Prisma : elles sont ajoutées à la main
 // dans la migration 0001_init/migration.sql, conformément à ADR-001.
+//
+// Ce fichier doit rester ALIGNÉ sur la base réellement migrée. Vérification :
+//   npx prisma migrate diff --from-url "$DATABASE_URL" \
+//     --to-schema-datamodel prisma/schema.prisma --script
+// ne doit produire aucune instruction (les CHECK et l'index unique partiel,
+// non modélisables ici, sont ignorés par Prisma et n'apparaissent pas).
 
 generator client {
   provider = "prisma-client-js"
@@ -70,7 +76,7 @@ enum StatutIncident {
 }
 
 model Utilisateur {
-  id                       String     @id @default(uuid()) @map("id_utilisateur") @db.Uuid
+  id                       String     @id @default(dbgenerated("gen_random_uuid()")) @map("id_utilisateur") @db.Uuid
   nom                      String     @db.VarChar(120)
   email                    String     @unique @db.VarChar(255)
   motDePasseHash           String     @map("mot_de_passe_hash") @db.VarChar(255)
@@ -78,15 +84,15 @@ model Utilisateur {
   estMembreConseilSyndical Boolean    @default(false) @map("est_membre_conseil_syndical")
   dateCreation             DateTime   @default(now()) @map("date_creation") @db.Timestamptz
 
-  rattachements       Rattachement[]
-  votes                Vote[]
-  incidentsDeclares   Incident[]
+  rattachements     Rattachement[]
+  votes             Vote[]
+  incidentsDeclares Incident[]
 
   @@map("utilisateur")
 }
 
 model Immeuble {
-  id      String @id @default(uuid()) @map("id_immeuble") @db.Uuid
+  id      String @id @default(dbgenerated("gen_random_uuid()")) @map("id_immeuble") @db.Uuid
   nom     String @db.VarChar(120)
   adresse String @db.VarChar(255)
 
@@ -98,55 +104,57 @@ model Immeuble {
 }
 
 model Lot {
-  id          String @id @default(uuid()) @map("id_lot") @db.Uuid
-  idImmeuble  String @map("id_immeuble") @db.Uuid
-  numero      String @db.VarChar(20)
-  typeLot     String @map("type_lot") @db.VarChar(50)
+  id         String @id @default(dbgenerated("gen_random_uuid()")) @map("id_lot") @db.Uuid
+  idImmeuble String @map("id_immeuble") @db.Uuid
+  numero     String @db.VarChar(20)
+  typeLot    String @map("type_lot") @db.VarChar(50)
 
-  immeuble       Immeuble       @relation(fields: [idImmeuble], references: [id], onDelete: Cascade)
-  rattachements  Rattachement[]
-  charges        Charge[]
-  incidents      Incident[]
+  immeuble      Immeuble       @relation(fields: [idImmeuble], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  rattachements Rattachement[]
+  charges       Charge[]
+  incidents     Incident[]
 
   @@unique([idImmeuble, numero])
+  @@index([idImmeuble], map: "idx_lot_immeuble")
   @@map("lot")
 }
 
 model Rattachement {
-  id            String    @id @default(uuid()) @map("id_rattachement") @db.Uuid
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @map("id_rattachement") @db.Uuid
   idLot         String    @map("id_lot") @db.Uuid
   idUtilisateur String    @map("id_utilisateur") @db.Uuid
-  dateDebut     DateTime  @default(now()) @map("date_debut") @db.Date
+  dateDebut     DateTime  @default(dbgenerated("CURRENT_DATE")) @map("date_debut") @db.Date
   dateFin       DateTime? @map("date_fin") @db.Date
 
-  lot         Lot         @relation(fields: [idLot], references: [id], onDelete: Cascade)
-  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [id], onDelete: Restrict)
+  lot         Lot         @relation(fields: [idLot], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@map("rattachement")
 }
 
 model AG {
-  id         String   @id @default(uuid()) @map("id_ag") @db.Uuid
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @map("id_ag") @db.Uuid
   idImmeuble String   @map("id_immeuble") @db.Uuid
   dateAg     DateTime @map("date_ag") @db.Date
   statut     StatutAG @default(PLANIFIEE)
 
-  immeuble    Immeuble     @relation(fields: [idImmeuble], references: [id], onDelete: Cascade)
+  immeuble    Immeuble     @relation(fields: [idImmeuble], references: [id], onDelete: Cascade, onUpdate: NoAction)
   resolutions Resolution[]
 
   @@map("ag")
 }
 
 model Resolution {
-  id             String           @id @default(uuid()) @map("id_resolution") @db.Uuid
+  id             String           @id @default(dbgenerated("gen_random_uuid()")) @map("id_resolution") @db.Uuid
   idAg           String           @map("id_ag") @db.Uuid
   libelle        String           @db.VarChar(500)
   typeMajorite   TypeMajorite     @map("type_majorite")
   statutResultat StatutResolution @default(EN_ATTENTE) @map("statut_resultat")
 
-  ag    AG     @relation(fields: [idAg], references: [id], onDelete: Cascade)
+  ag    AG     @relation(fields: [idAg], references: [id], onDelete: Cascade, onUpdate: NoAction)
   votes Vote[]
 
+  @@index([idAg], map: "idx_resolution_ag")
   @@map("resolution")
 }
 
@@ -156,27 +164,28 @@ model Vote {
   valeur        ValeurVote
   dateVote      DateTime   @default(now()) @map("date_vote") @db.Timestamptz
 
-  resolution  Resolution  @relation(fields: [idResolution], references: [id], onDelete: Cascade)
-  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [id], onDelete: Restrict)
+  resolution  Resolution  @relation(fields: [idResolution], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@id([idResolution, idUtilisateur])
   @@map("vote")
 }
 
 model Charge {
-  id       String       @id @default(uuid()) @map("id_charge") @db.Uuid
-  idLot    String       @map("id_lot") @db.Uuid
-  montant  Decimal      @db.Decimal(10, 2)
-  periode  String       @db.VarChar(20)
-  statut   StatutCharge @default(A_PAYER)
+  id      String       @id @default(dbgenerated("gen_random_uuid()")) @map("id_charge") @db.Uuid
+  idLot   String       @map("id_lot") @db.Uuid
+  montant Decimal      @db.Decimal(10, 2)
+  periode String       @db.VarChar(20)
+  statut  StatutCharge @default(A_PAYER)
 
-  lot Lot @relation(fields: [idLot], references: [id], onDelete: Cascade)
+  lot Lot @relation(fields: [idLot], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
+  @@index([idLot], map: "idx_charge_lot")
   @@map("charge")
 }
 
 model Incident {
-  id                     String         @id @default(uuid()) @map("id_incident") @db.Uuid
+  id                     String         @id @default(dbgenerated("gen_random_uuid()")) @map("id_incident") @db.Uuid
   idImmeuble             String         @map("id_immeuble") @db.Uuid
   idLot                  String?        @map("id_lot") @db.Uuid
   idUtilisateurDeclarant String         @map("id_utilisateur_declarant") @db.Uuid
@@ -185,9 +194,10 @@ model Incident {
   statut                 StatutIncident @default(DECLARE)
   dateCreation           DateTime       @default(now()) @map("date_creation") @db.Timestamptz
 
-  immeuble    Immeuble    @relation(fields: [idImmeuble], references: [id], onDelete: Cascade)
-  lot         Lot?        @relation(fields: [idLot], references: [id], onDelete: SetNull)
-  declarant   Utilisateur @relation(fields: [idUtilisateurDeclarant], references: [id], onDelete: Restrict)
+  immeuble  Immeuble    @relation(fields: [idImmeuble], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  lot       Lot?        @relation(fields: [idLot], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  declarant Utilisateur @relation(fields: [idUtilisateurDeclarant], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
+  @@index([idImmeuble, statut], map: "idx_incident_immeuble_statut")
   @@map("incident")
 }

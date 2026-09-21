@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { prisma } from './prisma-client.js';
 import type { TypeCompte } from '../types/auth.js';
 
@@ -22,8 +23,22 @@ export const utilisateurRepository = {
     return prisma.utilisateur.findUnique({ where: { id } });
   },
 
-  creer(donnees: NouvelUtilisateur) {
-    return prisma.utilisateur.create({ data: donnees });
+  /**
+   * Crée l'utilisateur. Retourne `null` si l'email est déjà pris : la
+   * vérification préalable (`parEmail`) ne suffit pas face à deux requêtes
+   * simultanées, seule la contrainte d'unicité de la base est fiable. On la
+   * traduit ici (violation d'unicité P2002) pour que le service réponde par
+   * une erreur métier et non par une erreur interne.
+   */
+  async creer(donnees: NouvelUtilisateur) {
+    try {
+      return await prisma.utilisateur.create({ data: donnees });
+    } catch (erreur) {
+      if (erreur instanceof Prisma.PrismaClientKnownRequestError && erreur.code === 'P2002') {
+        return null;
+      }
+      throw erreur;
+    }
   },
 
   /**
