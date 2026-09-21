@@ -19,5 +19,5 @@
     "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
     "no-console": ["warn", { "allow": ["error", "warn"] }]
   },
-  "ignorePatterns": ["dist", "generated", "node_modules"]
+  "ignorePatterns": ["dist", "generated", "node_modules", "vitest.config.ts"]
 }
