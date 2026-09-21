@@ -1,0 +1,3 @@
+# Middlewares transverses
+Authentification (session cookie), autorisation par rôle, validation des
+entrées (zod) — ajoutés au fil de T-06 à T-10 (Doc 9).

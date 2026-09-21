@@ -1,0 +1,67 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: coprophub_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Générer le client Prisma
+        run: npm run prisma:generate
+
+      - name: Migrer la base de test
+        run: npm run prisma:migrate:deploy
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
+
+      - name: Tests unitaires et d'intégration
+        run: npm run test -- --coverage
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
+
+      - name: Build
+        run: npm run build
+
+      - name: Audit de sécurité des dépendances
+        run: npm audit --audit-level=high
+
+  deploy:
+    needs: quality
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Déployer
+        run: echo "Étape de déploiement (Docker Compose / plateforme cloud, cf. Doc 8 CI/CD)"
