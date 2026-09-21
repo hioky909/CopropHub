@@ -6,6 +6,8 @@ import rateLimit from 'express-rate-limit';
 import { healthRouter } from './controllers/health.controller.js';
 import { authRouter } from './controllers/auth.controller.js';
 import { utilisateursRouter } from './controllers/utilisateurs.controller.js';
+import { agRouter } from './controllers/ag.controller.js';
+import { voteRouter } from './controllers/vote.controller.js';
 import { sessionMiddleware } from './middleware/session.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
 
@@ -47,21 +49,25 @@ export function createApp(): Express {
 
   app.use('/auth', authRouter);
   app.use('/utilisateurs', utilisateursRouter);
+  app.use('/ags', agRouter);
+  app.use('/resolutions', voteRouter);
 
-  // Les routeurs métier restants (AG, votes, incidents, charges) seront
+  // Les routeurs métier restants (incidents, charges) seront
   // montés ici au fur et à mesure de l'implémentation réelle des tâches
-  // T-11 et suivantes du backlog (Doc 9) — volontairement absents à ce
+  // suivantes du backlog (Doc 9) — volontairement absents à ce
   // stade (principe « pas d'anticipation » : pas de code fictif pour des fonctionnalités non
   // encore implémentées).
 
   // Gestionnaire d'erreur générique : jamais de trace de pile ni de détail
   // technique renvoyé au client (NF-06, Doc 5 § Gestion des erreurs) ; le
   // détail complet part uniquement dans les logs serveur.
-  app.use((err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
-    res.status(500).json({ erreur: 'Une erreur interne est survenue.' });
-  });
+  app.use(
+    (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      // eslint-disable-next-line no-console
+      console.error(err);
+      res.status(500).json({ erreur: 'Une erreur interne est survenue.' });
+    },
+  );
 
   return app;
 }
