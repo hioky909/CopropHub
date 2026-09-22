@@ -8,6 +8,7 @@ import { authRouter } from './controllers/auth.controller.js';
 import { utilisateursRouter } from './controllers/utilisateurs.controller.js';
 import { agRouter } from './controllers/ag.controller.js';
 import { voteRouter } from './controllers/vote.controller.js';
+import { incidentRouter } from './controllers/incident.controller.js';
 import { sessionMiddleware } from './middleware/session.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
 
@@ -51,12 +52,12 @@ export function createApp(): Express {
   app.use('/utilisateurs', utilisateursRouter);
   app.use('/ags', agRouter);
   app.use('/resolutions', voteRouter);
+  app.use('/incidents', incidentRouter);
 
-  // Les routeurs métier restants (incidents, charges) seront
-  // montés ici au fur et à mesure de l'implémentation réelle des tâches
-  // suivantes du backlog (Doc 9) — volontairement absents à ce
-  // stade (principe « pas d'anticipation » : pas de code fictif pour des fonctionnalités non
-  // encore implémentées).
+  // Le routeur métier restant (charges) sera monté ici au fur et à mesure
+  // de l'implémentation réelle des tâches suivantes du backlog (Doc 9) —
+  // volontairement absent à ce stade (principe « pas d'anticipation » : pas de code fictif
+  // pour des fonctionnalités non encore implémentées).
 
   // Gestionnaire d'erreur générique : jamais de trace de pile ni de détail
   // technique renvoyé au client (NF-06, Doc 5 § Gestion des erreurs) ; le

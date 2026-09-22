@@ -16,7 +16,11 @@ const SYNDIC: UtilisateurAuthentifie = {
   estMembreConseilSyndical: false,
 };
 const COPRO: UtilisateurAuthentifie = { ...SYNDIC, id: 'u-copro', typeCompte: 'COPROPRIETAIRE' };
-const MEMBRE_CONSEIL: UtilisateurAuthentifie = { ...COPRO, id: 'u-conseil', estMembreConseilSyndical: true };
+const MEMBRE_CONSEIL: UtilisateurAuthentifie = {
+  ...COPRO,
+  id: 'u-conseil',
+  estMembreConseilSyndical: true,
+};
 
 beforeAll(() => {
   process.env.SESSION_SECRET = 'secret-de-test-pour-les-tests-uniquement';
@@ -84,7 +88,9 @@ describe('GET /ags/:idAg/resolutions (T-11, F-07, US-04)', () => {
     ['un membre du conseil syndical', MEMBRE_CONSEIL],
     ['un copropriétaire', COPRO],
   ])('200 pour %s : décomptes anonymes uniquement', async (_libelle, utilisateur) => {
-    vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(agClotureeAvecDecomptes());
+    vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(
+      agClotureeAvecDecomptes(),
+    );
     const reponse = await request(createApp()).get(url).set('Cookie', cookieDe(utilisateur));
 
     expect(reponse.status).toBe(200);

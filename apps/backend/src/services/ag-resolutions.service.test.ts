@@ -1,9 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import {
-  agService,
-  AgIntrouvableError,
-  ResolutionsNonDisponiblesError,
-} from './ag.service.js';
+import { agService, AgIntrouvableError, ResolutionsNonDisponiblesError } from './ag.service.js';
 import { agRepository } from '../repositories/ag.repository.js';
 
 const ID_AG = '55555555-5555-4555-8555-555555555555';
@@ -34,7 +30,9 @@ afterEach(() => {
 
 describe('agService.listerAgs (T-11, F-07)', () => {
   it('délègue au dépôt', async () => {
-    const lister = vi.spyOn(agRepository, 'listerToutes').mockResolvedValue([agAvecDecomptes('CLOTUREE')]);
+    const lister = vi
+      .spyOn(agRepository, 'listerToutes')
+      .mockResolvedValue([agAvecDecomptes('CLOTUREE')]);
     const ags = await agService.listerAgs();
     expect(lister).toHaveBeenCalledTimes(1);
     expect(ags).toHaveLength(1);
@@ -43,7 +41,9 @@ describe('agService.listerAgs (T-11, F-07)', () => {
 
 describe('agService.consulterResolutions (T-11, F-07, US-04)', () => {
   it("renvoie les décomptes anonymes d'une AG clôturée", async () => {
-    vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(agAvecDecomptes('CLOTUREE'));
+    vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(
+      agAvecDecomptes('CLOTUREE'),
+    );
     const resultat = await agService.consulterResolutions(ID_AG);
     expect(resultat.resolutions[0]?.decomptes).toEqual({ oui: 3, non: 1, abstention: 0 });
     // US-04 : jamais l'identité d'un votant dans la réponse.
@@ -58,7 +58,9 @@ describe('agService.consulterResolutions (T-11, F-07, US-04)', () => {
   it.each(['PLANIFIEE', 'OUVERTE'] as const)(
     "refuse tant que l'AG est %s (les décomptes en cours ne doivent pas influencer les votants)",
     async (statut) => {
-      vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(agAvecDecomptes(statut));
+      vi.spyOn(agRepository, 'avecResolutionsEtDecomptes').mockResolvedValue(
+        agAvecDecomptes(statut),
+      );
       await expect(agService.consulterResolutions(ID_AG)).rejects.toBeInstanceOf(
         ResolutionsNonDisponiblesError,
       );

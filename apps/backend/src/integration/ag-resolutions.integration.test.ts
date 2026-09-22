@@ -81,9 +81,16 @@ describe('GET /ags/:idAg/resolutions — décomptes réels', () => {
   });
 
   it('liste toutes les AG (GET /ags), les plus récentes en premier', async () => {
-    const ancienne = await creerAg(immeuble.id, 'CLOTUREE', [{ libelle: 'A', typeMajorite: 'SIMPLE' }]);
-    await prisma.aG.update({ where: { id: ancienne.id }, data: { dateAg: new Date('2025-01-01') } });
-    const recente = await creerAg(immeuble.id, 'PLANIFIEE', [{ libelle: 'B', typeMajorite: 'SIMPLE' }]);
+    const ancienne = await creerAg(immeuble.id, 'CLOTUREE', [
+      { libelle: 'A', typeMajorite: 'SIMPLE' },
+    ]);
+    await prisma.aG.update({
+      where: { id: ancienne.id },
+      data: { dateAg: new Date('2025-01-01') },
+    });
+    const recente = await creerAg(immeuble.id, 'PLANIFIEE', [
+      { libelle: 'B', typeMajorite: 'SIMPLE' },
+    ]);
 
     const votant = await creerCoproprietaireHabilite(immeuble.id, '1');
     const reponse = await request(app).get('/ags').set('Cookie', cookieSession(votant.id));

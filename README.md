@@ -57,8 +57,9 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Voter OUI / NON / ABSTENTION sur une résolution d'une AG ouverte (F-05, RM-02, US-02) |
 | GET | `/ags` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des AG, les plus récentes en premier (T-11, F-07) |
 | GET | `/ags/:idAg/resolutions` | authentifié (syndic, conseil syndical, copropriétaire) | Résultat des résolutions d'une AG **clôturée** : décomptes anonymes (oui/non/abstention), jamais l'identité des votants (T-11, F-07, US-04) — refusé (409) tant que l'AG n'est pas clôturée |
+| POST | `/incidents` | copropriétaire | Déclarer un incident sur son propre lot ou une partie commune (`idLot` absent), statut « déclaré » (T-12, F-08 partiel, US-03) |
 
-Le reste des routes métier (incidents, charges) arrive avec les tâches T-12 et suivantes du backlog.
+Le suivi de statut d'un incident (US-09, RM-11 à RM-13) et sa consultation, ainsi que les charges, arrivent avec les tâches T-13 et suivantes du backlog.
 
 ## Documentation
 
