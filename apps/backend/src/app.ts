@@ -9,6 +9,7 @@ import { utilisateursRouter } from './controllers/utilisateurs.controller.js';
 import { agRouter } from './controllers/ag.controller.js';
 import { voteRouter } from './controllers/vote.controller.js';
 import { incidentRouter } from './controllers/incident.controller.js';
+import { chargeRouter } from './controllers/charge.controller.js';
 import { sessionMiddleware } from './middleware/session.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
 
@@ -53,11 +54,11 @@ export function createApp(): Express {
   app.use('/ags', agRouter);
   app.use('/resolutions', voteRouter);
   app.use('/incidents', incidentRouter);
+  app.use('/charges', chargeRouter);
 
-  // Le routeur métier restant (charges) sera monté ici au fur et à mesure
-  // de l'implémentation réelle des tâches suivantes du backlog (Doc 9) —
-  // volontairement absent à ce stade (principe « pas d'anticipation » : pas de code fictif
-  // pour des fonctionnalités non encore implémentées).
+  // Le backlog MVP (Doc 9) s'arrête ici pour les routeurs métier ; le reste
+  // (T-15 et suivantes) couvre tests, interface, sécurité transverse et
+  // documentation, pas de nouvelles routes.
 
   // Gestionnaire d'erreur générique : jamais de trace de pile ni de détail
   // technique renvoyé au client (NF-06, Doc 5 § Gestion des erreurs) ; le

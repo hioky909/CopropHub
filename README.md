@@ -60,8 +60,10 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/incidents` | copropriétaire | Déclarer un incident sur son propre lot ou une partie commune (`idLot` absent), statut « déclaré » (T-12, F-08 partiel, US-03) |
 | GET | `/incidents` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des incidents : tous pour le syndic et le conseil syndical, seulement « les siens » pour un copropriétaire (T-13, RM-12) |
 | PATCH | `/incidents/:idIncident/statut` | syndic | Faire progresser le statut d'un incident : déclaré → en cours → résolu uniquement, jamais de saut d'étape ni de retour en arrière (T-13, RM-11, RM-13, US-09) |
+| GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
+| GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |
 
-Les charges arrivent avec la tâche T-14 et suivantes du backlog.
+Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-15 et au-delà) couvrent tests, interface, sécurité transverse et documentation.
 
 ## Documentation
 
