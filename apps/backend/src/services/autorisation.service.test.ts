@@ -1,5 +1,10 @@
 import { describe, it, expect } from 'vitest';
-import { autoriser, PERMISSIONS_RESSOURCE_LOT, type RessourceAutorisable } from './autorisation.service.js';
+import {
+  autoriser,
+  PERMISSIONS_RESSOURCE_LOT,
+  type Action,
+  type RessourceAutorisable,
+} from './autorisation.service.js';
 import type { UtilisateurAuthentifie } from '../types/auth.js';
 
 /**
@@ -54,5 +59,41 @@ describe('autoriser (RM-14)', () => {
 
   it("refuse l'écriture à un copropriétaire même sur sa propre ressource (ligne 'lot' : lecture seule)", () => {
     expect(autoriser(coproprietaireA, 'ecrire', ressourceDeA, PERMISSIONS_RESSOURCE_LOT)).toBe(false);
+  });
+
+  describe('cumul des droits pour un membre du conseil syndical (décision confirmée avec l\'utilisateur, 22/09)', () => {
+    /** Ligne fictive où, contrairement à "lot", le copropriétaire a l'écriture sur SA ressource (ex. déclarer un incident sur son propre lot) mais pas le conseil syndical (lecture étendue seule). */
+    const permissionsAvecEcritureCoproprietaire = {
+      syndic: new Set<Action>(['lire', 'ecrire']),
+      conseilSyndical: new Set<Action>(['lire']),
+      coproprietaire: new Set<Action>(['lire', 'ecrire']),
+    };
+
+    const conseilSyndicalSurSaPropreRessource: RessourceAutorisable = {
+      appartientA: (u) => u.id === conseilSyndical.id,
+    };
+
+    it("un membre du conseil syndical garde son droit d'écriture de copropriétaire sur SA PROPRE ressource (cumul, pas remplacement)", () => {
+      expect(
+        autoriser(
+          conseilSyndical,
+          'ecrire',
+          conseilSyndicalSurSaPropreRessource,
+          permissionsAvecEcritureCoproprietaire,
+        ),
+      ).toBe(true);
+    });
+
+    it("un membre du conseil syndical n'a PAS le droit d'écriture de copropriétaire sur la ressource d'un AUTRE (le cumul ne casse pas l'IDOR)", () => {
+      expect(
+        autoriser(conseilSyndical, 'ecrire', ressourceDeA, permissionsAvecEcritureCoproprietaire),
+      ).toBe(false);
+    });
+
+    it('un membre du conseil syndical garde sa lecture étendue sur une ressource qui ne lui appartient pas, même avec cette nouvelle ligne', () => {
+      expect(
+        autoriser(conseilSyndical, 'lire', ressourceDeA, permissionsAvecEcritureCoproprietaire),
+      ).toBe(true);
+    });
   });
 });

@@ -1,5 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { incidentService, DeclarationInterditeError, LotNonRattacheError } from './incident.service.js';
+import {
+  incidentService,
+  DeclarationInterditeError,
+  LotNonRattacheError,
+} from './incident.service.js';
 import { ImmeubleNonInitialiseError } from './lot.service.js';
 import { incidentRepository, type NouvelIncident } from '../repositories/incident.repository.js';
 import { lotRepository } from '../repositories/lot.repository.js';
@@ -15,7 +19,11 @@ const COPRO: UtilisateurAuthentifie = {
   typeCompte: 'COPROPRIETAIRE',
   estMembreConseilSyndical: false,
 };
-const CONSEIL_COPRO: UtilisateurAuthentifie = { ...COPRO, id: 'u-conseil', estMembreConseilSyndical: true };
+const CONSEIL_COPRO: UtilisateurAuthentifie = {
+  ...COPRO,
+  id: 'u-conseil',
+  estMembreConseilSyndical: true,
+};
 const SYNDIC: UtilisateurAuthentifie = { ...COPRO, id: 'u-syndic', typeCompte: 'SYNDIC' };
 
 function espions() {

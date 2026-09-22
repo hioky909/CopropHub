@@ -50,10 +50,16 @@ export function autoriser(
   if (utilisateur.typeCompte === 'SYNDIC') {
     return permissions.syndic.has(action);
   }
-  if (utilisateur.estMembreConseilSyndical) {
-    return permissions.conseilSyndical.has(action);
-  }
   if (utilisateur.typeCompte === 'COPROPRIETAIRE') {
+    // Le conseil syndical CUMULE son droit de regard étendu (accordé sur
+    // TOUTES les ressources, sans vérification d'appartenance) avec ses
+    // droits de copropriétaire de base (eux restent conditionnés à
+    // l'appartenance) — jamais un remplacement de l'un par l'autre. Décision
+    // du 22/09 : « droit de regard
+    // supplémentaire » (Doc 2) ne retire aucun droit de base.
+    if (utilisateur.estMembreConseilSyndical && permissions.conseilSyndical.has(action)) {
+      return true;
+    }
     if (!ressource.appartientA(utilisateur)) {
       return false;
     }

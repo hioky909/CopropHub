@@ -41,3 +41,4 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Rattacher un lot à un utilisateur inexistant renvoyait 500 au lieu de 404.
 - Un vote pouvait s'enregistrer après le décompte de la clôture (course vote/clôture, RM-04) : contrôle « AG ouverte » et insertion désormais atomiques (verrou de ligne).
 - Documentation de démarrage : script racine `prisma:seed` inexistant, `.env` racine non chargé par `dev` et `prisma:seed`, migrations jamais appliquées par `docker compose up`, conflit possible du port 5432.
+- `autoriser()` (T-07) remplaçait intégralement les droits de base d'un copropriétaire membre du conseil syndical par le jeu de permissions conseil syndical, au lieu de les cumuler : un membre du conseil syndical aurait été refusé sur sa propre ressource si le conseil syndical n'a que la lecture pour cette ligne de la matrice. Corrigé en cumul (décision confirmée avec l'utilisateur), sans régression sur l'IDOR.
