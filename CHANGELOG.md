@@ -23,6 +23,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Service `migrate` dans `docker-compose.yml`, `.dockerignore`, variable `DB_PORT`.
 - Consultation des résolutions passées (T-11, F-07, US-04) : `GET /ags` et `GET /ags/:idAg/resolutions`, ouverts aux trois rôles authentifiés (Doc 5, matrice d'autorisation). Décomptes anonymes uniquement (oui/non/abstention), jamais l'identité des votants — choix tranché en conception détaillée, US-04 laissait le point ouvert. Refusé (409) tant que l'AG n'est pas clôturée, pour ne pas influencer les votants restants.
 - Déclaration d'incident (T-12, F-08 partiel, US-03) : `POST /incidents`, réservé au copropriétaire, statut « déclaré » (RM-11). `idLot` absent = partie commune (US-03) ; `idLot` fourni doit appartenir à un lot rattaché au déclarant, vérifié avant toute écriture (anti-IDOR/BOLA). Suivi de statut et consultation (RM-12, RM-13, US-09) laissés à T-13.
+- Machine à états incident (T-13, RM-11 à RM-13, US-09) : `GET /incidents` (tous pour syndic et conseil syndical, « les siens » pour un copropriétaire) et `PATCH /incidents/:idIncident/statut` (syndic uniquement), transitions déclaré→en cours et en cours→résolu seulement, tout saut d'étape ou retour en arrière rejeté (422). Visibilité des incidents « partie commune » d'autrui non implémentée (point ouvert documenté dans le Doc 5, non tranché).
 
 ### Changed
 

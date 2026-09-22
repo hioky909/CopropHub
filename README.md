@@ -58,8 +58,10 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | GET | `/ags` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des AG, les plus récentes en premier (T-11, F-07) |
 | GET | `/ags/:idAg/resolutions` | authentifié (syndic, conseil syndical, copropriétaire) | Résultat des résolutions d'une AG **clôturée** : décomptes anonymes (oui/non/abstention), jamais l'identité des votants (T-11, F-07, US-04) — refusé (409) tant que l'AG n'est pas clôturée |
 | POST | `/incidents` | copropriétaire | Déclarer un incident sur son propre lot ou une partie commune (`idLot` absent), statut « déclaré » (T-12, F-08 partiel, US-03) |
+| GET | `/incidents` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des incidents : tous pour le syndic et le conseil syndical, seulement « les siens » pour un copropriétaire (T-13, RM-12) |
+| PATCH | `/incidents/:idIncident/statut` | syndic | Faire progresser le statut d'un incident : déclaré → en cours → résolu uniquement, jamais de saut d'étape ni de retour en arrière (T-13, RM-11, RM-13, US-09) |
 
-Le suivi de statut d'un incident (US-09, RM-11 à RM-13) et sa consultation, ainsi que les charges, arrivent avec les tâches T-13 et suivantes du backlog.
+Les charges arrivent avec la tâche T-14 et suivantes du backlog.
 
 ## Documentation
 

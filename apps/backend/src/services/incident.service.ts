@@ -1,3 +1,4 @@
+import type { StatutIncident } from '@prisma/client';
 import { incidentRepository } from '../repositories/incident.repository.js';
 import { lotRepository } from '../repositories/lot.repository.js';
 import { immeubleRepository } from '../repositories/immeuble.repository.js';
@@ -5,10 +6,8 @@ import { ImmeubleNonInitialiseError } from './lot.service.js';
 import type { UtilisateurAuthentifie } from '../types/auth.js';
 
 /**
- * Business Layer — T-12 (F-08 partiel, US-03) : déclaration d'un incident
- * par un copropriétaire. Le suivi de statut (US-09, RM-11 à RM-13) et la
- * consultation (RM-12 « le consulter ») arrivent avec T-13 : ce service ne
- * fait volontairement que créer l'incident (principe « pas d'anticipation »).
+ * Business Layer — T-12 (F-08 partiel, US-03) : déclaration d'un incident.
+ * T-13 (RM-11 à RM-13, US-09) : consultation et machine à états.
  */
 
 export class DeclarationInterditeError extends Error {
@@ -28,7 +27,73 @@ export class LotNonRattacheError extends Error {
   }
 }
 
+export class IncidentIntrouvableError extends Error {
+  constructor() {
+    super('Incident introuvable.');
+    this.name = 'IncidentIntrouvableError';
+  }
+}
+
+export class TransitionInvalideError extends Error {
+  constructor() {
+    // RM-11 : seules déclaré→en cours et en cours→résolu sont valides.
+    // RM-13 : un incident résolu est terminal, jamais de retour en arrière.
+    super('Transition de statut invalide.');
+    this.name = 'TransitionInvalideError';
+  }
+}
+
+/** La seule transition valide à partir de chaque statut cible demandé (RM-11) — DECLARE n'est jamais une cible, on ne peut pas y revenir. */
+const STATUT_ATTENDU_POUR: Partial<Record<StatutIncident, StatutIncident>> = {
+  EN_COURS: 'DECLARE',
+  RESOLU: 'EN_COURS',
+};
+
 export const incidentService = {
+  /**
+   * RM-12 : le syndic et le conseil syndical consultent tous les incidents
+   * (droit de regard étendu, sans condition d'appartenance) ; un
+   * copropriétaire ne consulte que ceux qu'il a lui-même déclarés. La
+   * visibilité des incidents « partie commune » déclarés par un AUTRE
+   * copropriétaire reste un point ouvert non tranché (Doc 5 le marque
+   * explicitement « à trancher en conception détaillée ») : non implémentée.
+   */
+  async lister(utilisateur: UtilisateurAuthentifie) {
+    if (utilisateur.typeCompte === 'SYNDIC' || utilisateur.estMembreConseilSyndical) {
+      return incidentRepository.listerTous();
+    }
+    return incidentRepository.listerPourDeclarant(utilisateur.id);
+  },
+
+  /**
+   * US-09 : seul le syndic fait progresser le statut (RM-12 : le conseil
+   * syndical n'a que la lecture étendue, jamais l'écriture, sur cette
+   * ligne de la matrice — cf. Doc 5). L'appelant a déjà vérifié le rôle
+   * syndic (RM-14).
+   */
+  async transitionner(idIncident: string, statutCible: 'EN_COURS' | 'RESOLU') {
+    const incident = await incidentRepository.parId(idIncident);
+    if (!incident) {
+      throw new IncidentIntrouvableError();
+    }
+
+    const statutAttendu = STATUT_ATTENDU_POUR[statutCible];
+    if (incident.statut !== statutAttendu) {
+      throw new TransitionInvalideError();
+    }
+
+    const transitionne = await incidentRepository.transitionnerSiStatut(
+      idIncident,
+      statutAttendu,
+      statutCible,
+    );
+    if (!transitionne) {
+      // Requête concurrente : le statut a changé entre la lecture et l'écriture.
+      throw new TransitionInvalideError();
+    }
+    return transitionne;
+  },
+
   /**
    * RM-11 : l'incident est créé au statut « déclaré » (défaut du schéma).
    * `idLot` absent = incident sur une partie commune (US-03 : « mon lot ou

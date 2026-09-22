@@ -46,7 +46,9 @@ describe('autoriser (RM-14)', () => {
   });
 
   it("refuse l'écriture au conseil syndical sur la ligne 'lot' (lecture seule, cf. matrice Doc 5)", () => {
-    expect(autoriser(conseilSyndical, 'ecrire', ressourceDeA, PERMISSIONS_RESSOURCE_LOT)).toBe(false);
+    expect(autoriser(conseilSyndical, 'ecrire', ressourceDeA, PERMISSIONS_RESSOURCE_LOT)).toBe(
+      false,
+    );
   });
 
   it('autorise un copropriétaire à lire sa propre ressource', () => {
@@ -58,10 +60,12 @@ describe('autoriser (RM-14)', () => {
   });
 
   it("refuse l'écriture à un copropriétaire même sur sa propre ressource (ligne 'lot' : lecture seule)", () => {
-    expect(autoriser(coproprietaireA, 'ecrire', ressourceDeA, PERMISSIONS_RESSOURCE_LOT)).toBe(false);
+    expect(autoriser(coproprietaireA, 'ecrire', ressourceDeA, PERMISSIONS_RESSOURCE_LOT)).toBe(
+      false,
+    );
   });
 
-  describe('cumul des droits pour un membre du conseil syndical (décision confirmée avec l\'utilisateur, 22/09)', () => {
+  describe("cumul des droits pour un membre du conseil syndical (décision du 22/09)", () => {
     /** Ligne fictive où, contrairement à "lot", le copropriétaire a l'écriture sur SA ressource (ex. déclarer un incident sur son propre lot) mais pas le conseil syndical (lecture étendue seule). */
     const permissionsAvecEcritureCoproprietaire = {
       syndic: new Set<Action>(['lire', 'ecrire']),
