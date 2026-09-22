@@ -21,6 +21,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Tests d'intégration sur une vraie base PostgreSQL (`npm run test:integration`) : contraintes du MPD, authentification, gestion des utilisateurs, parcours AG → ouverture → votes → clôture, concurrence vote/clôture. Ils refusent de s'exécuter sur une base dont le nom ne se termine pas par `_test`.
 - Vérification de dérive entre `schema.prisma` et la base migrée (`npm run prisma:drift`), branchée sur le CI.
 - Service `migrate` dans `docker-compose.yml`, `.dockerignore`, variable `DB_PORT`.
+- Consultation des résolutions passées (T-11, F-07, US-04) : `GET /ags` et `GET /ags/:idAg/resolutions`, ouverts aux trois rôles authentifiés (Doc 5, matrice d'autorisation). Décomptes anonymes uniquement (oui/non/abstention), jamais l'identité des votants — choix tranché en conception détaillée, US-04 laissait le point ouvert. Refusé (409) tant que l'AG n'est pas clôturée, pour ne pas influencer les votants restants.
 
 ### Changed
 

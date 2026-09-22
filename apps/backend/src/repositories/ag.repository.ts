@@ -29,6 +29,43 @@ export const agRepository = {
     return prisma.aG.findUnique({ where: { id } });
   },
 
+  /** Liste toutes les AG (T-11, F-07), les plus récentes en premier. */
+  listerToutes() {
+    return prisma.aG.findMany({ orderBy: { dateAg: 'desc' } });
+  },
+
+  /**
+   * Une AG avec ses résolutions et, pour chacune, le décompte anonyme des
+   * voix (oui/non/abstention) — jamais l'identité des votants (US-04 :
+   * détail des voix sans lien vers l'auteur, choix confirmé avec
+   * l'utilisateur). Retourne `null` si l'AG n'existe pas.
+   */
+  async avecResolutionsEtDecomptes(id: string) {
+    const ag = await prisma.aG.findUnique({ where: { id }, include: { resolutions: true } });
+    if (!ag) {
+      return null;
+    }
+
+    const decomptes = await prisma.vote.groupBy({
+      by: ['idResolution', 'valeur'],
+      where: { resolution: { idAg: id } },
+      _count: { _all: true },
+    });
+
+    const resolutions = ag.resolutions.map((resolution) => {
+      const comptes = { oui: 0, non: 0, abstention: 0 };
+      for (const decompte of decomptes) {
+        if (decompte.idResolution !== resolution.id) continue;
+        if (decompte.valeur === 'OUI') comptes.oui = decompte._count._all;
+        else if (decompte.valeur === 'NON') comptes.non = decompte._count._all;
+        else comptes.abstention = decompte._count._all;
+      }
+      return { ...resolution, decomptes: comptes };
+    });
+
+    return { ...ag, resolutions };
+  },
+
   /**
    * Passe l'AG de PLANIFIEE à OUVERTE (RM-05) uniquement si elle est encore
    * PLANIFIEE au moment de l'écriture : la condition est dans le UPDATE

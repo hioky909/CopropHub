@@ -55,8 +55,10 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/ags/:idAg/ouverture` | syndic | Ouvrir le vote d'une AG planifiée (T-38, RM-05) |
 | POST | `/ags/:idAg/cloture` | syndic | Clôturer une AG ouverte : calcule et fige le résultat de chaque résolution (T-10, F-06, RM-03, RM-04, US-08) |
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Voter OUI / NON / ABSTENTION sur une résolution d'une AG ouverte (F-05, RM-02, US-02) |
+| GET | `/ags` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des AG, les plus récentes en premier (T-11, F-07) |
+| GET | `/ags/:idAg/resolutions` | authentifié (syndic, conseil syndical, copropriétaire) | Résultat des résolutions d'une AG **clôturée** : décomptes anonymes (oui/non/abstention), jamais l'identité des votants (T-11, F-07, US-04) — refusé (409) tant que l'AG n'est pas clôturée |
 
-Le reste des routes métier (consultation des résolutions passées, incidents, charges) arrive avec les tâches T-11 et suivantes du backlog.
+Le reste des routes métier (incidents, charges) arrive avec les tâches T-12 et suivantes du backlog.
 
 ## Documentation
 

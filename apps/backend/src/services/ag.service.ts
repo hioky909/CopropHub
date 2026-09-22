@@ -33,7 +33,39 @@ export class ClotureAgImpossibleError extends Error {
   }
 }
 
+export class ResolutionsNonDisponiblesError extends Error {
+  constructor() {
+    super(
+      "Les résultats d'une résolution ne sont consultables qu'après clôture de l'AG (RM-04) ; les révéler pendant le vote influencerait les votants restants.",
+    );
+    this.name = 'ResolutionsNonDisponiblesError';
+  }
+}
+
 export const agService = {
+  /** T-11 (F-07) : liste des AG, pour que le client sache lesquelles sont clôturées et donc consultables. */
+  async listerAgs() {
+    return agRepository.listerToutes();
+  },
+
+  /**
+   * T-11 (F-07, US-04) : résultat des résolutions d'une AG clôturée. Décomptes
+   * anonymes uniquement (oui/non/abstention), jamais l'identité des votants —
+   * choix tranché en conception détaillée (US-04 laissait le point ouvert).
+   * Refusé tant que l'AG n'est pas clôturée : avant CLOTUREE, le résultat de
+   * chaque résolution est EN_ATTENTE et exposer les décomptes en cours
+   * influencerait les copropriétaires qui n'ont pas encore voté.
+   */
+  async consulterResolutions(idAg: string) {
+    const ag = await agRepository.avecResolutionsEtDecomptes(idAg);
+    if (!ag) {
+      throw new AgIntrouvableError();
+    }
+    if (ag.statut !== 'CLOTUREE') {
+      throw new ResolutionsNonDisponiblesError();
+    }
+    return ag;
+  },
   /**
    * Transition OUVERTE → CLOTUREE (US-08). Le résultat de chaque résolution
    * est calculé selon son type (RM-03) et figé avec la clôture : CLOTUREE est
