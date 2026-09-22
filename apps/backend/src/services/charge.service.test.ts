@@ -22,7 +22,11 @@ const SYNDIC: UtilisateurAuthentifie = {
   estMembreConseilSyndical: false,
 };
 const COPRO: UtilisateurAuthentifie = { ...SYNDIC, id: 'u-copro-a', typeCompte: 'COPROPRIETAIRE' };
-const CONSEIL: UtilisateurAuthentifie = { ...COPRO, id: 'u-conseil', estMembreConseilSyndical: true };
+const CONSEIL: UtilisateurAuthentifie = {
+  ...COPRO,
+  id: 'u-conseil',
+  estMembreConseilSyndical: true,
+};
 
 afterEach(() => {
   vi.restoreAllMocks();

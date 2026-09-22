@@ -39,7 +39,11 @@ export const incidentRepository = {
    * saut d'étape ni de retour en arrière, même sous requêtes concurrentes).
    * Retourne `null` si la condition n'est plus vraie.
    */
-  async transitionnerSiStatut(id: string, statutAttendu: StatutIncident, statutCible: StatutIncident) {
+  async transitionnerSiStatut(
+    id: string,
+    statutAttendu: StatutIncident,
+    statutCible: StatutIncident,
+  ) {
     const resultat = await prisma.incident.updateMany({
       where: { id, statut: statutAttendu },
       data: { statut: statutCible },

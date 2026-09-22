@@ -55,7 +55,9 @@ describe('GET /charges — décomptes réels par rôle (RM-10, US-05)', () => {
     const membre = await creerUtilisateur({ email: 'membre@test.local', conseilSyndical: true });
 
     for (const utilisateur of [syndic, membre]) {
-      const reponse = await request(app).get('/charges').set('Cookie', cookieSession(utilisateur.id));
+      const reponse = await request(app)
+        .get('/charges')
+        .set('Cookie', cookieSession(utilisateur.id));
       expect(reponse.status).toBe(200);
       expect(reponse.body.charges).toHaveLength(1);
     }

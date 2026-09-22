@@ -17,7 +17,11 @@ const SYNDIC: UtilisateurAuthentifie = {
   estMembreConseilSyndical: false,
 };
 const COPRO: UtilisateurAuthentifie = { ...SYNDIC, id: 'u-copro-a', typeCompte: 'COPROPRIETAIRE' };
-const CONSEIL: UtilisateurAuthentifie = { ...COPRO, id: 'u-conseil', estMembreConseilSyndical: true };
+const CONSEIL: UtilisateurAuthentifie = {
+  ...COPRO,
+  id: 'u-conseil',
+  estMembreConseilSyndical: true,
+};
 
 function incident(statut: 'DECLARE' | 'EN_COURS' | 'RESOLU') {
   return {
@@ -38,7 +42,9 @@ afterEach(() => {
 
 describe('incidentService.lister (T-13, RM-12)', () => {
   it('renvoie tous les incidents pour le syndic', async () => {
-    const tous = vi.spyOn(incidentRepository, 'listerTous').mockResolvedValue([incident('DECLARE')]);
+    const tous = vi
+      .spyOn(incidentRepository, 'listerTous')
+      .mockResolvedValue([incident('DECLARE')]);
     const pourDeclarant = vi.spyOn(incidentRepository, 'listerPourDeclarant');
     const resultat = await incidentService.lister(SYNDIC);
     expect(tous).toHaveBeenCalledTimes(1);

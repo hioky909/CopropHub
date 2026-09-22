@@ -1,6 +1,10 @@
 import { chargeRepository } from '../repositories/charge.repository.js';
 import { lotRepository } from '../repositories/lot.repository.js';
-import { autoriser, PERMISSIONS_RESSOURCE_LOT, type RessourceAutorisable } from './autorisation.service.js';
+import {
+  autoriser,
+  PERMISSIONS_RESSOURCE_LOT,
+  type RessourceAutorisable,
+} from './autorisation.service.js';
 import type { UtilisateurAuthentifie } from '../types/auth.js';
 
 /**

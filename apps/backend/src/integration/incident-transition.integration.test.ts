@@ -42,7 +42,9 @@ describe('parcours complet : déclaration → en cours → résolu', () => {
     expect(listeAutre.body.incidents.map((i: { id: string }) => i.id)).not.toContain(idIncident);
 
     // RM-12 : le syndic voit tous les incidents.
-    const listeSyndic = await request(app).get('/incidents').set('Cookie', cookieSession(syndic.id));
+    const listeSyndic = await request(app)
+      .get('/incidents')
+      .set('Cookie', cookieSession(syndic.id));
     expect(listeSyndic.body.incidents.map((i: { id: string }) => i.id)).toContain(idIncident);
 
     // RM-11 : DECLARE → EN_COURS

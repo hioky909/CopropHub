@@ -21,7 +21,14 @@ describe('calculerResultat — majorité simple (oui > non, abstentions exclues)
   verifier('SIMPLE', [
     ['3 oui contre 2 non : adoptée', 3, 2, 0, 10, 'ADOPTEE'],
     ['égalité 2 contre 2 : rejetée', 2, 2, 0, 10, 'REJETEE'],
-    ['UT-02 (Doc 6) : 2 oui / 2 non / 1 abstention : rejetée (égalité, abstention exclue)', 2, 2, 1, 10, 'REJETEE'],
+    [
+      'UT-02 (Doc 6) : 2 oui / 2 non / 1 abstention : rejetée (égalité, abstention exclue)',
+      2,
+      2,
+      1,
+      10,
+      'REJETEE',
+    ],
     ['plus de non que de oui : rejetée', 1, 4, 0, 10, 'REJETEE'],
     ['1 oui, 0 non, 10 abstentions : adoptée (abstentions exclues)', 1, 0, 10, 20, 'ADOPTEE'],
     ['aucune voix exprimée : rejetée', 0, 0, 0, 10, 'REJETEE'],
@@ -58,7 +65,14 @@ describe('calculerResultat — unanimité (tous les inscrits votent oui)', () =>
     ['N=4, 3 oui + 1 abstention : rejetée', 3, 0, 1, 4, 'REJETEE'],
     ['N=4, 3 oui + 1 non : rejetée', 3, 1, 0, 4, 'REJETEE'],
     ['N=4, 3 oui + 1 non-votant : rejetée', 3, 0, 0, 4, 'REJETEE'],
-    ['UT-05 (Doc 6) : 9 oui sur 10 copropriétaires (1 absent) : rejetée (RM-03, tous doivent voter oui)', 9, 0, 0, 10, 'REJETEE'],
+    [
+      'UT-05 (Doc 6) : 9 oui sur 10 copropriétaires (1 absent) : rejetée (RM-03, tous doivent voter oui)',
+      9,
+      0,
+      0,
+      10,
+      'REJETEE',
+    ],
     ['N=1, 1 oui : adoptée', 1, 0, 0, 1, 'ADOPTEE'],
   ]);
 });

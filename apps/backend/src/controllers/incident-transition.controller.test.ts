@@ -16,7 +16,11 @@ const SYNDIC: UtilisateurAuthentifie = {
   estMembreConseilSyndical: false,
 };
 const COPRO: UtilisateurAuthentifie = { ...SYNDIC, id: 'u-copro', typeCompte: 'COPROPRIETAIRE' };
-const CONSEIL: UtilisateurAuthentifie = { ...COPRO, id: 'u-conseil', estMembreConseilSyndical: true };
+const CONSEIL: UtilisateurAuthentifie = {
+  ...COPRO,
+  id: 'u-conseil',
+  estMembreConseilSyndical: true,
+};
 
 beforeAll(() => {
   process.env.SESSION_SECRET = 'secret-de-test-pour-les-tests-uniquement';
