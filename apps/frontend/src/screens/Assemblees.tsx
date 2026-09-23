@@ -23,10 +23,21 @@ export default function Assemblees() {
   useEffect(() => {
     agsApi
       .lister()
-      .then((r) => setAgs(r.ags))
+      .then((r) => {
+        // Comme dans le proto (VoteResolution.tsx) : un copropriétaire est
+        // envoyé directement sur l'AG en cours de vote, sans passer par une
+        // liste — la liste ne reste utile qu'au syndic (gestion) ou à un
+        // copropriétaire sans AG ouverte (consultation de l'historique).
+        const ouverte = r.ags.find((ag) => ag.statut === 'OUVERTE')
+        if (utilisateur?.typeCompte === 'COPROPRIETAIRE' && ouverte) {
+          navigate(`/assemblees/${ouverte.id}`, { replace: true })
+          return
+        }
+        setAgs(r.ags)
+      })
       .catch((err) => setErreur(err instanceof ApiError ? err.message : 'Impossible de charger les assemblées.'))
       .finally(() => setChargement(false))
-  }, [])
+  }, [navigate, utilisateur])
 
   return (
     <main style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
