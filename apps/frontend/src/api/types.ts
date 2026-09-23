@@ -13,7 +13,6 @@ export type StatutResultat = 'EN_ATTENTE' | 'ADOPTEE' | 'REJETEE';
 
 export interface Ag {
   id: string;
-  idImmeuble: string;
   dateAg: string;
   statut: StatutAg;
 }
