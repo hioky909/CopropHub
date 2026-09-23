@@ -24,6 +24,24 @@ import { asyncHandler } from '../middleware/async-handler.js';
  * depuis une requête utilisateur, conformément à Doc 5 § Mass assignment.
  */
 export const utilisateursRouter = Router();
+
+/**
+ * Lots rattachés à l'utilisateur courant — ouvert à tout compte
+ * authentifié (contrairement au reste de ce routeur, réservé au syndic) :
+ * c'est toujours SA propre donnée, jamais celle d'un autre utilisateur
+ * (anti-IDOR : aucun paramètre `idUtilisateur` n'est accepté ici).
+ */
+utilisateursRouter.get(
+  '/moi/lots',
+  exigerAuthentification,
+  asyncHandler(async (req, res) => {
+    const lots = await lotService.mesLots(req.utilisateur!.id);
+    res.status(200).json({
+      lots: lots.map((lot) => ({ id: lot.id, numero: lot.numero, typeLot: lot.typeLot })),
+    });
+  }),
+);
+
 utilisateursRouter.use(exigerAuthentification, exigerRoleSyndic);
 
 const creerCoproprietaireSchema = z.object({

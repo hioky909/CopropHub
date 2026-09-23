@@ -247,3 +247,34 @@ describe("rattachement d'un lot à un copropriétaire (US-10)", () => {
     expect((await rattacher('pas-un-uuid', copro.id)).status).toBe(422);
   });
 });
+
+describe('GET /utilisateurs/moi/lots — mes propres lots (US-03), sans exiger le rôle syndic', () => {
+  it("renvoie le lot réellement rattaché au copropriétaire, jamais celui d'un autre", async () => {
+    const copro = await creerUtilisateur({ email: 'copro@test.local' });
+    const autre = await creerUtilisateur({ email: 'autre@test.local' });
+    const monLot = await creerLot(immeuble.id, '7', copro.id);
+    await creerLot(immeuble.id, '9', autre.id);
+
+    const reponse = await request(app)
+      .get('/utilisateurs/moi/lots')
+      .set('Cookie', cookieSession(copro.id));
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.lots).toEqual([
+      { id: monLot.id, numero: '7', typeLot: monLot.typeLot },
+    ]);
+  });
+
+  it('liste vide pour un copropriétaire sans lot rattaché ; accessible sans être syndic', async () => {
+    const copro = await creerUtilisateur();
+    const reponse = await request(app)
+      .get('/utilisateurs/moi/lots')
+      .set('Cookie', cookieSession(copro.id));
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.lots).toEqual([]);
+  });
+
+  it('401 sans session', async () => {
+    expect((await request(app).get('/utilisateurs/moi/lots')).status).toBe(401);
+  });
+});

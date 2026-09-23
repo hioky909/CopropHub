@@ -80,6 +80,24 @@ describe('GET /ags/:idAg/resolutions — décomptes réels', () => {
     expect(reponse.status).toBe(409);
   });
 
+  it("GET /ags/:idAg expose l'ordre du jour d'une AG OUVERTE (nécessaire au vote), sans décompte", async () => {
+    const votant = await creerCoproprietaireHabilite(immeuble.id, '1');
+    const ag = await creerAg(immeuble.id, 'OUVERTE', [
+      { libelle: 'Renouvellement du mandat du syndic', typeMajorite: 'ABSOLUE' },
+    ]);
+
+    const reponse = await request(app).get(`/ags/${ag.id}`).set('Cookie', cookieSession(votant.id));
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.ag).toMatchObject({ id: ag.id, statut: 'OUVERTE' });
+    expect(reponse.body.resolutions[0]).toMatchObject({
+      id: ag.resolutions[0]!.id,
+      libelle: 'Renouvellement du mandat du syndic',
+      typeMajorite: 'ABSOLUE',
+    });
+    expect(JSON.stringify(reponse.body)).not.toMatch(/decompte|statutResultat/i);
+  });
+
   it('liste toutes les AG (GET /ags), les plus récentes en premier', async () => {
     const ancienne = await creerAg(immeuble.id, 'CLOTUREE', [
       { libelle: 'A', typeMajorite: 'SIMPLE' },

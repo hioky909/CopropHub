@@ -4,7 +4,9 @@ Application de gestion de copropriété (syndic, conseil syndical, copropriétai
 
 ## État du projet
 
-La phase de conception est terminée (10 documents : besoins, Merise/UML, UX/UI, sécurité, tests, ADR-001, CI/CD, backlog, traçabilité). L'implémentation démarre avec ce dépôt, en suivant le backlog MVP (`docs/03-project-management/`).
+La phase de conception est terminée (10 documents : besoins, Merise/UML, UX/UI, sécurité, tests, ADR-001, CI/CD, backlog, traçabilité). Le backend MVP (toutes les routes métier du backlog) et un premier frontend fonctionnel (connexion, tableau de bord syndic, assemblées générales avec vote et résultats, incidents, charges) sont implémentés et câblés à l'API réelle.
+
+Le style visuel du frontend part d'une maquette générée par Figma à partir du design system du Doc 4 (conservée telle quelle sous `proto/`, non exécutée en CI, pour référence) ; les composants et écrans de `apps/frontend/src/` en sont un portage câblé sur l'API réelle (données réelles uniquement, aucune valeur fictive).
 
 ## Architecture
 
@@ -56,14 +58,26 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/ags/:idAg/cloture` | syndic | Clôturer une AG ouverte : calcule et fige le résultat de chaque résolution (T-10, F-06, RM-03, RM-04, US-08) |
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Voter OUI / NON / ABSTENTION sur une résolution d'une AG ouverte (F-05, RM-02, US-02) |
 | GET | `/ags` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des AG, les plus récentes en premier (T-11, F-07) |
+| GET | `/ags/:idAg` | authentifié (syndic, conseil syndical, copropriétaire) | Ordre du jour d'une AG (id, date, statut + résolutions : id, libellé, type de majorité), **jamais** de décompte ni de résultat, quel que soit le statut de l'AG — nécessaire à l'écran de vote d'une AG planifiée ou ouverte, que `GET /ags/:idAg/resolutions` refuse avant clôture (RM-04) |
 | GET | `/ags/:idAg/resolutions` | authentifié (syndic, conseil syndical, copropriétaire) | Résultat des résolutions d'une AG **clôturée** : décomptes anonymes (oui/non/abstention), jamais l'identité des votants (T-11, F-07, US-04) — refusé (409) tant que l'AG n'est pas clôturée |
+| GET | `/utilisateurs/moi/lots` | authentifié (tout rôle) | Lots rattachés à l'appelant lui-même — jamais ceux d'un autre utilisateur (anti-IDOR) ; nécessaire à l'écran de déclaration d'incident pour proposer les lots réels du copropriétaire |
 | POST | `/incidents` | copropriétaire | Déclarer un incident sur son propre lot ou une partie commune (`idLot` absent), statut « déclaré » (T-12, F-08 partiel, US-03) |
 | GET | `/incidents` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des incidents : tous pour le syndic et le conseil syndical, seulement « les siens » pour un copropriétaire (T-13, RM-12) |
 | PATCH | `/incidents/:idIncident/statut` | syndic | Faire progresser le statut d'un incident : déclaré → en cours → résolu uniquement, jamais de saut d'étape ni de retour en arrière (T-13, RM-11, RM-13, US-09) |
 | GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
 | GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |
 
-Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-15 et au-delà) couvrent tests, interface, sécurité transverse et documentation.
+Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-17 et au-delà) couvrent les tests end-to-end, la sécurité transverse et la documentation.
+
+## Frontend
+
+`apps/frontend` est une SPA React (Vite, sans framework CSS — le design system du Doc 4 est appliqué via des styles inline et des variables CSS, `apps/frontend/src/index.css`) qui ne parle au backend qu'en HTTP, via un cookie de session (`credentials: 'include'`). Écrans disponibles : connexion / auto-inscription, tableau de bord syndic, liste et détail des assemblées générales (ouverture du vote, vote, clôture, résultats), incidents (déclaration et suivi de statut), charges. Le routage est basé sur le rôle du compte connecté (`apps/frontend/src/components/RouteProtegee.tsx`, `Shell.tsx`).
+
+```bash
+npm run dev --workspace=apps/frontend    # http://localhost:5173, attend le backend sur http://localhost:3000
+```
+
+`VITE_API_URL` (optionnelle, défaut `http://localhost:3000`) pointe le frontend vers une autre origine d'API. Le backend doit alors définir `FRONTEND_ORIGIN` en conséquence (CORS avec `credentials: true`).
 
 ## Documentation
 

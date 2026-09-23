@@ -148,6 +148,41 @@ agRouter.get(
 );
 
 /**
+ * Ordre du jour d'une AG (id, date, statut + résolutions : id, libellé,
+ * type de majorité), sans jamais les décomptes ni le résultat (RM-04) —
+ * utilisé par l'écran de vote pour afficher les résolutions d'une AG
+ * planifiée ou ouverte. Tous les rôles authentifiés.
+ */
+agRouter.get(
+  '/:idAg',
+  asyncHandler(async (req, res) => {
+    const params = paramsAgSchema.safeParse(req.params);
+    if (!params.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      const ag = await agService.consulterOrdreDuJour(params.data.idAg);
+      res.status(200).json({
+        ag: { id: ag.id, dateAg: ag.dateAg, statut: ag.statut },
+        resolutions: ag.resolutions.map((r) => ({
+          id: r.id,
+          libelle: r.libelle,
+          typeMajorite: r.typeMajorite,
+        })),
+      });
+    } catch (erreur) {
+      if (erreur instanceof AgIntrouvableError) {
+        res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+/**
  * T-11 (F-07, US-04) : résultat de chaque résolution d'une AG clôturée —
  * décomptes anonymes (oui/non/abstention) uniquement, jamais l'identité des
  * votants. Tous les rôles authentifiés (Doc 5, matrice d'autorisation :

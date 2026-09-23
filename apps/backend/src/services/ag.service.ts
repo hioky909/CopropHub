@@ -49,6 +49,21 @@ export const agService = {
   },
 
   /**
+   * Ordre du jour d'une AG (id, libellé, type de majorité de chaque
+   * résolution), sans décompte ni résultat — nécessaire pour afficher
+   * l'écran de vote d'une AG ouverte (`consulterResolutions` refuse tant
+   * que l'AG n'est pas clôturée, RM-04, ce qui est correct pour les
+   * résultats mais bloquerait aussi l'affichage de l'ordre du jour à voter).
+   */
+  async consulterOrdreDuJour(idAg: string) {
+    const ag = await agRepository.avecResolutions(idAg);
+    if (!ag) {
+      throw new AgIntrouvableError();
+    }
+    return ag;
+  },
+
+  /**
    * T-11 (F-07, US-04) : résultat des résolutions d'une AG clôturée. Décomptes
    * anonymes uniquement (oui/non/abstention), jamais l'identité des votants —
    * choix tranché en conception détaillée (US-04 laissait le point ouvert).

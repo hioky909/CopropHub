@@ -18,6 +18,15 @@ export class LotDejaExistantError extends Error {
 }
 
 export const lotService = {
+  /**
+   * Les lots rattachés à l'utilisateur courant — nécessaire à l'écran de
+   * déclaration d'incident (US-03 : « mon lot ou une partie commune ») pour
+   * proposer les lots réels du copropriétaire, jamais ceux d'autrui.
+   */
+  mesLots(idUtilisateur: string) {
+    return lotRepository.lotsRattachesAUtilisateur(idUtilisateur);
+  },
+
   async creerLot(donnees: { numero: string; typeLot: string }) {
     const immeuble = await immeubleRepository.unique();
     if (!immeuble) {

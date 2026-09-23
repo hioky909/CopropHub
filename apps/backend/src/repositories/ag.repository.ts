@@ -29,6 +29,17 @@ export const agRepository = {
     return prisma.aG.findUnique({ where: { id } });
   },
 
+  /**
+   * Une AG avec la liste de ses résolutions (id, libellé, type de majorité)
+   * mais jamais les décomptes ni le résultat — utilisé pour afficher l'ordre
+   * du jour pendant le vote (AG planifiée ou ouverte), avant toute clôture.
+   * Les résultats agrégés restent exclusivement sur `avecResolutionsEtDecomptes`
+   * (T-11), réservés à une AG clôturée (RM-04).
+   */
+  avecResolutions(id: string) {
+    return prisma.aG.findUnique({ where: { id }, include: { resolutions: true } });
+  },
+
   /** Liste toutes les AG (T-11, F-07), les plus récentes en premier. */
   listerToutes() {
     return prisma.aG.findMany({ orderBy: { dateAg: 'desc' } });
