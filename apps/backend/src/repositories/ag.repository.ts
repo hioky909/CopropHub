@@ -82,16 +82,32 @@ export const agRepository = {
    * PLANIFIEE au moment de l'écriture : la condition est dans le UPDATE
    * lui-même, donc deux ouvertures concurrentes ne peuvent pas réussir
    * toutes les deux. Retourne `null` si aucune ligne n'a été modifiée.
+   *
+   * Fige aussi `nombreInscritsGeles` à cet instant, dans la même
+   * transaction : l'électorat de l'AG ne doit plus bouger après l'ouverture,
+   * même si des rattachements changent ensuite pendant que le vote est en
+   * cours (cf. commentaire du champ dans schema.prisma).
    */
   async ouvrirSiPlanifiee(id: string) {
-    const resultat = await prisma.aG.updateMany({
-      where: { id, statut: 'PLANIFIEE' },
-      data: { statut: 'OUVERTE' },
+    return prisma.$transaction(async (tx) => {
+      const resultat = await tx.aG.updateMany({
+        where: { id, statut: 'PLANIFIEE' },
+        data: { statut: 'OUVERTE' },
+      });
+      if (resultat.count === 0) {
+        return null;
+      }
+
+      const inscrits = await tx.rattachement.groupBy({
+        by: ['idUtilisateur'],
+        where: { dateFin: null, utilisateur: { typeCompte: 'COPROPRIETAIRE' } },
+      });
+
+      return tx.aG.update({
+        where: { id },
+        data: { nombreInscritsGeles: inscrits.length },
+      });
     });
-    if (resultat.count === 0) {
-      return null;
-    }
-    return prisma.aG.findUnique({ where: { id } });
   },
 
   /**
@@ -127,10 +143,25 @@ export const agRepository = {
         return null;
       }
 
-      const inscrits = await tx.rattachement.groupBy({
-        by: ['idUtilisateur'],
-        where: { dateFin: null, utilisateur: { typeCompte: 'COPROPRIETAIRE' } },
+      // L'électorat a été figé à l'ouverture du vote (`ouvrirSiPlanifiee`) et
+      // ne doit jamais être recalculé ici : un transfert de rattachement
+      // pendant que l'AG était OUVERTE ne doit pas modifier rétroactivement
+      // le dénominateur des majorités déjà en cours de vote. Le fallback de
+      // recalcul ne couvre que des AG ouvertes avant l'introduction de ce
+      // champ (migration 0002) et jamais rétro-remplies.
+      const agAvantCloture = await tx.aG.findUnique({
+        where: { id: idAg },
+        select: { nombreInscritsGeles: true },
       });
+      let nombreInscrits = agAvantCloture?.nombreInscritsGeles ?? null;
+      if (nombreInscrits === null) {
+        const inscrits = await tx.rattachement.groupBy({
+          by: ['idUtilisateur'],
+          where: { dateFin: null, utilisateur: { typeCompte: 'COPROPRIETAIRE' } },
+        });
+        nombreInscrits = inscrits.length;
+      }
+
       const resolutions = await tx.resolution.findMany({
         where: { idAg },
         select: { id: true, typeMajorite: true },
@@ -154,7 +185,7 @@ export const agRepository = {
           data: {
             statutResultat: calculer(
               { typeMajorite: resolution.typeMajorite, comptes },
-              inscrits.length,
+              nombreInscrits,
             ),
           },
         });

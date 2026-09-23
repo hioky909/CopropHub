@@ -36,6 +36,7 @@ function agOuverteAvecResolutions() {
     idImmeuble: 'imm-1',
     dateAg: DATE_AG,
     statut: 'OUVERTE' as const,
+    nombreInscritsGeles: null,
     resolutions: [
       {
         id: 'r-1',

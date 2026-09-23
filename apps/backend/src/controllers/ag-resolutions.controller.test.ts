@@ -41,6 +41,7 @@ function agClotureeAvecDecomptes() {
     idImmeuble: 'imm-1',
     dateAg: DATE_AG,
     statut: 'CLOTUREE' as const,
+    nombreInscritsGeles: null,
     resolutions: [
       {
         id: 'r-1',

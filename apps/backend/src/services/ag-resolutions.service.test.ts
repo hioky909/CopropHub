@@ -11,6 +11,7 @@ function agAvecDecomptes(statut: 'PLANIFIEE' | 'OUVERTE' | 'CLOTUREE') {
     idImmeuble: 'imm-1',
     dateAg: DATE_AG,
     statut,
+    nombreInscritsGeles: null,
     resolutions: [
       {
         id: 'r-1',

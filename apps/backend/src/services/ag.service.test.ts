@@ -27,6 +27,7 @@ describe('agService.creerAG (F-04, US-07)', () => {
       idImmeuble: IMMEUBLE.id,
       dateAg: DATE_AG,
       statut: 'PLANIFIEE',
+      nombreInscritsGeles: null,
       resolutions: [],
     });
 

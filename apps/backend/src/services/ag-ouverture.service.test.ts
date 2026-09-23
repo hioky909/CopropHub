@@ -6,7 +6,7 @@ const ID_AG = '33333333-3333-4333-8333-333333333333';
 const DATE_AG = new Date('2026-10-15T00:00:00.000Z');
 
 function ag(statut: 'PLANIFIEE' | 'OUVERTE' | 'CLOTUREE') {
-  return { id: ID_AG, idImmeuble: 'imm-1', dateAg: DATE_AG, statut };
+  return { id: ID_AG, idImmeuble: 'imm-1', dateAg: DATE_AG, statut, nombreInscritsGeles: null };
 }
 
 afterEach(() => {

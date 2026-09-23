@@ -223,6 +223,46 @@ describe('autorisation (RM-14) sur /ags', () => {
   });
 });
 
+describe("électorat figé à l'ouverture du vote", () => {
+  it(
+    "un copropriétaire qui quitte l'immeuble après avoir voté ne fait pas basculer " +
+      'rétroactivement le résultat : le dénominateur reste celui figé à l’ouverture',
+    async () => {
+      const [a, b, c, d] = await Promise.all(
+        ['1', '2', '3', '4'].map((numero) => creerCoproprietaireHabilite(immeuble.id, numero)),
+      );
+      const creation = await request(app)
+        .post('/ags')
+        .set('Cookie', cookieSyndic)
+        .send({ dateAg: '2026-10-15', resolutions: [{ libelle: 'R', typeMajorite: 'ABSOLUE' }] });
+      const idAg: string = creation.body.ag.id;
+      const idResolution: string = creation.body.ag.resolutions[0].id;
+
+      await request(app).post(`/ags/${idAg}/ouverture`).set('Cookie', cookieSyndic);
+      expect((await prisma.aG.findUniqueOrThrow({ where: { id: idAg } })).nombreInscritsGeles).toBe(
+        4,
+      );
+
+      // 2 OUI sur 4 inscrits figés : 2*2=4, pas > 4 → REJETEE (majorité absolue, RM-03).
+      expect((await voter(cookieSession(a!.id), idResolution, 'OUI')).status).toBe(201);
+      expect((await voter(cookieSession(b!.id), idResolution, 'OUI')).status).toBe(201);
+
+      // D quitte l'immeuble (rattachement supprimé, sans remplaçant) pendant que l'AG est
+      // toujours ouverte : si le dénominateur était recalculé à la clôture, il tomberait à 3
+      // et 2*2=4 > 3 ferait basculer le résultat à ADOPTEE — exactement le bug corrigé.
+      // (`deleteMany` plutôt qu'une clôture par date_fin : chk_periode interdit date_fin =
+      // date_debut le jour même, non pertinent pour ce test.)
+      await prisma.rattachement.deleteMany({ where: { idUtilisateur: d!.id, dateFin: null } });
+      void c; // C n'a jamais voté, volontairement (RM-03 : les non-votants comptent contre en ABSOLUE)
+
+      const cloture = await request(app).post(`/ags/${idAg}/cloture`).set('Cookie', cookieSyndic);
+      expect(cloture.status).toBe(200);
+      const resolution = await prisma.resolution.findUniqueOrThrow({ where: { id: idResolution } });
+      expect(resolution.statutResultat).toBe('REJETEE');
+    },
+  );
+});
+
 describe('atomicité des écritures', () => {
   it("la création d'une AG est atomique : si une résolution est refusée par la base, aucune AG n'est créée", async () => {
     await expect(

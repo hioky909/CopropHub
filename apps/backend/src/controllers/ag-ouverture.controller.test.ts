@@ -38,11 +38,23 @@ function cookieDe(utilisateur: UtilisateurAuthentifie): string {
 
 function espions(statutActuel: 'PLANIFIEE' | 'OUVERTE' | 'CLOTUREE' | null = 'PLANIFIEE') {
   vi.spyOn(agRepository, 'parId').mockResolvedValue(
-    statutActuel ? { id: ID_AG, idImmeuble: 'imm-1', dateAg: DATE_AG, statut: statutActuel } : null,
+    statutActuel
+      ? {
+          id: ID_AG,
+          idImmeuble: 'imm-1',
+          dateAg: DATE_AG,
+          statut: statutActuel,
+          nombreInscritsGeles: null,
+        }
+      : null,
   );
-  return vi
-    .spyOn(agRepository, 'ouvrirSiPlanifiee')
-    .mockResolvedValue({ id: ID_AG, idImmeuble: 'imm-1', dateAg: DATE_AG, statut: 'OUVERTE' });
+  return vi.spyOn(agRepository, 'ouvrirSiPlanifiee').mockResolvedValue({
+    id: ID_AG,
+    idImmeuble: 'imm-1',
+    dateAg: DATE_AG,
+    statut: 'OUVERTE',
+    nombreInscritsGeles: 0,
+  });
 }
 
 describe('POST /ags/:idAg/ouverture', () => {
