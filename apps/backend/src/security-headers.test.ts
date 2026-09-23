@@ -29,9 +29,7 @@ describe('En-têtes de sécurité (Helmet)', () => {
 
 describe('CORS', () => {
   it("reflète l'origine autorisée (FRONTEND_ORIGIN) avec les identifiants", async () => {
-    const reponse = await request(createApp())
-      .get('/health')
-      .set('Origin', ORIGINE_AUTORISEE);
+    const reponse = await request(createApp()).get('/health').set('Origin', ORIGINE_AUTORISEE);
     expect(reponse.headers['access-control-allow-origin']).toBe(ORIGINE_AUTORISEE);
     expect(reponse.headers['access-control-allow-credentials']).toBe('true');
   });
