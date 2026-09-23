@@ -4,7 +4,7 @@ Application de gestion de copropriété (syndic, conseil syndical, copropriétai
 
 ## État du projet
 
-La phase de conception est terminée (10 documents : besoins, Merise/UML, UX/UI, sécurité, tests, ADR-001, CI/CD, backlog, traçabilité). Le backend MVP (toutes les routes métier du backlog) et un premier frontend fonctionnel (connexion, tableau de bord syndic, assemblées générales avec vote et résultats, incidents, charges) sont implémentés et câblés à l'API réelle.
+**Le backlog MVP (27 tâches, T-01 à T-26 + T-38) est terminé et vérifié réellement** : backend complet (toutes les routes métier), frontend fonctionnel câblé sur l'API réelle (connexion, tableau de bord syndic, assemblées générales avec vote et résultats, incidents, charges), suite E2E Playwright, audits réels des états d'interface et de l'accessibilité clavier, en-têtes de sécurité testés, documentation de conception exportée dans [`docs/`](docs/). Détail de chaque vérification : Doc 10 (document « Traçabilité & structure documentaire »).
 
 Le style visuel du frontend part d'une maquette générée par Figma à partir du design system du Doc 4 (conservée telle quelle sous `proto/`, non exécutée en CI, pour référence) ; les composants et écrans de `apps/frontend/src/` en sont un portage câblé sur l'API réelle (données réelles uniquement, aucune valeur fictive).
 
@@ -94,7 +94,7 @@ npm run test:e2e --workspace=apps/frontend
 
 ## Documentation
 
-La documentation de conception complète vit pour l'instant dans documents de conception (liens dans le document de traçabilité) ; elle sera progressivement exportée dans `docs/` au fil de l'avancement, conformément à la règle de traçabilité du projet (18 BIS) — jamais rédigée par anticipation.
+La documentation de conception vit dans documents de conception (version la plus riche : tableaux interactifs, diagrammes mermaid rendus) et est exportée dans [`docs/`](docs/) (T-26) comme référence versionnée et défendable hors connexion — voir [`docs/README.md`](docs/README.md) pour l'index complet (périmètre, exigences, Merise/UML, architecture, sécurité, base de données, tests, CI/CD, API, décisions).
 
 ## Qualité
 
