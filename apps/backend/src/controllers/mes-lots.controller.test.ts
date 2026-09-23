@@ -35,7 +35,9 @@ describe('GET /utilisateurs/moi/lots — mes propres lots (US-03, anti-IDOR)', (
   });
 
   it("200 avec les lots rattachés à l'appelant, sans exiger le rôle syndic", async () => {
-    const rattaches = vi.spyOn(lotRepository, 'lotsRattachesAUtilisateur').mockResolvedValue([LOT_A]);
+    const rattaches = vi
+      .spyOn(lotRepository, 'lotsRattachesAUtilisateur')
+      .mockResolvedValue([LOT_A]);
     const reponse = await request(createApp())
       .get('/utilisateurs/moi/lots')
       .set('Cookie', cookieDe(COPRO));

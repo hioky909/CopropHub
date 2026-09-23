@@ -59,18 +59,21 @@ describe("GET /ags/:idAg — ordre du jour d'une AG (nécessaire à l'écran de 
   it.each([
     ['le syndic', SYNDIC],
     ['un copropriétaire', COPRO],
-  ])("200 pour %s même si l'AG est OUVERTE (pas encore clôturée)", async (_libelle, utilisateur) => {
-    vi.spyOn(agRepository, 'avecResolutions').mockResolvedValue(agOuverteAvecResolutions());
-    const reponse = await request(createApp()).get(url).set('Cookie', cookieDe(utilisateur));
+  ])(
+    "200 pour %s même si l'AG est OUVERTE (pas encore clôturée)",
+    async (_libelle, utilisateur) => {
+      vi.spyOn(agRepository, 'avecResolutions').mockResolvedValue(agOuverteAvecResolutions());
+      const reponse = await request(createApp()).get(url).set('Cookie', cookieDe(utilisateur));
 
-    expect(reponse.status).toBe(200);
-    expect(reponse.body.ag).toMatchObject({ id: ID_AG, statut: 'OUVERTE' });
-    expect(reponse.body.resolutions[0]).toMatchObject({
-      id: 'r-1',
-      libelle: 'Approbation des comptes',
-      typeMajorite: 'SIMPLE',
-    });
-  });
+      expect(reponse.status).toBe(200);
+      expect(reponse.body.ag).toMatchObject({ id: ID_AG, statut: 'OUVERTE' });
+      expect(reponse.body.resolutions[0]).toMatchObject({
+        id: 'r-1',
+        libelle: 'Approbation des comptes',
+        typeMajorite: 'SIMPLE',
+      });
+    },
+  );
 
   it('ne renvoie jamais de décompte ni de résultat, même si le dépôt en fournirait (RM-04)', async () => {
     vi.spyOn(agRepository, 'avecResolutions').mockResolvedValue(agOuverteAvecResolutions());

@@ -71,15 +71,12 @@ describe('copropriétaires (F-03)', () => {
   });
 
   it('ignore un type de compte envoyé par le client (le syndic ne peut créer que des copropriétaires)', async () => {
-    const reponse = await request(app)
-      .post('/utilisateurs')
-      .set('Cookie', cookieSyndic)
-      .send({
-        nom: 'Eve',
-        email: 'eve@test.local',
-        motDePasse: MOT_DE_PASSE,
-        typeCompte: 'SYNDIC',
-      });
+    const reponse = await request(app).post('/utilisateurs').set('Cookie', cookieSyndic).send({
+      nom: 'Eve',
+      email: 'eve@test.local',
+      motDePasse: MOT_DE_PASSE,
+      typeCompte: 'SYNDIC',
+    });
     expect(reponse.status).toBe(201);
     const enBase = await prisma.utilisateur.findUniqueOrThrow({
       where: { email: 'eve@test.local' },
@@ -260,9 +257,7 @@ describe('GET /utilisateurs/moi/lots — mes propres lots (US-03), sans exiger l
       .set('Cookie', cookieSession(copro.id));
 
     expect(reponse.status).toBe(200);
-    expect(reponse.body.lots).toEqual([
-      { id: monLot.id, numero: '7', typeLot: monLot.typeLot },
-    ]);
+    expect(reponse.body.lots).toEqual([{ id: monLot.id, numero: '7', typeLot: monLot.typeLot }]);
   });
 
   it('liste vide pour un copropriétaire sans lot rattaché ; accessible sans être syndic', async () => {
