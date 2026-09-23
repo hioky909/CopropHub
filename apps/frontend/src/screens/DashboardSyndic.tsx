@@ -9,17 +9,8 @@ import { chargesApi } from '../api/charges.js'
 import { ApiError } from '../api/client.js'
 import type { Ag, Charge, Incident, TypeMajorite } from '../api/types.js'
 
-const STATUT_INCIDENT_BADGE: Record<Incident['statut'], { variant: 'success' | 'warning' | 'neutral'; label: string }> = {
-  DECLARE: { variant: 'neutral', label: 'Declare' },
-  EN_COURS: { variant: 'warning', label: 'En cours' },
-  RESOLU: { variant: 'success', label: 'Resolu' },
-}
-
-const STATUT_AG_BADGE: Record<Ag['statut'], { variant: 'neutral' | 'info' | 'success'; label: string }> = {
-  PLANIFIEE: { variant: 'neutral', label: 'Planifiee' },
-  OUVERTE: { variant: 'info', label: 'Vote ouvert' },
-  CLOTUREE: { variant: 'success', label: 'Cloturee' },
-}
+import { STATUT_AG as STATUT_AG_BADGE, STATUT_INCIDENT as STATUT_INCIDENT_BADGE } from '../constants/statuts.js'
+import { formaterDate, formaterMontant } from '../utils/format.js'
 
 interface NouvelleResolution {
   libelle: string
@@ -70,15 +61,15 @@ export default function DashboardSyndic() {
             Tableau de bord
           </h1>
           <p style={{ margin: 0, fontSize: 14, color: '#5C5C5C' }}>
-            {chargement ? 'Chargement...' : `${ags.length} AG - ${incidents.length} incidents - ${charges.length} charges`}
+            {chargement ? 'Chargement…' : `${ags.length} AG · ${incidents.length} incidents · ${charges.length} charges`}
           </p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <Button variant="secondary" onClick={() => navigate('/incidents')}>
-            Declarer un incident
+            Déclarer un incident
           </Button>
           <Button variant="primary" onClick={() => setShowModal(true)}>
-            Creer une AG
+            Créer une AG
           </Button>
         </div>
       </div>
@@ -91,13 +82,13 @@ export default function DashboardSyndic() {
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
         {[
-          { label: 'Assemblees generales', value: String(ags.length), sub: `${ags.filter((a) => a.statut === 'OUVERTE').length} en vote` },
-          { label: 'Incidents', value: String(incidents.length), sub: `${incidents.filter((i) => i.statut !== 'RESOLU').length} non resolus` },
-          { label: 'Charges', value: String(charges.length), sub: `${charges.filter((c) => c.statut === 'A_PAYER').length} a payer` },
+          { label: 'Assemblées générales', value: String(ags.length), sub: `${ags.filter((a) => a.statut === 'OUVERTE').length} en vote` },
+          { label: 'Incidents', value: String(incidents.length), sub: `${incidents.filter((i) => i.statut !== 'RESOLU').length} non résolus` },
+          { label: 'Charges', value: String(charges.length), sub: `${charges.filter((c) => c.statut === 'A_PAYER').length} à payer` },
           {
             label: 'Charges en retard',
             value: String(chargesEnRetard.length),
-            sub: `${totalRetard.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} non recouvres`,
+            sub: `${formaterMontant(totalRetard)} non recouvrés`,
             alert: chargesEnRetard.length > 0,
           },
         ].map((stat) => (
@@ -124,7 +115,7 @@ export default function DashboardSyndic() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
         <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflow: 'hidden' }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Incidents recents</h2>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Incidents récents</h2>
             <button
               onClick={() => navigate('/incidents')}
               style={{ fontSize: 13, color: '#1E4B8F', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
@@ -134,7 +125,7 @@ export default function DashboardSyndic() {
           </div>
           {incidentsRecents.length === 0 ? (
             <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>
-              {chargement ? 'Chargement...' : 'Aucun incident declare.'}
+              {chargement ? 'Chargement…' : 'Aucun incident déclaré.'}
             </p>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -143,7 +134,7 @@ export default function DashboardSyndic() {
                   <tr key={inc.id} style={{ borderTop: i > 0 ? '1px solid #F2F2F2' : 'none' }}>
                     <td style={{ padding: '12px 24px', fontSize: 14, color: '#1A1A1A', fontWeight: 500 }}>{inc.titre}</td>
                     <td style={{ padding: '12px 24px', fontSize: 13, color: '#5C5C5C' }}>
-                      {new Date(inc.dateCreation).toLocaleDateString('fr-FR')}
+                      {formaterDate(inc.dateCreation)}
                     </td>
                     <td style={{ padding: '12px 24px' }}>
                       <Badge {...STATUT_INCIDENT_BADGE[inc.statut]} />
@@ -158,22 +149,22 @@ export default function DashboardSyndic() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24 }}>
             <h2 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>
-              Assemblee generale
+              Assemblée générale
             </h2>
             {prochaineAg ? (
               <div style={{ padding: 16, backgroundColor: '#EBF0F9', borderRadius: 6, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                   <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1E4B8F' }}>
-                    {new Date(prochaineAg.dateAg).toLocaleDateString('fr-FR')}
+                    {formaterDate(prochaineAg.dateAg)}
                   </p>
                   <Badge {...STATUT_AG_BADGE[prochaineAg.statut]} />
                 </div>
               </div>
             ) : (
-              <p style={{ margin: '0 0 16px', fontSize: 13, color: '#5C5C5C' }}>Aucune AG planifiee.</p>
+              <p style={{ margin: '0 0 16px', fontSize: 13, color: '#5C5C5C' }}>Aucune AG planifiée.</p>
             )}
             <Button variant="primary" fullWidth onClick={() => navigate('/assemblees')}>
-              Gerer les AG
+              Gérer les AG
             </Button>
           </div>
 
@@ -183,7 +174,7 @@ export default function DashboardSyndic() {
                 {chargesEnRetard.length} charge{chargesEnRetard.length > 1 ? 's' : ''} en retard
               </p>
               <p style={{ margin: '0 0 10px', fontSize: 13, color: '#3D3D3D' }}>
-                {totalRetard.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })} non recouvres.
+                {formaterMontant(totalRetard)} non recouvrés.
               </p>
               <button
                 onClick={() => navigate('/charges')}
@@ -210,10 +201,10 @@ export default function DashboardSyndic() {
 }
 
 const OPTIONS_MAJORITE: { value: TypeMajorite; label: string }[] = [
-  { value: 'SIMPLE', label: 'Majorite simple (art. 24)' },
-  { value: 'ABSOLUE', label: 'Majorite absolue (art. 25)' },
-  { value: 'DOUBLE_MAJORITE', label: 'Double majorite (art. 26)' },
-  { value: 'UNANIMITE', label: 'Unanimite' },
+  { value: 'SIMPLE', label: 'Majorité simple (art. 24)' },
+  { value: 'ABSOLUE', label: 'Majorité absolue (art. 25)' },
+  { value: 'DOUBLE_MAJORITE', label: 'Double majorité (art. 26)' },
+  { value: 'UNANIMITE', label: 'Unanimité' },
 ]
 
 function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: () => void }) {
@@ -242,7 +233,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
     setErreur(null)
     const propres = resolutions.filter((r) => r.libelle.trim().length > 0)
     if (!dateAg || propres.length === 0) {
-      setErreur('La date et au moins une resolution sont requises.')
+      setErreur('La date et au moins une résolution sont requises.')
       return
     }
     setEnvoi(true)
@@ -250,7 +241,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       await agsApi.creer(dateAg, propres)
       onCreated()
     } catch (err) {
-      setErreur(err instanceof ApiError ? err.message : 'Impossible de creer l’AG.')
+      setErreur(err instanceof ApiError ? err.message : 'Impossible de créer l’AG.')
     } finally {
       setEnvoi(false)
     }
@@ -277,15 +268,15 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         style={{ backgroundColor: '#FFFFFF', borderRadius: 10, padding: 32, width: '100%', maxWidth: 520, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="titre-modal-creation-ag" style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: '#1A1A1A' }}>Creer une assemblee generale</h2>
+        <h2 id="titre-modal-creation-ag" style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: '#1A1A1A' }}>Créer une assemblée générale</h2>
         <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>
-          L&apos;AG est creee a l&apos;etat planifiee. Vous l&apos;ouvrirez au vote depuis la liste des assemblees.
+          L&apos;AG est créée à l&apos;état planifiée. Vous l&apos;ouvrirez au vote depuis la liste des assemblées.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div>
             <label htmlFor="date-ag-creation" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#1A1A1A', marginBottom: 4 }}>
-              Date prevue <span style={{ color: '#B3261E' }}>*</span>
+              Date prévue <span style={{ color: '#B3261E' }}>*</span>
             </label>
             <input
               id="date-ag-creation"
@@ -299,13 +290,13 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
 
           <div>
             <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
-              Resolutions <span style={{ color: '#B3261E' }}>*</span>
+              Résolutions <span style={{ color: '#B3261E' }}>*</span>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resolutions.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 6 }}>
                   <input
-                    placeholder={`Resolution ${i + 1}`}
+                    placeholder={`Résolution ${i + 1}`}
                     value={r.libelle}
                     onChange={(e) => majResolution(i, { libelle: e.target.value })}
                     style={{ flex: 1, padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', outline: 'none' }}
@@ -325,10 +316,10 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                     <button
                       type="button"
                       onClick={() => setResolutions((prev) => prev.filter((_, idx) => idx !== i))}
-                      aria-label="Retirer la resolution"
+                      aria-label="Retirer la résolution"
                       style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 6, color: '#B3261E', cursor: 'pointer', padding: '0 10px' }}
                     >
-                      x
+                      ×
                     </button>
                   )}
                 </div>
@@ -339,7 +330,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
               onClick={() => setResolutions((prev) => [...prev, { libelle: '', typeMajorite: 'SIMPLE' }])}
               style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#1E4B8F', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
             >
-              + Ajouter une resolution
+              + Ajouter une résolution
             </button>
           </div>
         </div>
@@ -355,7 +346,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
             Annuler
           </Button>
           <Button variant="primary" onClick={handleCreer} disabled={envoi}>
-            {envoi ? 'Creation...' : 'Creer l’AG'}
+            {envoi ? 'Création…' : 'Créer l’AG'}
           </Button>
         </div>
       </div>

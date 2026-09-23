@@ -9,13 +9,13 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   // Le syndic crée l'AG avec une résolution.
   await login(page, SYNDIC.email, SYNDIC.motDePasse)
   await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
-  await page.getByRole('button', { name: 'Creer une AG' }).click()
+  await page.getByRole('button', { name: 'Créer une AG' }).click()
   await page.locator('input[type="date"]').fill('2026-12-01')
-  await page.getByPlaceholder('Resolution 1').fill(libelle)
+  await page.getByPlaceholder('Résolution 1').fill(libelle)
 
   const [creationResponse] = await Promise.all([
     page.waitForResponse((r) => r.request().method() === 'POST' && r.url().endsWith('/ags')),
-    page.getByRole('button', { name: 'Creer l’AG' }).click(),
+    page.getByRole('button', { name: 'Créer l’AG' }).click(),
   ])
   const { ag } = (await creationResponse.json()) as { ag: { id: string; statut: string } }
   expect(ag.statut).toBe('PLANIFIEE')
@@ -33,7 +33,7 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await page.goto(`/assemblees/${ag.id}`)
   await expect(page.getByText(libelle)).toBeVisible()
   await page.getByRole('button', { name: 'Pour' }).click()
-  await expect(page.getByText('Vote enregistré : Pour.')).toBeVisible()
+  await expect(page.getByText('Votre vote a été pris en compte pour cette résolution.')).toBeVisible()
 
   await logout(page)
 

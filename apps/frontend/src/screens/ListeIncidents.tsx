@@ -8,12 +8,8 @@ import { lotsApi } from '../api/lots.js'
 import { ApiError } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.js'
 import type { Incident, Lot } from '../api/types.js'
-
-const STATUT_MAP: Record<Incident['statut'], { variant: 'success' | 'warning' | 'neutral'; label: string }> = {
-  DECLARE: { variant: 'neutral', label: 'Déclaré' },
-  EN_COURS: { variant: 'warning', label: 'En cours' },
-  RESOLU: { variant: 'success', label: 'Résolu' },
-}
+import { STATUT_INCIDENT as STATUT_MAP } from '../constants/statuts.js'
+import { formaterDate } from '../utils/format.js'
 
 const PROCHAIN_STATUT: Partial<Record<Incident['statut'], 'EN_COURS' | 'RESOLU'>> = {
   DECLARE: 'EN_COURS',
@@ -236,7 +232,7 @@ export default function ListeIncidents() {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>{inc.titre}</p>
                     <p style={{ margin: 0, fontSize: 12, color: '#5C5C5C' }}>
-                      {new Date(inc.dateCreation).toLocaleDateString('fr-FR')} · {inc.idLot ? 'Lot' : 'Partie commune'}
+                      {formaterDate(inc.dateCreation)} · {inc.idLot ? 'Lot' : 'Partie commune'}
                     </p>
                   </div>
                   <Badge {...s} />

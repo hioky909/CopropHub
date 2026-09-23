@@ -4,16 +4,8 @@ import Notification from '../components/Notification.js'
 import { chargesApi } from '../api/charges.js'
 import { ApiError } from '../api/client.js'
 import type { Charge } from '../api/types.js'
-
-const STATUT_MAP: Record<Charge['statut'], { variant: 'success' | 'warning' | 'danger' | 'neutral'; label: string }> = {
-  A_PAYER: { variant: 'neutral', label: 'À payer' },
-  PAYEE: { variant: 'success', label: 'Payée' },
-  EN_RETARD: { variant: 'danger', label: 'En retard' },
-}
-
-function fmt(n: number) {
-  return n.toLocaleString('fr-FR', { style: 'currency', currency: 'EUR' })
-}
+import { STATUT_CHARGE as STATUT_MAP } from '../constants/statuts.js'
+import { formaterMontant as fmt } from '../utils/format.js'
 
 export default function ListeCharges() {
   const [charges, setCharges] = useState<Charge[]>([])

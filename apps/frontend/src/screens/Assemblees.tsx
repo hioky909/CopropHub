@@ -6,12 +6,8 @@ import { agsApi } from '../api/ags.js'
 import { ApiError } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.js'
 import type { Ag } from '../api/types.js'
-
-const STATUT_BADGE: Record<Ag['statut'], { variant: 'neutral' | 'info' | 'success'; label: string }> = {
-  PLANIFIEE: { variant: 'neutral', label: 'Planifiée' },
-  OUVERTE: { variant: 'info', label: 'Vote ouvert' },
-  CLOTUREE: { variant: 'success', label: 'Clôturée' },
-}
+import { STATUT_AG as STATUT_BADGE } from '../constants/statuts.js'
+import { formaterDate } from '../utils/format.js'
 
 export default function Assemblees() {
   const navigate = useNavigate()
@@ -82,7 +78,7 @@ export default function Assemblees() {
               }}
             >
               <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>
-                Assemblée générale du {new Date(ag.dateAg).toLocaleDateString('fr-FR')}
+                Assemblée générale du {formaterDate(ag.dateAg)}
               </span>
               <Badge {...STATUT_BADGE[ag.statut]} />
             </button>

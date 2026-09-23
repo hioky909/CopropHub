@@ -8,18 +8,8 @@ import { ApiError } from '../api/client.js'
 import { useAuth } from '../context/AuthContext.js'
 import type { Ag, ResolutionOrdreDuJour, ResolutionResultat } from '../api/types.js'
 
-const MAJORITE_LABEL: Record<string, string> = {
-  SIMPLE: 'Majorité simple (art. 24)',
-  ABSOLUE: 'Majorité absolue (art. 25)',
-  DOUBLE_MAJORITE: 'Double majorité (art. 26)',
-  UNANIMITE: 'Unanimité',
-}
-
-const STATUT_BADGE: Record<Ag['statut'], { variant: 'neutral' | 'info' | 'success'; label: string }> = {
-  PLANIFIEE: { variant: 'neutral', label: 'Planifiée' },
-  OUVERTE: { variant: 'info', label: 'Vote ouvert' },
-  CLOTUREE: { variant: 'success', label: 'Clôturée' },
-}
+import { MAJORITE_LABEL, STATUT_AG as STATUT_BADGE } from '../constants/statuts.js'
+import { formaterDate } from '../utils/format.js'
 
 type VoteChoice = 'OUI' | 'NON' | 'ABSTENTION'
 
@@ -134,7 +124,7 @@ export default function AssembleeDetail() {
       {!modeVoteCopro && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>
-            AG du {new Date(ag.dateAg).toLocaleDateString('fr-FR')}
+            AG du {formaterDate(ag.dateAg)}
           </h1>
           <Badge {...STATUT_BADGE[ag.statut]} />
         </div>
@@ -295,7 +285,7 @@ function EcranVote({
       <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E0E0E0', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
           <p style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>
-            Vote en ligne — AG du {new Date(ag.dateAg).toLocaleDateString('fr-FR')}
+            Vote en ligne — AG du {formaterDate(ag.dateAg)}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
             {resolutions.map((r, i) => (
