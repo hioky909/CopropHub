@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Badge from '../components/Badge.js'
 import Button from '../components/Button.js'
@@ -223,6 +223,16 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   ])
   const [erreur, setErreur] = useState<string | null>(null)
   const [envoi, setEnvoi] = useState(false)
+  const dateInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    dateInputRef.current?.focus()
+    function surEchap(e: KeyboardEvent) {
+      if (e.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', surEchap)
+    return () => window.removeEventListener('keydown', surEchap)
+  }, [onClose])
 
   function majResolution(index: number, patch: Partial<NouvelleResolution>) {
     setResolutions((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)))
@@ -261,20 +271,25 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       onClick={onClose}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="titre-modal-creation-ag"
         style={{ backgroundColor: '#FFFFFF', borderRadius: 10, padding: 32, width: '100%', maxWidth: 520, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: '#1A1A1A' }}>Creer une assemblee generale</h2>
+        <h2 id="titre-modal-creation-ag" style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: '#1A1A1A' }}>Creer une assemblee generale</h2>
         <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>
           L&apos;AG est creee a l&apos;etat planifiee. Vous l&apos;ouvrirez au vote depuis la liste des assemblees.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div>
-            <label style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#1A1A1A', marginBottom: 4 }}>
+            <label htmlFor="date-ag-creation" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#1A1A1A', marginBottom: 4 }}>
               Date prevue <span style={{ color: '#B3261E' }}>*</span>
             </label>
             <input
+              id="date-ag-creation"
+              ref={dateInputRef}
               type="date"
               value={dateAg}
               onChange={(e) => setDateAg(e.target.value)}
