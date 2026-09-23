@@ -67,7 +67,7 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
 | GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |
 
-Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-25 et au-delà) couvrent les en-têtes de sécurité testés et la documentation (`docs/`).
+Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; il ne reste que T-26 (peupler `docs/` avec les documents de conception).
 
 ## Frontend
 
