@@ -30,6 +30,16 @@ function signer(donnees: string): string {
   return createHmac('sha256', secret()).update(donnees).digest('base64url');
 }
 
+/**
+ * Jetons révoqués par une déconnexion explicite (signature → date d'expiration
+ * naturelle du jeton). Stockage en mémoire du processus : aucune table de
+ * session n'est ajoutée (cf. commentaire d'en-tête), donc la révocation est
+ * perdue au redémarrage du serveur et n'est pas partagée entre instances —
+ * suffisant pour un déploiement mono-instance du MVP. Les entrées expirées
+ * sont purgées à chaque révocation pour que la table reste bornée.
+ */
+const jetonsRevoques = new Map<string, number>();
+
 export const sessionService = {
   emettreJeton(utilisateurId: string): string {
     const payload: SessionPayload = { utilisateurId, emisLe: Date.now() };
@@ -38,11 +48,23 @@ export const sessionService = {
     return `${corps}.${signature}`;
   },
 
+  /** Invalide côté serveur un jeton valide (déconnexion) : il ne sera plus accepté même s'il a été copié. */
+  revoquerJeton(jeton: string | undefined): void {
+    const payload = this.verifierJeton(jeton);
+    if (!jeton || !payload) return;
+    const maintenant = Date.now();
+    for (const [signature, expiration] of jetonsRevoques) {
+      if (expiration <= maintenant) jetonsRevoques.delete(signature);
+    }
+    jetonsRevoques.set(jeton.split('.')[1]!, payload.emisLe + DUREE_SESSION_MS);
+  },
+
   /** Retourne le payload si le jeton est valide et non expiré, sinon `null`. Ne lance jamais d'exception sur une entrée malformée (peut provenir d'un client non fiable). */
   verifierJeton(jeton: string | undefined): SessionPayload | null {
     if (!jeton) return null;
     const [corps, signature] = jeton.split('.');
     if (!corps || !signature) return null;
+    if (jetonsRevoques.has(signature)) return null; // déconnecté explicitement
 
     const signatureAttendue = signer(corps);
     const bufSignature = Buffer.from(signature);

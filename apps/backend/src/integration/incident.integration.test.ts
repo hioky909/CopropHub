@@ -42,6 +42,24 @@ describe('POST /incidents', () => {
     expect(enBase.statut).toBe('DECLARE');
   });
 
+  it('refuse (422) un titre ou une description contenant du balisage HTML, sans rien écrire', async () => {
+    const copro = await creerUtilisateur();
+    const cookie = cookieSession(copro.id);
+
+    const titre = await request(app)
+      .post('/incidents')
+      .set('Cookie', cookie)
+      .send({ titre: '<script>alert(1)</script>' });
+    const description = await request(app)
+      .post('/incidents')
+      .set('Cookie', cookie)
+      .send({ titre: 'Fuite', description: 'voir <img src=x onerror=alert(1)>' });
+
+    expect(titre.status).toBe(422);
+    expect(description.status).toBe(422);
+    expect(await prisma.incident.count()).toBe(0);
+  });
+
   it('un copropriétaire déclare un incident sur son propre lot', async () => {
     const copro = await creerUtilisateur();
     const lot = await creerLot(immeuble.id, '12', copro.id);

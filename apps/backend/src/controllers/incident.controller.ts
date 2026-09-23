@@ -21,10 +21,22 @@ import { asyncHandler } from '../middleware/async-handler.js';
 export const incidentRouter = Router();
 incidentRouter.use(exigerAuthentification);
 
+// Défense en profondeur (audit pré-production) : React échappe déjà le
+// rendu côté frontend, mais on refuse `<`/`>` côté serveur pour ne pas
+// stocker de balisage exploitable par un futur export (PDF, email) qui
+// n'échapperait pas forcément le HTML.
+const texteSansBalise = (max: number) =>
+  z
+    .string()
+    .trim()
+    .min(1)
+    .max(max)
+    .refine((valeur) => !/[<>]/.test(valeur), { message: 'Les caractères < et > sont interdits.' });
+
 const declarerIncidentSchema = z.object({
   idLot: z.string().uuid().optional(),
-  titre: z.string().trim().min(1).max(200),
-  description: z.string().trim().min(1).max(2000).optional(),
+  titre: texteSansBalise(200),
+  description: texteSansBalise(2000).optional(),
 });
 
 incidentRouter.post(

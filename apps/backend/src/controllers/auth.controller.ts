@@ -7,6 +7,7 @@ import {
   IdentifiantsInvalidesError,
 } from '../services/auth.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
+import { sessionService } from '../services/session.service.js';
 import {
   exigerAuthentification,
   poserCookieSession,
@@ -34,15 +35,31 @@ const limiteurConnexion = rateLimit({
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
 });
 
+// Complément par compte (audit pré-production) : le limiteur par IP ci-dessus
+// ne protège pas un compte précis contre un attaquant qui change d'IP. Clé =
+// email visé, indépendante de l'adresse source ; seuil un peu plus large que
+// celui par IP pour ne pas verrouiller un utilisateur légitime derrière un
+// NAT partagé. Comme le limiteur par IP, le compteur est en mémoire du
+// processus (mono-instance au MVP).
+const limiteurParCompte = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5) * 2,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  skip: (req) => typeof req.body?.email !== 'string',
+  keyGenerator: (req) => String(req.body.email).trim().toLowerCase(),
+});
+
 const inscriptionSchema = z.object({
   nom: z.string().trim().min(1).max(120),
   email: z.string().trim().toLowerCase().email().max(255),
-  motDePasse: z.string(),
+  motDePasse: z.string().max(128),
 });
 
 const connexionSchema = z.object({
   email: z.string().trim().toLowerCase().email().max(255),
-  motDePasse: z.string(),
+  motDePasse: z.string().max(128),
 });
 
 authRouter.post(
@@ -79,6 +96,7 @@ authRouter.post(
 authRouter.post(
   '/connexion',
   limiteurConnexion,
+  limiteurParCompte,
   asyncHandler(async (req, res) => {
     const analyse = connexionSchema.safeParse(req.body);
     if (!analyse.success) {
@@ -103,7 +121,8 @@ authRouter.post(
   }),
 );
 
-authRouter.post('/deconnexion', exigerAuthentification, (_req, res) => {
+authRouter.post('/deconnexion', exigerAuthentification, (req, res) => {
+  sessionService.revoquerJeton(req.cookies?.session as string | undefined);
   supprimerCookieSession(res);
   res.status(204).send();
 });

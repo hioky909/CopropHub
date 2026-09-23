@@ -65,6 +65,19 @@ export function createApp(): Express {
   // détail complet part uniquement dans les logs serveur.
   app.use(
     (err: unknown, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+      // Erreurs de parsing du corps de requête (JSON malformé, payload trop
+      // volumineux) : ce sont des erreurs client, pas des pannes serveur —
+      // audit pré-production, corrige un 500 trompeur en 400/413.
+      if (err && typeof err === 'object' && 'type' in err) {
+        if (err.type === 'entity.parse.failed') {
+          res.status(400).json({ erreur: 'Corps de requête JSON invalide.' });
+          return;
+        }
+        if (err.type === 'entity.too.large') {
+          res.status(413).json({ erreur: 'Corps de requête trop volumineux.' });
+          return;
+        }
+      }
       // eslint-disable-next-line no-console
       console.error(err);
       res.status(500).json({ erreur: 'Une erreur interne est survenue.' });

@@ -161,4 +161,13 @@ describe('connexion, session et déconnexion', () => {
 
     expect((await request(app).post('/auth/deconnexion')).status).toBe(401);
   });
+
+  it('un cookie copié avant la déconnexion est refusé après (jeton révoqué côté serveur)', async () => {
+    const cookie = await inscrire();
+    expect((await request(app).get('/auth/moi').set('Cookie', cookie)).status).toBe(200);
+
+    await request(app).post('/auth/deconnexion').set('Cookie', cookie);
+
+    expect((await request(app).get('/auth/moi').set('Cookie', cookie)).status).toBe(401);
+  });
 });

@@ -35,6 +35,20 @@ describe('sessionService', () => {
     process.env.SESSION_SECRET = 'secret-de-test-suffisamment-long';
   });
 
+  it('rejette un jeton révoqué (déconnexion) même si sa signature et sa date restent valides', () => {
+    const jeton = sessionService.emettreJeton('utilisateur-1');
+    expect(sessionService.verifierJeton(jeton)).not.toBeNull();
+    sessionService.revoquerJeton(jeton);
+    expect(sessionService.verifierJeton(jeton)).toBeNull();
+  });
+
+  it("révoquer un jeton n'affecte pas celui d'un autre utilisateur", () => {
+    const jetonA = sessionService.emettreJeton('utilisateur-A');
+    const jetonB = sessionService.emettreJeton('utilisateur-B');
+    sessionService.revoquerJeton(jetonA);
+    expect(sessionService.verifierJeton(jetonB)?.utilisateurId).toBe('utilisateur-B');
+  });
+
   it('rejette un jeton expiré (session de plus de 8h)', () => {
     vi.useFakeTimers();
     const jeton = sessionService.emettreJeton('utilisateur-1');

@@ -223,6 +223,23 @@ describe('autorisation (RM-14) sur /ags', () => {
   });
 });
 
+describe('double vote concurrent', () => {
+  it('20 requêtes simultanées du même copropriétaire sur la même résolution : un seul vote enregistré', async () => {
+    const votant = await creerCoproprietaireHabilite(immeuble.id, '1');
+    const ag = await creerAg(immeuble.id, 'OUVERTE', [{ libelle: 'R', typeMajorite: 'SIMPLE' }]);
+    const idResolution = ag.resolutions[0]!.id;
+    const cookie = cookieSession(votant.id);
+
+    const reponses = await Promise.all(
+      Array.from({ length: 20 }, () => voter(cookie, idResolution, 'OUI')),
+    );
+
+    expect(reponses.filter((r) => r.status === 201)).toHaveLength(1);
+    expect(reponses.filter((r) => r.status === 409)).toHaveLength(19);
+    expect(await prisma.vote.count()).toBe(1);
+  });
+});
+
 describe("électorat figé à l'ouverture du vote", () => {
   it(
     "un copropriétaire qui quitte l'immeuble après avoir voté ne fait pas basculer " +

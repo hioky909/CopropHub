@@ -59,6 +59,16 @@ describe('CORS', () => {
   });
 });
 
+describe('Gestion des erreurs de parsing du corps de requête', () => {
+  it('JSON malformé : 400, pas 500', async () => {
+    const reponse = await request(createApp())
+      .post('/auth/connexion')
+      .set('Content-Type', 'application/json')
+      .send('{ceci nest pas du json');
+    expect(reponse.status).toBe(400);
+  });
+});
+
 describe('Rate limiting global', () => {
   it('annonce sa limite via les en-têtes standard (RateLimit-*)', async () => {
     const reponse = await request(createApp()).get('/health');
