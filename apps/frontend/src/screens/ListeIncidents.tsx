@@ -223,6 +223,7 @@ export default function ListeIncidents() {
               return (
                 <div
                   key={inc.id}
+                  data-testid={`incident-${inc.id}`}
                   style={{
                     display: 'flex',
                     alignItems: 'center',

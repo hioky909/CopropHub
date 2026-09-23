@@ -7,3 +7,6 @@ coverage/
 *.tsbuildinfo
 .DS_Store
 apps/backend/generated/
+apps/frontend/test-results/
+apps/frontend/playwright-report/
+apps/frontend/blob-report/

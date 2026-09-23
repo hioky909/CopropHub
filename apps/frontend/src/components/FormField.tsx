@@ -1,4 +1,4 @@
-import { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode } from 'react'
+import { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes, ReactNode, useId } from 'react'
 
 interface BaseFieldProps {
   label: string
@@ -21,10 +21,12 @@ const inputBase = {
   lineHeight: 1.5,
 }
 
-function FieldWrapper({ label, help, error, required, children }: BaseFieldProps & { children: ReactNode }) {
+function FieldWrapper({
+  label, help, error, required, fieldId, children,
+}: BaseFieldProps & { fieldId: string; children: ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
+      <label htmlFor={fieldId} style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
         {label}
         {required && <span style={{ color: '#B3261E', marginLeft: 2 }}>*</span>}
       </label>
@@ -40,11 +42,14 @@ function FieldWrapper({ label, help, error, required, children }: BaseFieldProps
 }
 
 export function TextField({
-  label, help, error, required, ...props
+  label, help, error, required, id, ...props
 }: BaseFieldProps & InputHTMLAttributes<HTMLInputElement>) {
+  const generatedId = useId()
+  const fieldId = id ?? generatedId
   return (
-    <FieldWrapper label={label} help={help} error={error} required={required}>
+    <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <input
+        id={fieldId}
         {...props}
         style={{
           ...inputBase,
@@ -64,11 +69,14 @@ export function TextField({
 }
 
 export function SelectField({
-  label, help, error, required, children, ...props
+  label, help, error, required, id, children, ...props
 }: BaseFieldProps & SelectHTMLAttributes<HTMLSelectElement> & { children: ReactNode }) {
+  const generatedId = useId()
+  const fieldId = id ?? generatedId
   return (
-    <FieldWrapper label={label} help={help} error={error} required={required}>
+    <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <select
+        id={fieldId}
         {...props}
         style={{
           ...inputBase,
@@ -87,11 +95,14 @@ export function SelectField({
 }
 
 export function TextareaField({
-  label, help, error, required, ...props
+  label, help, error, required, id, ...props
 }: BaseFieldProps & TextareaHTMLAttributes<HTMLTextAreaElement>) {
+  const generatedId = useId()
+  const fieldId = id ?? generatedId
   return (
-    <FieldWrapper label={label} help={help} error={error} required={required}>
+    <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <textarea
+        id={fieldId}
         {...props}
         rows={props.rows ?? 4}
         style={{

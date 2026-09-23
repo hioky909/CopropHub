@@ -22,10 +22,13 @@ import { asyncHandler } from '../middleware/async-handler.js';
 export const authRouter = Router();
 
 // Limite stricte sur la connexion (NF-05, brute force) : plus sévère que
-// le rate limit global posé dans app.ts.
+// le rate limit global posé dans app.ts. Seuil configurable (AUTH_RATE_LIMIT_MAX,
+// défaut 5, comportement de production inchangé) : uniquement relevé pour le
+// backend E2E (T-17), démarré une seule fois pour toute la suite Playwright,
+// qui enchaîne légitimement plus de 5 connexions réelles.
 const limiteurConnexion = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 5,
+  limit: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5),
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },

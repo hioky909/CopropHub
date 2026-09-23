@@ -67,7 +67,7 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
 | GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |
 
-Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-17 et au-delà) couvrent les tests end-to-end, la sécurité transverse et la documentation.
+Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; les tâches suivantes (T-23 et au-delà) couvrent l'audit formel des états d'interface, l'accessibilité et la documentation.
 
 ## Frontend
 
@@ -78,6 +78,19 @@ npm run dev --workspace=apps/frontend    # http://localhost:5173, attend le back
 ```
 
 `VITE_API_URL` (optionnelle, défaut `http://localhost:3000`) pointe le frontend vers une autre origine d'API. Le backend doit alors définir `FRONTEND_ORIGIN` en conséquence (CORS avec `credentials: true`).
+
+### Tests E2E (T-17, Playwright)
+
+`apps/frontend/e2e/` couvre les parcours clés contre un backend, un frontend et un PostgreSQL réellement démarrés (pas de mock) : connexion/inscription, cycle complet d'une AG (création → ouverture → vote → clôture → résultats), déclaration et progression d'un incident, consultation des charges.
+
+```bash
+# sur une base dédiée dont le nom finit par _test (même garde-fou que test:integration)
+export DATABASE_URL=postgresql://<utilisateur>:<mot_de_passe>@localhost:5432/coprophub_test
+npx playwright install --with-deps chromium   # une seule fois
+npm run test:e2e --workspace=apps/frontend
+```
+
+`playwright.config.ts` démarre lui-même le backend (`apps/backend`, script `e2e:serve` : migration → `apps/backend/scripts/e2e-seed.ts` → serveur) et le frontend (`vite dev`) ; `e2e-seed.ts` vide la base puis amorce un syndic, un copropriétaire avec un lot rattaché et une charge, avec des identifiants réels (contrairement aux tests d'intégration, qui contournent la connexion via un cookie signé). Le seuil du rate limiter de connexion (NF-05, 5 tentatives/15 min en production) est relevé via `AUTH_RATE_LIMIT_MAX` pour ce seul processus, la suite entière enchaînant légitimement plus de 5 connexions réelles contre un unique backend.
 
 ## Documentation
 
@@ -103,4 +116,4 @@ npm run prisma:migrate:deploy
 npm run test:integration
 ```
 
-La CI (`.github/workflows/ci.yml`) exécute ces étapes (intégration comprise, sur un service PostgreSQL) plus un audit de dépendances à chaque pull request, et déploie depuis `main` après leur succès.
+La CI (`.github/workflows/ci.yml`) exécute ces étapes (intégration et E2E comprises, sur un service PostgreSQL) plus un audit de dépendances à chaque pull request, et déploie depuis `main` après leur succès.

@@ -16,7 +16,9 @@
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",
     "prisma:drift": "prisma migrate diff --from-schema-datasource prisma/schema.prisma --to-schema-datamodel prisma/schema.prisma --exit-code",
-    "prisma:seed": "tsx --env-file-if-exists=../../.env prisma/seed.ts"
+    "prisma:seed": "tsx --env-file-if-exists=../../.env prisma/seed.ts",
+    "e2e:seed": "tsx scripts/e2e-seed.ts",
+    "e2e:serve": "npm run prisma:migrate:deploy && npm run e2e:seed && tsx src/server.ts"
   },
   "dependencies": {
     "@prisma/client": "^5.20.0",

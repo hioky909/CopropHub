@@ -62,6 +62,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Installer les navigateurs Playwright
+        run: npx playwright install --with-deps chromium
+        working-directory: apps/frontend
+
+      - name: Tests E2E (Playwright, backend + frontend + PostgreSQL réels)
+        run: npm run test:e2e --workspace=apps/frontend
+        env:
+          DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
+
       - name: Audit de sécurité des dépendances
         run: npm audit --audit-level=high
 
