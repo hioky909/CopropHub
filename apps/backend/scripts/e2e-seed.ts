@@ -20,8 +20,14 @@ if (!nomBase.endsWith('_test')) {
   );
 }
 
-export const E2E_SYNDIC = { email: 'e2e-syndic@coprophub.local', motDePasse: 'un-mot-de-passe-e2e-syndic-1' };
-export const E2E_COPRO = { email: 'e2e-copro@coprophub.local', motDePasse: 'un-mot-de-passe-e2e-copro-1' };
+export const E2E_SYNDIC = {
+  email: 'e2e-syndic@coprophub.local',
+  motDePasse: 'un-mot-de-passe-e2e-syndic-1',
+};
+export const E2E_COPRO = {
+  email: 'e2e-copro@coprophub.local',
+  motDePasse: 'un-mot-de-passe-e2e-copro-1',
+};
 export const E2E_LOT_NUMERO = 'E2E-1';
 export const E2E_CHARGE_PERIODE = '2026-E2E';
 

@@ -45,56 +45,63 @@ const connexionSchema = z.object({
   motDePasse: z.string(),
 });
 
-authRouter.post('/inscription', asyncHandler(async (req, res) => {
-  const analyse = inscriptionSchema.safeParse(req.body);
-  if (!analyse.success) {
-    res.status(422).json({ erreur: 'Requête invalide.' });
-    return;
-  }
-
-  try {
-    const { utilisateur, jeton } = await authService.inscrire({
-      nom: analyse.data.nom,
-      email: analyse.data.email,
-      motDePasseClair: analyse.data.motDePasse,
-    });
-    poserCookieSession(res, jeton);
-    res.status(201).json({ utilisateur });
-  } catch (erreur) {
-    if (erreur instanceof EmailDejaUtiliseError) {
-      res.status(409).json({ erreur: erreur.message });
+authRouter.post(
+  '/inscription',
+  asyncHandler(async (req, res) => {
+    const analyse = inscriptionSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
       return;
     }
-    if (erreur instanceof MotDePasseInvalideError) {
-      res.status(422).json({ erreur: erreur.message });
+
+    try {
+      const { utilisateur, jeton } = await authService.inscrire({
+        nom: analyse.data.nom,
+        email: analyse.data.email,
+        motDePasseClair: analyse.data.motDePasse,
+      });
+      poserCookieSession(res, jeton);
+      res.status(201).json({ utilisateur });
+    } catch (erreur) {
+      if (erreur instanceof EmailDejaUtiliseError) {
+        res.status(409).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof MotDePasseInvalideError) {
+        res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+authRouter.post(
+  '/connexion',
+  limiteurConnexion,
+  asyncHandler(async (req, res) => {
+    const analyse = connexionSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
       return;
     }
-    throw erreur;
-  }
-}));
 
-authRouter.post('/connexion', limiteurConnexion, asyncHandler(async (req, res) => {
-  const analyse = connexionSchema.safeParse(req.body);
-  if (!analyse.success) {
-    res.status(422).json({ erreur: 'Requête invalide.' });
-    return;
-  }
-
-  try {
-    const { utilisateur, jeton } = await authService.connecter({
-      email: analyse.data.email,
-      motDePasseClair: analyse.data.motDePasse,
-    });
-    poserCookieSession(res, jeton);
-    res.status(200).json({ utilisateur });
-  } catch (erreur) {
-    if (erreur instanceof IdentifiantsInvalidesError) {
-      res.status(401).json({ erreur: erreur.message });
-      return;
+    try {
+      const { utilisateur, jeton } = await authService.connecter({
+        email: analyse.data.email,
+        motDePasseClair: analyse.data.motDePasse,
+      });
+      poserCookieSession(res, jeton);
+      res.status(200).json({ utilisateur });
+    } catch (erreur) {
+      if (erreur instanceof IdentifiantsInvalidesError) {
+        res.status(401).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
     }
-    throw erreur;
-  }
-}));
+  }),
+);
 
 authRouter.post('/deconnexion', exigerAuthentification, (_req, res) => {
   supprimerCookieSession(res);
