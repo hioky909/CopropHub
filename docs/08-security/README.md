@@ -15,7 +15,7 @@ Export condensé du Doc 5 (« Modèle de menace & sécurité »). Frontière de 
 
 ## Authentification
 
-Décision (`ADR-002-authentification`) : cookie de session signé **HttpOnly/Secure/SameSite=Strict**, sans table de session en base — pas de jeton stocké côté serveur à révoquer individuellement, cohérent avec le périmètre mono-immeuble du MVP.
+Décision (`ADR-002-authentification`) : cookie de session signé **HttpOnly/Secure/SameSite=Strict**, sans table de session en base, cohérent avec le périmètre mono-immeuble du MVP. La déconnexion **révoque** néanmoins le jeton côté serveur (liste en mémoire du processus, purgée à l'expiration des 8 h) : un cookie copié avant le logout n'est plus rejouable. Limites assumées : la révocation est perdue au redémarrage et n'est pas partagée entre instances (à remplacer par un stockage partagé si le backend passe en multi-instance). La connexion est limitée par IP **et** par compte (email visé, seuil double de celui par IP), les mots de passe sont plafonnés à 128 caractères et les champs texte des incidents refusent `<`/`>` (défense en profondeur avant tout futur export).
 
 ## Autorisation — matrice par ressource
 

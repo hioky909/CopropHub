@@ -54,4 +54,4 @@ Consultation seule : aucune route de création (écart documenté, données alim
 
 ## Codes d'erreur communs
 
-401 (non authentifié), 403 (autorisé mais interdit sur cette ressource), 404 (introuvable ou masqué — anti-IDOR selon les cas), 409 (conflit d'état : double clôture, AG non ouverte, transition invalide), 422 (validation).
+400 (corps JSON malformé), 413 (corps trop volumineux), 400 (corps JSON malformé), 413 (corps trop volumineux), 401 (non authentifié), 403 (autorisé mais interdit sur cette ressource), 404 (introuvable ou masqué — anti-IDOR selon les cas), 409 (conflit d'état : double clôture, AG non ouverte, transition invalide), 422 (validation).

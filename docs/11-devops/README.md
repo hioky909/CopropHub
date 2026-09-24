@@ -24,6 +24,9 @@ npm install
 npm run prisma:generate
 docker compose up --build
 npm run prisma:seed
+# optionnel — jeu de données de démonstration réaliste (6 copropriétaires, charges,
+# incidents, 3 AG à 3 stades ; comptes @demo.local, mot de passe commun affiché à la fin)
+npm run demo:seed --workspace=apps/backend
 ```
 
 ## Variables d'environnement clés

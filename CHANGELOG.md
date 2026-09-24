@@ -36,6 +36,10 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Tests des en-têtes de sécurité transverses (T-25, `apps/backend/src/security-headers.test.ts`) : Helmet (`X-Content-Type-Options`, `X-Frame-Options`, `Strict-Transport-Security`, absence de `X-Powered-By`), CORS (origine autorisée reflétée avec `credentials`, préflight `OPTIONS` correct sur une route authentifiée), rate limiter global (en-têtes `RateLimit-*`). Rien n'était vérifié par un test jusqu'ici pour ces trois mécanismes (seul le rate limiter dédié à `/auth/connexion` avait un test).
 - Documentation de conception exportée dans `docs/` (T-26, dernière tâche du backlog MVP) : 13 dossiers (`01-project` à `13-decisions`), transcrits fidèlement depuis les documents sources (F-01→F-11, NF-01→NF-14, RM-01→RM-14, US-01→US-10, MCD/MLD, cas d'usage/classes/séquence/états, STRIDE, matrice d'autorisation, checklist sécurité honnête avec ses vrais écarts) et depuis l'implémentation réelle (`12-api/` : endpoints réellement livrés ; `10-testing/evidence/` : relevé réel du dernier passage complet). Le backlog MVP (27 tâches, T-01 à T-26 + T-38) est désormais entièrement terminé et vérifié.
 
+- Tests frontend automatisés (Vitest + React Testing Library, `npm run test:frontend`, branchés en CI) : garde de route par rôle et logique de vote d'une AG. Pool `threads` car le pool `forks` dépasse son délai de démarrage sous Windows (jsdom lent à charger).
+- Script de démonstration `npm run demo:seed --workspace=apps/backend` (`apps/backend/scripts/seed-demo.ts`) : 6 copropriétaires avec lots, charges, incidents et 3 AG (planifiée, ouverte, clôturée avec résultats calculés par le vrai moteur métier), séparé du seed minimal.
+- Écran de vote AG copropriétaire refait à l'identique du proto Figma (une résolution à la fois, barre de progression, gros boutons Pour/Contre/Abstention, récapitulatif, écran final) ; un copropriétaire arrivant sur « Assemblées » est envoyé directement sur l'AG ouverte, sans liste.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.
@@ -58,6 +62,20 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Une panne réseau au démarrage (backend injoignable) était traitée en silence comme une session absente : redirection immédiate vers `/connexion` sans aucun message, l'utilisateur ne pouvant pas distinguer « pas connecté » de « le serveur ne répond pas ». Trouvé en coupant réellement le backend pendant l'audit T-23, corrigé (`RouteProtegee.tsx`, `AuthContext.tsx`).
 
 - `react-router-dom` (moderate, GHSA-wrjc-x8rr-h8h6 / GHSA-337j-9hxr-rhxg) : correctif disponible uniquement en 7.18.4 (changement majeur depuis 6.x) ; `npm audit --audit-level=high` reste à 0 (le seuil du projet), non bloquant, à traiter avec la migration React Router v7 planifiée.
+
+Correctifs de l'audit pré-production (2026-09-23) :
+
+- **Électorat AG figé à l'ouverture du vote** : `nombreInscrits` était recalculé à la clôture ; un copropriétaire qui votait puis quittait l'immeuble pendant que l'AG était ouverte sortait du dénominateur alors que son vote restait compté (résultat faussé pour ABSOLUE/DOUBLE_MAJORITE/UNANIMITE). Nouvelle colonne `ag.nombre_inscrits_geles` (migration `0002_ag_electorat_fige`, rétro-remplie pour les AG déjà ouvertes), figée dans la transaction d'ouverture et réutilisée à la clôture. Test d'intégration reproduisant le scénario exact.
+- La déconnexion révoque désormais le jeton côté serveur (un cookie copié avant le logout n'est plus rejouable) ; révocation en mémoire, mono-instance.
+- Rate limiting de connexion aussi par compte (email visé), en plus de l'IP.
+- Mot de passe plafonné à 128 caractères ; titre/description d'incident refusent `<` et `>`.
+- JSON malformé / corps trop volumineux : 400/413 au lieu de 500.
+- Tableau de bord syndic : accents restaurés ; mappings de statut et formatage date/montant centralisés (`src/constants/statuts.ts`, `src/utils/format.ts`), cause racine de la divergence.
+- Type frontend `Ag` : retrait de `idImmeuble`, non renvoyé par 2 endpoints sur 3 et jamais lu.
+- Test d'intégration du double vote simultané (20 requêtes, un seul vote enregistré).
+- `.env.example` : placeholders restaurés (une modification locale y avait mis des valeurs ressemblant à de vrais secrets ; jamais commitée).
+
+Volontairement laissé de côté : l'énumération de comptes sur `POST /auth/inscription` (409 si l'email existe) est le comportement standard d'une inscription libre — la masquer exigerait un flux de confirmation par email, hors périmètre MVP ; à arbitrer côté produit. La montée `react-router-dom` 6→7 (changement majeur) reste à planifier séparément, aucun vecteur d'exploitation n'ayant été identifié dans le code actuel.
 
 ### Notes
 

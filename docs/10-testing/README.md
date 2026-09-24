@@ -6,6 +6,7 @@
 |---|---|---|
 | Unitaires | `npm run test` | Services et contrôleurs avec repositories simulés — aucune base requise. 200 tests. |
 | Intégration | `npm run test:integration` | Vraies routes contre PostgreSQL réel (migration appliquée) : contraintes du MPD, parcours AG, concurrence vote/clôture. 72 tests, refusent de démarrer si `DATABASE_URL` n'est pas une base `_test`. |
+| Frontend (composants) | `npm run test:frontend` | Vitest + React Testing Library (jsdom) : garde de route par rôle (`RouteProtegee`) et logique de vote d'une AG (`AssembleeDetail`) avec l'API mockée. Branché en CI. |
 | E2E | `npm run test:e2e --workspace=apps/frontend` | Backend + frontend + PostgreSQL réellement démarrés (Playwright) : connexion/inscription, cycle complet d'une AG, incident, charges. 7 scénarios. |
 | Sécurité transverse | `apps/backend/src/security-headers.test.ts` | Helmet, CORS, rate limiting global (T-25). |
 

@@ -33,6 +33,7 @@ npm install
 npm run prisma:generate
 docker compose up --build     # base PostgreSQL, migrations, backend, frontend
 npm run prisma:seed           # crée l'immeuble unique du MVP + un compte syndic
+npm run demo:seed --workspace=apps/backend   # optionnel : données de démonstration réalistes (comptes @demo.local)
 ```
 
 `docker compose up` applique les migrations (service `migrate`) avant de démarrer le backend. Si un PostgreSQL local occupe déjà le port 5432, définir `DB_PORT` (ex. `5433`) dans `.env` et adapter le port de `DATABASE_URL`.

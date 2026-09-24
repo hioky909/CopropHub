@@ -12,7 +12,7 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 | `utilisateur` | Comptes (syndic, copropriétaire), `est_membre_conseil_syndical` optionnel sur un compte copropriétaire |
 | `lot` | Lots de l'immeuble, unique par `(id_immeuble, numero)` |
 | `rattachement` | Historique des rattachements copropriétaire ↔ lot ; un seul rattachement actif (`date_fin IS NULL`) par lot, garanti par un index unique partiel |
-| `ag` | Assemblées générales, statut `PLANIFIEE` → `OUVERTE` → `CLOTUREE` |
+| `ag` | Assemblées générales, statut `PLANIFIEE` → `OUVERTE` → `CLOTUREE`. `nombre_inscrits_geles` (migration `0002`) : nombre de copropriétaires inscrits figé à l'ouverture du vote, réutilisé tel quel à la clôture pour les majorités (RM-03) |
 | `resolution` | Résolutions d'une AG, type de majorité (`SIMPLE`/`ABSOLUE`/`DOUBLE_MAJORITE`/`UNANIMITE`), résultat figé à la clôture |
 | `vote` | Un vote par `(id_resolution, id_utilisateur)` — clé primaire composite, une seule voix par résolution |
 | `incident` | Déclaré par un copropriétaire, `id_lot` nul = partie commune, machine à états `DECLARE`→`EN_COURS`→`RESOLU` |
