@@ -202,7 +202,8 @@ agRouter.get(
     try {
       const ag = await agService.consulterResolutions(params.data.idAg);
       res.status(200).json({
-        ag: { id: ag.id, dateAg: ag.dateAg, statut: ag.statut },
+        // `nombreInscrits` : électorat figé à l'ouverture (null pour une AG ouverte avant la migration 0002).
+        ag: { id: ag.id, dateAg: ag.dateAg, statut: ag.statut, nombreInscrits: ag.nombreInscritsGeles },
         resolutions: ag.resolutions.map((r) => ({
           id: r.id,
           libelle: r.libelle,

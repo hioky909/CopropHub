@@ -6,7 +6,7 @@ export const agsApi = {
   ordreDuJour: (idAg: string) =>
     api.get<{ ag: Ag; resolutions: ResolutionOrdreDuJour[] }>(`/ags/${idAg}`),
   resultats: (idAg: string) =>
-    api.get<{ ag: Ag; resolutions: ResolutionResultat[] }>(`/ags/${idAg}/resolutions`),
+    api.get<{ ag: Ag & { nombreInscrits: number | null }; resolutions: ResolutionResultat[] }>(`/ags/${idAg}/resolutions`),
   creer: (dateAg: string, resolutions: { libelle: string; typeMajorite: TypeMajorite }[]) =>
     api.post<{ ag: Ag }>('/ags', { dateAg, resolutions }),
   ouvrir: (idAg: string) => api.post<{ ag: Ag }>(`/ags/${idAg}/ouverture`),

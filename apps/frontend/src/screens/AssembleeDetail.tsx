@@ -20,6 +20,7 @@ export default function AssembleeDetail() {
   const [ag, setAg] = useState<Ag | null>(null)
   const [resolutions, setResolutions] = useState<ResolutionOrdreDuJour[]>([])
   const [resultats, setResultats] = useState<ResolutionResultat[] | null>(null)
+  const [nombreInscrits, setNombreInscrits] = useState<number | null>(null)
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState<string | null>(null)
   const [action, setAction] = useState(false)
@@ -38,6 +39,7 @@ export default function AssembleeDetail() {
       if (detail.ag.statut === 'CLOTUREE') {
         const res = await agsApi.resultats(idAg)
         setResultats(res.resolutions)
+        setNombreInscrits(res.ag.nombreInscrits)
       } else {
         setResultats(null)
       }
@@ -184,6 +186,12 @@ export default function AssembleeDetail() {
                 <span style={{ color: '#B3261E', fontWeight: 600 }}>Non : {r.decomptes.non}</span>
                 <span style={{ color: '#5C5C5C', fontWeight: 600 }}>Abstention : {r.decomptes.abstention}</span>
               </div>
+              {nombreInscrits !== null && (
+                <p style={{ margin: '8px 0 0', fontSize: 12, color: '#5C5C5C' }}>
+                  Participation : {r.decomptes.oui + r.decomptes.non + r.decomptes.abstention} votant(s) sur{' '}
+                  {nombreInscrits} copropriétaire(s) inscrit(s)
+                </p>
+              )}
               {estCopro && (
                 <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C', display: 'flex', alignItems: 'center', gap: 8 }}>
                   Mon vote :

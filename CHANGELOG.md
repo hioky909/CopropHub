@@ -46,6 +46,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 - Visibilité des incidents de partie commune (point ouvert du Doc 5, tranché) : un copropriétaire voit désormais ses incidents ET ceux des parties communes (`id_lot` nul), qui concernent tout l'immeuble ; il ne voit jamais un incident portant sur le lot d'un autre, ni l'identité du déclarant d'un incident d'autrui (`idUtilisateurDeclarant` masqué). Test d'intégration dédié.
 
+- Participation aux AG : `GET /ags/:idAg/resolutions` expose `ag.nombreInscrits` (électorat figé à l'ouverture) et l'écran des résultats affiche « X votant(s) sur N copropriétaire(s) inscrit(s) ». Remplace un contrôle de quorum : aucun seuil de quorum n'est défini par les règles métier (RM-03), l'inventer aurait été une règle juridique non validée ; le taux de participation est en revanche un fait, affiché sans en tirer de conséquence.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

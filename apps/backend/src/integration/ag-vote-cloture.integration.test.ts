@@ -142,6 +142,10 @@ describe('parcours complet : création → ouverture → votes → clôture', ()
     expect(cloture.status).toBe(200);
     expect(cloture.body.ag.statut).toBe('CLOTUREE');
 
+    // La participation s'appuie sur l'électorat figé à l'ouverture (4 copropriétaires habilités).
+    const resultatsApi = await request(app).get(`/ags/${idAg}/resolutions`).set('Cookie', cookieSyndic);
+    expect(resultatsApi.body.ag.nombreInscrits).toBe(4);
+
     const attendu: Record<string, 'ADOPTEE' | 'REJETEE'> = {
       'R1 simple': 'ADOPTEE',
       'R2 absolue': 'REJETEE',
