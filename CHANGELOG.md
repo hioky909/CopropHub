@@ -52,6 +52,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 - Changement de mot de passe par l'utilisateur : `POST /auth/mot-de-passe` (mot de passe actuel exigé, politique de 12 caractères, refus d'un mot de passe identique, limité par utilisateur, journalisé) et écran « Mon compte » (clic sur l'email dans l'en-tête). Ne couvre pas l'oubli de mot de passe (réinitialisation par email, prévue en V1). Tests d'intégration sur vraie base et parcours E2E.
 
+- Charges : date d'échéance (`charge.date_echeance`, migration `0003`, RM-09) — une charge à payer dont l'échéance est passée est affichée « en retard » sans intervention du syndic (statut dérivé à la lecture, jamais écrit) ; création (`POST /charges`) et marquage « payée » (`PATCH /charges/:idCharge/paiement`) par le syndic, journalisés, avec formulaire et bouton dans l'écran Charges. Comble l'écart « aucune route de création de charge » du backlog MVP. Tests unitaires, d'intégration et E2E.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

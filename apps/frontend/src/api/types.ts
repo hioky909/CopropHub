@@ -48,6 +48,7 @@ export interface Charge {
   montant: string;
   periode: string;
   statut: StatutCharge;
+  dateEcheance: string | null;
 }
 
 export interface Lot {

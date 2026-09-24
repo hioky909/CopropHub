@@ -52,9 +52,11 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | Méthode | Route | Rôle | Description |
 |---|---|---|---|
 | GET | `/charges` | authentifié | 200 `{charges}`. Toutes pour syndic/conseil syndical, seulement les siennes pour un copropriétaire. |
+| POST | `/charges` | syndic | `{idLot, montant, periode, dateEcheance?}` → 201 `{charge}`. Montant en euros, strictement positif, 2 décimales max ; date calendaire réelle ; 404 si le lot n'existe pas. Statut initial `A_PAYER`. |
+| PATCH | `/charges/:idCharge/paiement` | syndic | → 200 `{charge}` (statut `PAYEE`). 409 si déjà payée, 404 si inconnue. Déclaratif : aucune intégration bancaire. |
 | GET | `/charges/:idCharge` | authentifié | 200 `{charge}`. 403 explicite (pas 404) sur la charge d'un autre lot. |
 
-Consultation seule : aucune route de création (écart documenté, données alimentées par le seed).
+`statut` renvoyé par les lectures est **dérivé** : une charge `A_PAYER` dont `dateEcheance` (AAAA-MM-JJ, ou `null`) est passée est renvoyée `EN_RETARD` (RM-09), sans modification du stockage.
 
 ## Codes d'erreur communs
 

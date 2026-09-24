@@ -16,7 +16,7 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 | `resolution` | Résolutions d'une AG, type de majorité (`SIMPLE`/`ABSOLUE`/`DOUBLE_MAJORITE`/`UNANIMITE`), résultat figé à la clôture |
 | `vote` | Un vote par `(id_resolution, id_utilisateur)` — clé primaire composite, une seule voix par résolution |
 | `incident` | Déclaré par un copropriétaire, `id_lot` nul = partie commune, machine à états `DECLARE`→`EN_COURS`→`RESOLU` |
-| `charge` | Charges par lot et période, consultation seule au MVP (aucune route de création) |
+| `charge` | Charges par lot et période ; `date_echeance` optionnelle (RM-09, migration `0003`) dont dépend le statut « en retard », calculé à la lecture |
 
 ## Points d'attention réels (trouvés en implémentant, pas en concevant)
 

@@ -79,7 +79,7 @@ Le périmètre MVP retient les **4 mêmes types de résolution**, pour rester fi
 ### RM-08 à RM-10 — Charges
 
 - **RM-08** : une charge est rattachée à un lot et à une période (ex. trimestre), avec un statut { à payer, payée, en retard }.
-- **RM-09** : le statut « en retard » est calculé automatiquement lorsque la date d'échéance est dépassée sans passage à « payée » (le passage à « payée » reste déclaratif au MVP). *Écart connu* : le modèle `charge` du MPD n'a pas de date d'échéance, RM-09 n'est donc pas implémentable en l'état (documenté dans Doc 10).
+- **RM-09** : le statut « en retard » est calculé automatiquement lorsque la date d'échéance est dépassée sans passage à « payée » (le passage à « payée » reste déclaratif : le syndic l'enregistre). Implémenté : `charge.date_echeance` (migration `0003`), statut dérivé à la lecture (jamais écrit en base) ; une charge sans échéance conserve son statut stocké.
 - **RM-10** : un copropriétaire ne consulte que les charges de ses propres lots.
 
 ### RM-11 à RM-13 — Incidents
