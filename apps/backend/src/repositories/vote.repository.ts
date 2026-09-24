@@ -51,11 +51,12 @@ export const voteRepository = {
         return { statut: 'AG_NON_OUVERTE' } as const;
       }
 
-      const modifies = await tx.vote.updateMany({
-        where: { idResolution, idUtilisateur },
-        data: { valeur, dateVote: new Date() },
-      });
-      if (modifies.count === 0) {
+      // Horloge de la base (comme le `now()` par défaut de l'insertion), pas celle du serveur Node.
+      const modifies = await tx.$executeRaw`
+        UPDATE vote
+        SET valeur = ${valeur}::valeur_vote_enum, date_vote = now()
+        WHERE id_resolution = ${idResolution}::uuid AND id_utilisateur = ${idUtilisateur}::uuid`;
+      if (modifies === 0) {
         return { statut: 'AUCUN_VOTE' } as const;
       }
 
