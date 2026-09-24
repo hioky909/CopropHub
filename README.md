@@ -58,6 +58,8 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/ags/:idAg/ouverture` | syndic | Ouvrir le vote d'une AG planifiée (T-38, RM-05) |
 | POST | `/ags/:idAg/cloture` | syndic | Clôturer une AG ouverte : calcule et fige le résultat de chaque résolution (T-10, F-06, RM-03, RM-04, US-08) |
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Voter OUI / NON / ABSTENTION sur une résolution d'une AG ouverte (F-05, RM-02, US-02) |
+| PUT | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | Modifier son vote tant que l'AG est ouverte (409 après clôture, RM-04) ; ne crée jamais de vote |
+| GET | `/ags/:idAg/mes-votes` | copropriétaire | Uniquement ses propres votes sur cette AG (anti-IDOR) |
 | GET | `/ags` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des AG, les plus récentes en premier (T-11, F-07) |
 | GET | `/ags/:idAg` | authentifié (syndic, conseil syndical, copropriétaire) | Ordre du jour d'une AG (id, date, statut + résolutions : id, libellé, type de majorité), **jamais** de décompte ni de résultat, quel que soit le statut de l'AG — nécessaire à l'écran de vote d'une AG planifiée ou ouverte, que `GET /ags/:idAg/resolutions` refuse avant clôture (RM-04) |
 | GET | `/ags/:idAg/resolutions` | authentifié (syndic, conseil syndical, copropriétaire) | Résultat des résolutions d'une AG **clôturée** : décomptes anonymes (oui/non/abstention), jamais l'identité des votants (T-11, F-07, US-04) — refusé (409) tant que l'AG n'est pas clôturée |
@@ -69,11 +71,11 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
 | GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |
 
-Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; il ne reste que T-26 (peupler `docs/` avec les documents de conception).
+Consultation seule : le backlog MVP ne prévoit aucune route de création de charge par le syndic (écart documenté, Doc 10). Toutes les routes métier du MVP (Doc 9) sont désormais implémentées ; `docs/` est peuplé (T-26).
 
 ## Frontend
 
-`apps/frontend` est une SPA React (Vite, sans framework CSS — le design system du Doc 4 est appliqué via des styles inline et des variables CSS, `apps/frontend/src/index.css`) qui ne parle au backend qu'en HTTP, via un cookie de session (`credentials: 'include'`). Écrans disponibles : connexion / auto-inscription, tableau de bord syndic, liste et détail des assemblées générales (ouverture du vote, vote, clôture, résultats), incidents (déclaration et suivi de statut), charges. Le routage est basé sur le rôle du compte connecté (`apps/frontend/src/components/RouteProtegee.tsx`, `Shell.tsx`).
+`apps/frontend` est une SPA React (Vite, sans framework CSS — le design system du Doc 4 est appliqué via des styles inline et des variables CSS, `apps/frontend/src/index.css`) qui ne parle au backend qu'en HTTP, via un cookie de session (`credentials: 'include'`). Écrans disponibles : connexion / auto-inscription, tableau de bord syndic, gestion des copropriétaires et des lots (syndic), liste et détail des assemblées générales (ouverture du vote, vote et modification de son vote, clôture, résultats), incidents (déclaration et suivi de statut), charges. Le routage est basé sur le rôle du compte connecté (`apps/frontend/src/components/RouteProtegee.tsx`, `Shell.tsx`).
 
 ```bash
 npm run dev --workspace=apps/frontend    # http://localhost:5173, attend le backend sur http://localhost:3000
