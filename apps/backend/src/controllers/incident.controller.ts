@@ -10,6 +10,7 @@ import {
 } from '../services/incident.service.js';
 import { ImmeubleNonInitialiseError } from '../services/lot.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { journalService } from '../services/journal.service.js';
 
 /**
  * Controller — T-12 (F-08 partiel, US-03). Authentification exigée ; le
@@ -51,6 +52,7 @@ incidentRouter.post(
     try {
       // exigerAuthentification garantit req.utilisateur.
       const incident = await incidentService.declarer(req.utilisateur!, analyse.data);
+      journalService.journaliser('INCIDENT_DECLARE', req.utilisateur!.id, incident.id);
       res.status(201).json({
         incident: {
           id: incident.id,
@@ -131,6 +133,9 @@ incidentRouter.patch(
         params.data.idIncident,
         corps.data.statut,
       );
+      journalService.journaliser('INCIDENT_STATUT_MODIFIE', req.utilisateur!.id, incident.id, {
+        statut: incident.statut,
+      });
       res.status(200).json({
         incident: { id: incident.id, statut: incident.statut },
       });

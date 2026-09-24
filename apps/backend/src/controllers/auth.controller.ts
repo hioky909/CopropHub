@@ -8,6 +8,7 @@ import {
 } from '../services/auth.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { sessionService } from '../services/session.service.js';
+import { journalService } from '../services/journal.service.js';
 import {
   exigerAuthentification,
   poserCookieSession,
@@ -78,6 +79,7 @@ authRouter.post(
         motDePasseClair: analyse.data.motDePasse,
       });
       poserCookieSession(res, jeton);
+      journalService.journaliser('INSCRIPTION', utilisateur.id);
       res.status(201).json({ utilisateur });
     } catch (erreur) {
       if (erreur instanceof EmailDejaUtiliseError) {
@@ -110,6 +112,7 @@ authRouter.post(
         motDePasseClair: analyse.data.motDePasse,
       });
       poserCookieSession(res, jeton);
+      journalService.journaliser('CONNEXION', utilisateur.id);
       res.status(200).json({ utilisateur });
     } catch (erreur) {
       if (erreur instanceof IdentifiantsInvalidesError) {
@@ -122,6 +125,7 @@ authRouter.post(
 );
 
 authRouter.post('/deconnexion', exigerAuthentification, (req, res) => {
+  journalService.journaliser('DECONNEXION', req.utilisateur!.id);
   sessionService.revoquerJeton(req.cookies?.session as string | undefined);
   supprimerCookieSession(res);
   res.status(204).send();

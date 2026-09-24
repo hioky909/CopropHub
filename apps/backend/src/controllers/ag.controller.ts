@@ -11,6 +11,7 @@ import {
 } from '../services/ag.service.js';
 import { ImmeubleNonInitialiseError } from '../services/lot.service.js';
 import { voteService, VoteInterditError } from '../services/vote.service.js';
+import { journalService } from '../services/journal.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 
 /**
@@ -66,6 +67,7 @@ agRouter.post(
         dateAg: new Date(`${analyse.data.dateAg}T00:00:00.000Z`),
         resolutions: analyse.data.resolutions,
       });
+      journalService.journaliser('AG_CREEE', req.utilisateur!.id, ag.id);
       res.status(201).json({ ag });
     } catch (erreur) {
       if (erreur instanceof OrdreDuJourVideError) {
@@ -96,6 +98,7 @@ agRouter.post(
 
     try {
       const ag = await agService.ouvrirVote(params.data.idAg);
+      journalService.journaliser('AG_OUVERTE', req.utilisateur!.id, ag.id);
       res.status(200).json({ ag });
     } catch (erreur) {
       if (erreur instanceof AgIntrouvableError) {
@@ -124,6 +127,7 @@ agRouter.post(
 
     try {
       const ag = await agService.cloturer(params.data.idAg);
+      journalService.journaliser('AG_CLOTUREE', req.utilisateur!.id, ag.id);
       res.status(200).json({ ag });
     } catch (erreur) {
       if (erreur instanceof AgIntrouvableError) {

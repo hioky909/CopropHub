@@ -18,7 +18,7 @@ Export condensé du Doc 2. Chaque exigence pointe vers son état réel dans [Doc
 | F-10 | Contrôle d'accès strict par rôle et par périmètre de données (immeuble/lot) | Bloc 1 — sécurité |
 | F-11 | Journalisation des actions sensibles (vote, création d'AG, changement de statut d'incident) | Bloc 3 — logs |
 
-F-11 (journalisation) reste un écart connu : aucune tâche du backlog MVP ne la couvre (documenté dans Doc 10, non résolu).
+F-11 (journalisation) est implémentée (`journal.service.ts`) : lignes JSON d'audit sur la sortie standard, sans valeur de vote.
 
 Les niveaux SHOULD HAVE, COULD HAVE et le détail complet vivent dans le document source (tableaux interactifs).
 

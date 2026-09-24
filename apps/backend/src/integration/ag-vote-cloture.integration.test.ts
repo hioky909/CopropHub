@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { agRepository } from '../repositories/ag.repository.js';
+import { journalService } from '../services/journal.service.js';
 import {
   cookieSession,
   creerAg,
@@ -332,6 +333,26 @@ describe('modifier et consulter son vote', () => {
           .set('Cookie', cookieSession(a.id))
       ).status,
     ).toBe(404);
+  });
+});
+
+describe("journalisation des actions sensibles (F-11)", () => {
+  it("journalise l'ouverture, le vote et la clôture, sans jamais écrire la valeur du vote (anonymat)", async () => {
+    const lignes: string[] = [];
+    journalService.definirSortie((ligne) => lignes.push(ligne));
+    try {
+      const votant = await creerCoproprietaireHabilite(immeuble.id, '1');
+      const ag = await creerAg(immeuble.id, 'PLANIFIEE', [{ libelle: 'R', typeMajorite: 'SIMPLE' }]);
+      await request(app).post(`/ags/${ag.id}/ouverture`).set('Cookie', cookieSyndic);
+      await voter(cookieSession(votant.id), ag.resolutions[0]!.id, 'OUI');
+      await request(app).post(`/ags/${ag.id}/cloture`).set('Cookie', cookieSyndic);
+    } finally {
+      journalService.definirSortie();
+    }
+
+    const entrees = lignes.map((l) => JSON.parse(l));
+    expect(entrees.map((e) => e.action)).toEqual(['AG_OUVERTE', 'VOTE_ENREGISTRE', 'AG_CLOTUREE']);
+    expect(lignes.join(' ')).not.toMatch(/OUI|NON|ABSTENTION/);
   });
 });
 

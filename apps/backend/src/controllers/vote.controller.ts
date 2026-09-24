@@ -10,6 +10,7 @@ import {
   AucunVoteAModifierError,
 } from '../services/vote.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { journalService } from '../services/journal.service.js';
 
 /**
  * Controller — T-09 (F-05, US-02). Authentification exigée ; l'éligibilité
@@ -39,6 +40,7 @@ voteRouter.post(
         params.data.idResolution,
         corps.data.valeur,
       );
+      journalService.journaliser('VOTE_ENREGISTRE', req.utilisateur!.id, params.data.idResolution);
       res.status(201).json({
         vote: { idResolution: vote.idResolution, valeur: vote.valeur, dateVote: vote.dateVote },
       });
@@ -82,6 +84,7 @@ voteRouter.put(
         params.data.idResolution,
         corps.data.valeur,
       );
+      journalService.journaliser('VOTE_MODIFIE', req.utilisateur!.id, params.data.idResolution);
       res.status(200).json({
         vote: { idResolution: vote.idResolution, valeur: vote.valeur, dateVote: vote.dateVote },
       });

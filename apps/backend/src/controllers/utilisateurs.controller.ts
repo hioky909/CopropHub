@@ -15,6 +15,7 @@ import {
 } from '../services/lot.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { journalService } from '../services/journal.service.js';
 
 /**
  * Controller — T-06 (F-02, F-03, US-10). Toutes les routes sont réservées
@@ -80,6 +81,7 @@ utilisateursRouter.post(
         email: analyse.data.email,
         motDePasseClair: analyse.data.motDePasse,
       });
+      journalService.journaliser('COPROPRIETAIRE_CREE', req.utilisateur!.id, coproprietaire.id);
       res.status(201).json({
         utilisateur: {
           id: coproprietaire.id,
@@ -124,6 +126,7 @@ utilisateursRouter.post(
 
     try {
       const lot = await lotService.creerLot(analyse.data);
+      journalService.journaliser('LOT_CREE', req.utilisateur!.id, lot.id);
       res.status(201).json({ lot });
     } catch (erreur) {
       if (erreur instanceof LotDejaExistantError) {
@@ -158,6 +161,9 @@ utilisateursRouter.post(
         analyse.data.idLot,
         analyse.data.idUtilisateur,
       );
+      journalService.journaliser('LOT_RATTACHE', req.utilisateur!.id, analyse.data.idLot, {
+        idUtilisateur: analyse.data.idUtilisateur,
+      });
       res.status(201).json({ rattachement });
     } catch (erreur) {
       if (erreur instanceof LotIntrouvableError || erreur instanceof UtilisateurIntrouvableError) {

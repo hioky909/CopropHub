@@ -8,7 +8,7 @@ Export condensé du Doc 5 (« Modèle de menace & sécurité »). Frontière de 
 |---|---|---|---|
 | **S**poofing | Un attaquant devine ou vole des identifiants pour se connecter en tant qu'un autre copropriétaire | Hash bcrypt (NF-01), rate limiting sur la connexion (NF-05), message d'erreur générique ne révélant pas si l'email existe | MFA hors périmètre MVP — documenté comme extension |
 | **T**ampering | Un utilisateur modifie un vote ou un résultat après clôture de l'AG | Immutabilité imposée en base (clé primaire composite sur `vote`), aucune route API de modification après clôture (RM-04) | Faible : contrôle au niveau schéma, pas seulement applicatif |
-| **R**epudiation | Le syndic nie avoir clôturé une AG ou changé le statut d'un incident | Journalisation horodatée des actions sensibles (F-11) | **Non implémenté** — F-11 reste un écart connu du backlog MVP (aucune tâche ne le couvre, documenté dans Doc 10) |
+| **R**epudiation | Le syndic nie avoir clôturé une AG ou changé le statut d'un incident | Journalisation horodatée des actions sensibles (F-11) | Journalisation des actions sensibles (F-11) : une ligne JSON `type: "audit"` par action (connexion, inscription, création/ouverture/clôture d'AG, vote, incident, gestion des copropriétaires et lots) sur la sortie standard, sans mot de passe, jeton, email ni valeur de vote (anonymat) |
 | **I**nformation disclosure | Un copropriétaire consulte les charges/incidents d'un autre lot en modifiant un identifiant dans l'URL (IDOR/BOLA) | Vérification systématique d'appartenance côté serveur (RM-14, `autoriser()`), tests d'autorisation négatifs systématiques | Réellement couvert : cas de référence testé sur `/charges/:id` (403 explicite), `/incidents`, `autorisation.service.test.ts` |
 | **D**enial of service | Un attaquant spamme le formulaire de déclaration d'incident ou de vote | Rate limiting applicatif global (300/15 min) et dédié à la connexion (5/15 min, NF-05) | Moyen — pas de protection réseau (WAF/CDN) au MVP |
 | **E**levation of privilege | Un copropriétaire modifie son propre `type_compte` ou `est_membre_conseil_syndical` via une requête falsifiée (mass assignment) | Champs de rôle jamais acceptés depuis une requête utilisateur ; seul un endpoint réservé au syndic peut les modifier ; contrainte CHECK en base | Faible : défense en profondeur (applicatif + base) |
@@ -40,7 +40,7 @@ Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, f
 - [ ] **Jeton CSRF sur actions sensibles** — non implémenté ; la protection repose uniquement sur `SameSite=Strict`, jugée suffisante en pratique (pas de sous-domaines, pas de navigation cross-site vers l'API) mais un jeton CSRF explicite n'existe pas — écart honnête, pas un oubli caché
 - [x] Champs de rôle exclus des endpoints modifiables par l'utilisateur lui-même (anti mass assignment) — testé sur `/utilisateurs`
 - [x] Secrets uniquement en variables d'environnement, `.env` dans `.gitignore`, `.env.example` fourni
-- [ ] **Journalisation des actions sensibles (F-11)** — non implémenté, écart connu du backlog MVP
+- [x] Journalisation des actions sensibles (F-11) — `journal.service.ts`, testée ; stockage/collecte à la charge de la plateforme de déploiement
 - [x] Headers de sécurité (Helmet : HSTS, X-Content-Type-Options, X-Frame-Options…) — testés (T-25, `security-headers.test.ts`)
 - [x] CORS restreint à l'origine du front, pas de wildcard — testé (T-25)
 - [ ] HTTPS obligatoire en production — dépend de l'infrastructure de déploiement, non encore définie (T-11-devops)
