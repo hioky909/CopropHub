@@ -56,6 +56,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Changed
 
+- Liste des assemblées refaite dans le langage visuel du proto : cartes blanches bordées avec tuile de date (bleue, grise pour une AG clôturée), titre en date longue, nombre de résolutions et phrase de contexte, badges « Voté » et de statut, pastilles de filtre avec compteurs (Toutes / À venir / Vote ouvert / Clôturées). `GET /ags` renvoie désormais `nombreResolutions`.
 - Limite globale de débit assouplie sans être supprimée : 1000 requêtes / 15 min (au lieu de 300 par IP), comptées **par utilisateur connecté** (jeton signé vérifié sans accès base) et par IP seulement pour les anonymes, `/health` exclu, configurable (`RATE_LIMIT_MAX`). Les limites strictes anti-force-brute (connexion, changement de mot de passe) sont inchangées. Un test vérifie qu'un utilisateur qui épuise son quota ne bloque pas un autre derrière la même IP.
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

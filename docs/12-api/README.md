@@ -32,7 +32,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | POST | `/ags` | syndic | `{dateAg, resolutions: [{libelle, typeMajorite}]}` → 201 `{ag}`. Statut initial `PLANIFIEE`. |
 | POST | `/ags/:idAg/ouverture` | syndic | `PLANIFIEE`→`OUVERTE`. |
 | POST | `/ags/:idAg/cloture` | syndic | `OUVERTE`→`CLOTUREE` : calcule et fige le résultat de chaque résolution (RM-03), atomique. |
-| GET | `/ags` | authentifié | 200 `{ags}` — les plus récentes en premier. |
+| GET | `/ags` | authentifié | 200 `{ags: [{id, dateAg, statut, nombreResolutions}]}` — les plus récentes en premier. |
 | GET | `/ags/:idAg` | authentifié | 200 `{ag, resolutions: [{id, libelle, typeMajorite}]}`. Ordre du jour SANS décompte ni résultat, quel que soit le statut — nécessaire à l'écran de vote avant clôture. |
 | GET | `/ags/:idAg/resolutions` | authentifié | 200 `{ag, resolutions: [{..., statutResultat, decomptes}]}` sur une AG **clôturée** uniquement (409 sinon, RM-04). Décomptes anonymes, jamais l'identité des votants (US-04). |
 | GET | `/ags/:idAg/mes-votes` | copropriétaire (403 sinon) | 200 `{votes: [{idResolution, valeur}]}` — uniquement les votes de l'utilisateur courant sur cette AG (aucun identifiant d'utilisateur accepté, anti-IDOR) ; 404 si AG inconnue. |

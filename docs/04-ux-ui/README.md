@@ -39,6 +39,7 @@ Badge de statut (succès/avertissement/danger/neutre), Bouton (primaire/secondai
 | Écran | Zoning principal | Écran réel |
 |---|---|---|
 | Tableau de bord syndic | En-tête (immeuble/rôle/nav), état de l'immeuble, incidents récents, charges, actions rapides | `DashboardSyndic.tsx` |
+| Liste des assemblées | Filtres par statut avec compteurs, cartes (tuile de date, titre, nombre de résolutions, badges) | `Assemblees.tsx` |
 | Écran de vote | Résolution courante, règle de majorité, choix Pour/Contre/Abstention | `AssembleeDetail.tsx` |
 | Liste des incidents | Filtres par statut, formulaire de déclaration, liste | `ListeIncidents.tsx` |
 | Charges | KPI, taux de recouvrement, tableau filtrable | `ListeCharges.tsx` |
