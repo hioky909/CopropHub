@@ -12,6 +12,7 @@ const CHARGE_LOT_A = {
   montant: new Prisma.Decimal('150.00'),
   periode: '2026-T1',
   statut: 'A_PAYER' as const,
+  dateEcheance: null,
 };
 const CHARGE_AUTRE_LOT = { ...CHARGE_LOT_A, id: 'charge-2', idLot: 'lot-autrui' };
 
@@ -96,5 +97,23 @@ describe("chargeService.voirUne (T-14, US-01 — 403 explicite sur la charge d'u
     await expect(chargeService.voirUne(COPRO, 'charge-inconnue')).rejects.toBeInstanceOf(
       ChargeIntrouvableError,
     );
+  });
+});
+
+describe('chargeService — statut « en retard » dérivé de l’échéance (RM-09)', () => {
+  const hier = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const demain = new Date(Date.now() + 24 * 60 * 60 * 1000);
+
+  it('une charge à payer dont l’échéance est dépassée est affichée en retard, sans toucher au stockage', async () => {
+    vi.spyOn(chargeRepository, 'listerToutes').mockResolvedValue([
+      { ...CHARGE_LOT_A, statut: 'A_PAYER', dateEcheance: hier },
+      { ...CHARGE_LOT_A, id: 'c-2', statut: 'A_PAYER', dateEcheance: demain },
+      { ...CHARGE_LOT_A, id: 'c-3', statut: 'A_PAYER', dateEcheance: null },
+      { ...CHARGE_LOT_A, id: 'c-4', statut: 'PAYEE', dateEcheance: hier },
+    ]);
+
+    const charges = await chargeService.lister(SYNDIC);
+
+    expect(charges.map((c) => c.statut)).toEqual(['EN_RETARD', 'A_PAYER', 'A_PAYER', 'PAYEE']);
   });
 });

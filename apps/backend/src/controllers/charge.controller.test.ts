@@ -15,6 +15,7 @@ const CHARGE_LOT_A = {
   montant: new Prisma.Decimal('150.00'),
   periode: '2026-T1',
   statut: 'A_PAYER' as const,
+  dateEcheance: null,
 };
 const CHARGE_AUTRE_LOT = {
   ...CHARGE_LOT_A,

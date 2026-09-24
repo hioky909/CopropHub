@@ -1,7 +1,34 @@
 import { prisma } from './prisma-client.js';
 
-/** Data Access Layer — seul point d'accès à la table `charge`. Aucune écriture : T-14 est consultation seule (F-09, US-01, US-05), le backlog MVP ne prévoit aucune tâche de création de charge par le syndic. */
+/** Data Access Layer — seul point d'accès à la table `charge`. Consultation (T-14) et, pour le syndic, création et marquage « payée » (RM-08, RM-09). */
+export interface NouvelleCharge {
+  idLot: string;
+  montant: string;
+  periode: string;
+  dateEcheance: Date | null;
+}
+
 export const chargeRepository = {
+  creer(donnees: NouvelleCharge) {
+    return prisma.charge.create({ data: donnees });
+  },
+
+  /**
+   * Passe la charge à PAYEE si elle ne l'est pas déjà — condition dans le
+   * UPDATE lui-même, donc deux requêtes concurrentes ne l'appliquent pas deux
+   * fois. Retourne `null` si aucune ligne n'a changé (déjà payée).
+   */
+  async marquerPayeeSiNonPayee(id: string) {
+    const resultat = await prisma.charge.updateMany({
+      where: { id, statut: { not: 'PAYEE' } },
+      data: { statut: 'PAYEE' },
+    });
+    if (resultat.count === 0) {
+      return null;
+    }
+    return prisma.charge.findUnique({ where: { id } });
+  },
+
   parId(id: string) {
     return prisma.charge.findUnique({ where: { id } });
   },
