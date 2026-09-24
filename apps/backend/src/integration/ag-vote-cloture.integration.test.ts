@@ -223,6 +223,114 @@ describe('autorisation (RM-14) sur /ags', () => {
   });
 });
 
+describe('modifier et consulter son vote', () => {
+  const modifier = (cookie: string, idResolution: string, valeur: string) =>
+    request(app).put(`/resolutions/${idResolution}/votes`).set('Cookie', cookie).send({ valeur });
+
+  async function agOuverteAvecDeuxVotants() {
+    const [a, b] = await Promise.all(
+      ['1', '2'].map((numero) => creerCoproprietaireHabilite(immeuble.id, numero)),
+    );
+    const ag = await creerAg(immeuble.id, 'OUVERTE', [
+      { libelle: 'R1', typeMajorite: 'SIMPLE' },
+      { libelle: 'R2', typeMajorite: 'SIMPLE' },
+    ]);
+    return { a: a!, b: b!, ag, r1: ag.resolutions[0]!.id, r2: ag.resolutions[1]!.id };
+  }
+
+  it("changer d'avis tant que l'AG est ouverte : la valeur et la date sont mises à jour, un seul vote reste en base", async () => {
+    const { a, r1 } = await agOuverteAvecDeuxVotants();
+    const cookie = cookieSession(a.id);
+    expect((await voter(cookie, r1, 'OUI')).status).toBe(201);
+    const avant = await prisma.vote.findFirstOrThrow({ where: { idResolution: r1 } });
+
+    const reponse = await modifier(cookie, r1, 'NON');
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.vote).toMatchObject({ idResolution: r1, valeur: 'NON' });
+    const apres = await prisma.vote.findMany({ where: { idResolution: r1 } });
+    expect(apres).toHaveLength(1);
+    expect(apres[0]!.valeur).toBe('NON');
+    expect(apres[0]!.dateVote.getTime()).toBeGreaterThanOrEqual(avant.dateVote.getTime());
+  });
+
+  it("modifier sans avoir voté : 404, et rien n'est créé (le PUT ne crée pas de vote)", async () => {
+    const { a, r1 } = await agOuverteAvecDeuxVotants();
+    expect((await modifier(cookieSession(a.id), r1, 'OUI')).status).toBe(404);
+    expect(await prisma.vote.count()).toBe(0);
+  });
+
+  it("l'identité vient de la session : modifier ne peut jamais toucher le vote d'un autre copropriétaire", async () => {
+    const { a, b, r1 } = await agOuverteAvecDeuxVotants();
+    await voter(cookieSession(a.id), r1, 'OUI');
+
+    expect((await modifier(cookieSession(b.id), r1, 'NON')).status).toBe(404);
+    expect((await prisma.vote.findFirstOrThrow({ where: { idResolution: r1 } })).valeur).toBe('OUI');
+  });
+
+  it('après la clôture, la modification est refusée (409) et le vote figé reste inchangé (RM-04)', async () => {
+    const { a, ag, r1 } = await agOuverteAvecDeuxVotants();
+    const cookie = cookieSession(a.id);
+    await voter(cookie, r1, 'OUI');
+    await request(app).post(`/ags/${ag.id}/cloture`).set('Cookie', cookieSyndic);
+
+    expect((await modifier(cookie, r1, 'NON')).status).toBe(409);
+    expect((await prisma.vote.findFirstOrThrow({ where: { idResolution: r1 } })).valeur).toBe('OUI');
+  });
+
+  it('le résultat calculé à la clôture tient compte de la dernière valeur du vote modifié', async () => {
+    const { a, ag, r1 } = await agOuverteAvecDeuxVotants();
+    const cookie = cookieSession(a.id);
+    await voter(cookie, r1, 'OUI');
+    await modifier(cookie, r1, 'NON');
+
+    await request(app).post(`/ags/${ag.id}/cloture`).set('Cookie', cookieSyndic);
+
+    const resolution = await prisma.resolution.findUniqueOrThrow({ where: { id: r1 } });
+    expect(resolution.statutResultat).toBe('REJETEE'); // 0 oui / 1 non en majorité simple
+  });
+
+  it('le syndic ne peut pas modifier de vote (403) ; sans session : 401 ; corps invalide : 422', async () => {
+    const { a, r1 } = await agOuverteAvecDeuxVotants();
+    await voter(cookieSession(a.id), r1, 'OUI');
+
+    expect((await modifier(cookieSyndic, r1, 'NON')).status).toBe(403);
+    expect((await request(app).put(`/resolutions/${r1}/votes`).send({ valeur: 'NON' })).status).toBe(
+      401,
+    );
+    expect((await modifier(cookieSession(a.id), r1, 'PEUT-ETRE')).status).toBe(422);
+  });
+
+  it("GET /ags/:idAg/mes-votes ne renvoie que MES votes de cette AG, jamais ceux d'un autre", async () => {
+    const { a, b, ag, r1, r2 } = await agOuverteAvecDeuxVotants();
+    await voter(cookieSession(a.id), r1, 'OUI');
+    await voter(cookieSession(b.id), r1, 'NON');
+    await voter(cookieSession(b.id), r2, 'ABSTENTION');
+
+    const reponse = await request(app)
+      .get(`/ags/${ag.id}/mes-votes`)
+      .set('Cookie', cookieSession(a.id));
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.votes).toEqual([{ idResolution: r1, valeur: 'OUI' }]);
+  });
+
+  it('mes-votes : 403 pour le syndic, 401 sans session, 404 pour une AG inconnue', async () => {
+    const { a, ag } = await agOuverteAvecDeuxVotants();
+    expect(
+      (await request(app).get(`/ags/${ag.id}/mes-votes`).set('Cookie', cookieSyndic)).status,
+    ).toBe(403);
+    expect((await request(app).get(`/ags/${ag.id}/mes-votes`)).status).toBe(401);
+    expect(
+      (
+        await request(app)
+          .get('/ags/99999999-9999-4999-8999-999999999999/mes-votes')
+          .set('Cookie', cookieSession(a.id))
+      ).status,
+    ).toBe(404);
+  });
+});
+
 describe('double vote concurrent', () => {
   it('20 requêtes simultanées du même copropriétaire sur la même résolution : un seul vote enregistré', async () => {
     const votant = await creerCoproprietaireHabilite(immeuble.id, '1');

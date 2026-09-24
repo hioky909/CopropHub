@@ -33,7 +33,50 @@ export class VoteDejaExprimeError extends Error {
   }
 }
 
+export class AucunVoteAModifierError extends Error {
+  constructor() {
+    super("Vous n'avez pas encore voté sur cette résolution.");
+    this.name = 'AucunVoteAModifierError';
+  }
+}
+
 export const voteService = {
+  /** Les votes de l'utilisateur courant sur une AG — jamais ceux d'un autre (aucun `idUtilisateur` accepté). */
+  async mesVotes(utilisateur: UtilisateurAuthentifie, idAg: string) {
+    if (utilisateur.typeCompte !== 'COPROPRIETAIRE') {
+      throw new VoteInterditError();
+    }
+    return voteRepository.mesVotesPourAg(utilisateur.id, idAg);
+  },
+
+  /**
+   * Modification d'un vote déjà exprimé, tant que l'AG est ouverte : mêmes
+   * contrôles d'éligibilité que `voter` (RM-06, RM-07), et le refus après
+   * clôture (RM-04) est tranché atomiquement par le dépôt.
+   */
+  async modifier(utilisateur: UtilisateurAuthentifie, idResolution: string, valeur: ValeurVote) {
+    if (utilisateur.typeCompte !== 'COPROPRIETAIRE') {
+      throw new VoteInterditError();
+    }
+
+    const lots = await lotRepository.lotsRattachesAUtilisateur(utilisateur.id);
+    if (lots.length === 0) {
+      throw new VoteInterditError();
+    }
+
+    const resultat = await voteRepository.modifierSiAgOuverte(idResolution, utilisateur.id, valeur);
+    switch (resultat.statut) {
+      case 'RESOLUTION_INTROUVABLE':
+        throw new ResolutionIntrouvableError();
+      case 'AG_NON_OUVERTE':
+        throw new AgNonOuverteError();
+      case 'AUCUN_VOTE':
+        throw new AucunVoteAModifierError();
+      case 'MODIFIE':
+        return resultat.vote;
+    }
+  },
+
   /**
    * Les contrôles d'éligibilité passent AVANT tout accès à la résolution
    * (Doc 5 : autoriser avant de charger), dans cet ordre :

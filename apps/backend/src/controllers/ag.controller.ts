@@ -10,6 +10,7 @@ import {
   ResolutionsNonDisponiblesError,
 } from '../services/ag.service.js';
 import { ImmeubleNonInitialiseError } from '../services/lot.service.js';
+import { voteService, VoteInterditError } from '../services/vote.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 
 /**
@@ -217,6 +218,42 @@ agRouter.get(
       }
       if (erreur instanceof ResolutionsNonDisponiblesError) {
         res.status(409).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+/**
+ * Les votes déjà exprimés par l'utilisateur courant sur cette AG (pour qu'il
+ * les retrouve, sache lesquelles de ses résolutions restent à voter et puisse
+ * modifier un vote tant que l'AG est ouverte). Toujours SES votes : aucun
+ * identifiant d'utilisateur n'est accepté (anti-IDOR). Réservé aux
+ * copropriétaires (le syndic ne vote pas, RM-07).
+ */
+agRouter.get(
+  '/:idAg/mes-votes',
+  asyncHandler(async (req, res) => {
+    const params = paramsAgSchema.safeParse(req.params);
+    if (!params.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      await agService.consulterOrdreDuJour(params.data.idAg); // 404 si l'AG n'existe pas
+      const votes = await voteService.mesVotes(req.utilisateur!, params.data.idAg);
+      res.status(200).json({
+        votes: votes.map((v) => ({ idResolution: v.idResolution, valeur: v.valeur })),
+      });
+    } catch (erreur) {
+      if (erreur instanceof AgIntrouvableError) {
+        res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof VoteInterditError) {
+        res.status(403).json({ erreur: erreur.message });
         return;
       }
       throw erreur;
