@@ -256,7 +256,8 @@ function VoteLabel({ choix, enAttente }: { choix: VoteChoice | 'DEJA_VOTE' | und
  * Écran de vote copropriétaire : porté fidèlement du design proto
  * (`proto/.../VoteResolution.tsx`) — une résolution affichée à la fois,
  * barre de progression par résolution, gros boutons de vote colorés,
- * écran de confirmation final. Données 100% réelles (aucune valeur
+ * récapitulatif ; après le dernier vote, retour direct à la liste (pas
+ * d'écran de confirmation intermédiaire). Données 100% réelles (aucune valeur
  * fictive : ni tantièmes, ni documents annexés, absents de notre modèle).
  */
 function EcranVote({
@@ -279,11 +280,9 @@ function EcranVote({
     const premiereSansVote = resolutions.findIndex((r) => votes[r.id] === undefined)
     return premiereSansVote === -1 ? 0 : premiereSansVote
   })
-  const [showSuccess, setShowSuccess] = useState(false)
   const [enModification, setEnModification] = useState(false)
   const resolution = resolutions[index]!
   const confirmee = votes[resolution.id] !== undefined
-  const toutesVotees = resolutions.every((r) => votes[r.id] !== undefined)
 
   useEffect(() => {
     setEnModification(false)
@@ -301,36 +300,12 @@ function EcranVote({
       setEnModification(false) // simple changement d'avis : on reste sur la résolution
       return
     }
-    if (index < resolutions.length - 1) {
-      setTimeout(() => setIndex((i) => i + 1), 500)
-    }
-  }
-
-  if (showSuccess) {
-    return (
-      <div style={{ maxWidth: 400, margin: '48px auto 0', padding: '0 16px', textAlign: 'center' }}>
-        <div style={{ width: 64, height: 64, borderRadius: '50%', backgroundColor: '#E8F5EE', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-          <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
-            <path d="M5 14l7 7L23 8" stroke="#1E7A4C" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </div>
-        <h1 style={{ margin: '0 0 8px', fontSize: 24, fontWeight: 700, color: '#1A1A1A' }}>Votes enregistrés</h1>
-        <p style={{ margin: '0 0 24px', fontSize: 15, color: '#5C5C5C', lineHeight: 1.6 }}>
-          Vos votes sur les {resolutions.length} résolutions ont bien été enregistrés.
-        </p>
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 16, marginBottom: 24, textAlign: 'left' }}>
-          {resolutions.map((r, i) => (
-            <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0', borderBottom: i < resolutions.length - 1 ? '1px solid #F2F2F2' : 'none' }}>
-              <span style={{ fontSize: 13, color: '#1A1A1A' }}>Résolution {i + 1}</span>
-              <VoteLabel choix={votes[r.id]} />
-            </div>
-          ))}
-        </div>
-        <Button variant="secondary" fullWidth onClick={onRetour}>
-          Retour aux assemblées
-        </Button>
-      </div>
-    )
+    // Première réponse à cette résolution : on enchaîne sur la prochaine encore sans vote
+    // (d'abord après celle-ci, sinon depuis le début) ; s'il n'en reste aucune, retour direct
+    // à la liste des assemblées, où le badge « Voté » confirme — pas d'écran intermédiaire.
+    const apres = resolutions.findIndex((r, i) => i > index && votes[r.id] === undefined)
+    const cible = apres !== -1 ? apres : resolutions.findIndex((r, i) => i !== index && votes[r.id] === undefined)
+    setTimeout(() => (cible !== -1 ? setIndex(cible) : onRetour()), 500)
   }
 
   return (
@@ -474,17 +449,9 @@ function EcranVote({
           <Button variant="secondary" disabled={index === 0} onClick={() => setIndex((i) => i - 1)}>
             ← Précédente
           </Button>
-          {index < resolutions.length - 1 ? (
+          {index < resolutions.length - 1 && (
             <Button variant={confirmee ? 'primary' : 'secondary'} onClick={() => setIndex((i) => i + 1)}>
               Résolution suivante →
-            </Button>
-          ) : toutesVotees ? (
-            <Button variant="primary" onClick={() => setShowSuccess(true)}>
-              Terminer le vote ✓
-            </Button>
-          ) : (
-            <Button variant="secondary" disabled>
-              Voter toutes les résolutions
             </Button>
           )}
         </div>

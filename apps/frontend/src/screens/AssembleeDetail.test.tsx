@@ -117,19 +117,19 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     expect(screen.getByRole('button', { name: 'Pour' })).toBeEnabled();
   });
 
-  it('propose « Terminer le vote » seulement une fois toutes les résolutions votées, puis affiche le récapitulatif', async () => {
+  it('après le dernier vote, retourne directement à la liste des assemblées, sans écran de confirmation intermédiaire', async () => {
     const user = userEvent.setup();
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
     await user.click(screen.getByRole('button', { name: 'Pour' }));
     await screen.findByText('Installation de la vidéosurveillance');
-    expect(screen.queryByRole('button', { name: /Terminer le vote/ })).not.toBeInTheDocument();
+    expect(screen.queryByText('Liste des assemblées')).not.toBeInTheDocument();
 
     await user.click(screen.getByRole('button', { name: 'Abstention' }));
-    await user.click(await screen.findByRole('button', { name: /Terminer le vote/ }));
 
-    expect(await screen.findByText('Votes enregistrés')).toBeInTheDocument();
+    expect(await screen.findByText('Liste des assemblées')).toBeInTheDocument();
+    expect(screen.queryByText('Votes enregistrés')).not.toBeInTheDocument();
     expect(agsApi.voter).toHaveBeenCalledWith('r-1', 'OUI');
     expect(agsApi.voter).toHaveBeenCalledWith('r-2', 'ABSTENTION');
   });
