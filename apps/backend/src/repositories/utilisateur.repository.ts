@@ -23,6 +23,10 @@ export const utilisateurRepository = {
     return prisma.utilisateur.findUnique({ where: { id } });
   },
 
+  async mettreAJourMotDePasse(id: string, motDePasseHash: string): Promise<void> {
+    await prisma.utilisateur.update({ where: { id }, data: { motDePasseHash } });
+  },
+
   /**
    * Crée l'utilisateur. Retourne `null` si l'email est déjà pris : la
    * vérification préalable (`parEmail`) ne suffit pas face à deux requêtes

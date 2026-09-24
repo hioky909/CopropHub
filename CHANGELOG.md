@@ -50,6 +50,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 - Journalisation des actions sensibles (F-11) : `journal.service.ts` écrit une ligne JSON `type: "audit"` (horodatage, action, utilisateur, cible) pour la connexion, l'inscription, la déconnexion, la création/ouverture/clôture d'AG, le vote et sa modification, la déclaration et le changement de statut d'un incident, la création de copropriétaires et de lots et les rattachements. Jamais de mot de passe, de jeton, d'email ni — surtout — de valeur de vote (anonymat, US-04). Testée (unitaire + intégration).
 
+- Changement de mot de passe par l'utilisateur : `POST /auth/mot-de-passe` (mot de passe actuel exigé, politique de 12 caractères, refus d'un mot de passe identique, limité par utilisateur, journalisé) et écran « Mon compte » (clic sur l'email dans l'en-tête). Ne couvre pas l'oubli de mot de passe (réinitialisation par email, prévue en V1). Tests d'intégration sur vraie base et parcours E2E.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

@@ -8,4 +8,6 @@ export const authApi = {
   inscrire: (nom: string, email: string, motDePasse: string) =>
     api.post<{ utilisateur: Utilisateur }>('/auth/inscription', { nom, email, motDePasse }),
   deconnecter: () => api.post<void>('/auth/deconnexion'),
+  changerMotDePasse: (motDePasseActuel: string, nouveauMotDePasse: string) =>
+    api.post<void>('/auth/mot-de-passe', { motDePasseActuel, nouveauMotDePasse }),
 };

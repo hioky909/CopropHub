@@ -42,4 +42,4 @@ npm run demo:seed --workspace=apps/backend
 
 ## Secrets
 
-Aucun secret n'est committé (`.env` dans `.gitignore`, `.env.example` documente les clés sans valeurs réelles). Le compte syndic créé par le seed a un mot de passe par défaut, **non modifiable dans l'application au MVP** — à ne pas utiliser tel quel hors développement.
+Aucun secret n'est committé (`.env` dans `.gitignore`, `.env.example` documente les clés sans valeurs réelles). Le compte syndic créé par le seed a un mot de passe par défaut, **modifiable depuis « Mon compte » (la réinitialisation en cas d'oubli reste prévue en V1)** — à ne pas utiliser tel quel hors développement.

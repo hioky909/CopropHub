@@ -25,6 +25,20 @@ export class IdentifiantsInvalidesError extends Error {
   }
 }
 
+export class MotDePasseActuelIncorrectError extends Error {
+  constructor() {
+    super('Le mot de passe actuel est incorrect.');
+    this.name = 'MotDePasseActuelIncorrectError';
+  }
+}
+
+export class NouveauMotDePasseIdentiqueError extends Error {
+  constructor() {
+    super('Le nouveau mot de passe doit être différent de l’actuel.');
+    this.name = 'NouveauMotDePasseIdentiqueError';
+  }
+}
+
 function versUtilisateurAuthentifie(utilisateur: {
   id: string;
   email: string;
@@ -93,6 +107,27 @@ export const authService = {
 
     const jeton = sessionService.emettreJeton(utilisateur.id);
     return { utilisateur: versUtilisateurAuthentifie(utilisateur), jeton };
+  },
+
+  /**
+   * Changement de mot de passe par l'utilisateur connecté : exige le mot de
+   * passe ACTUEL (une session volée ne suffit pas à prendre le compte) et
+   * applique la même politique que l'inscription. Les autres jetons déjà
+   * émis restent valides jusqu'à leur expiration (sessions sans état).
+   */
+  async changerMotDePasse(utilisateurId: string, actuel: string, nouveau: string): Promise<void> {
+    const utilisateur = await utilisateurRepository.parId(utilisateurId);
+    if (!utilisateur) {
+      throw new MotDePasseActuelIncorrectError();
+    }
+    if (!(await motDePasseService.verifier(actuel, utilisateur.motDePasseHash))) {
+      throw new MotDePasseActuelIncorrectError();
+    }
+    if (nouveau === actuel) {
+      throw new NouveauMotDePasseIdentiqueError();
+    }
+    const nouveauHash = await motDePasseService.hacher(nouveau); // applique la politique
+    await utilisateurRepository.mettreAJourMotDePasse(utilisateurId, nouveauHash);
   },
 
   async utilisateurCourant(utilisateurId: string): Promise<UtilisateurAuthentifie | null> {

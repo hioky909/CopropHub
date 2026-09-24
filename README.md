@@ -38,7 +38,7 @@ npm run demo:seed --workspace=apps/backend   # optionnel : données de démonstr
 
 `docker compose up` applique les migrations (service `migrate`) avant de démarrer le backend. Si un PostgreSQL local occupe déjà le port 5432, définir `DB_PORT` (ex. `5433`) dans `.env` et adapter le port de `DATABASE_URL`.
 
-Le seed lit `DATABASE_URL` dans le `.env` racine et crée le compte `syndic@coprophub.local` avec un mot de passe par défaut, qui **n'est pas modifiable dans l'application au MVP** (la réinitialisation de mot de passe est prévue en V1) : ne pas utiliser ce compte tel quel en dehors d'un environnement de développement.
+Le seed lit `DATABASE_URL` dans le `.env` racine et crée le compte `syndic@coprophub.local` avec un mot de passe par défaut, que chaque utilisateur peut changer depuis « Mon compte » (clic sur son email en haut à droite ; la réinitialisation en cas d'oubli reste prévue en V1) : ne pas utiliser ce compte tel quel en dehors d'un environnement de développement.
 
 L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démarrage), le frontend sur `http://localhost:5173`. Sans Docker, `npm run dev:backend` lance l'API en local (elle lit le `.env` racine) sur une base PostgreSQL déjà migrée (`npm run prisma:migrate:deploy`).
 
@@ -49,6 +49,7 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/auth/inscription` | public | Auto-inscription d'un copropriétaire (F-01) |
 | POST | `/auth/connexion` | public | Connexion (F-01), limitée à 5 tentatives / 15 min |
 | POST | `/auth/deconnexion` | authentifié | Invalide le cookie de session |
+| POST | `/auth/mot-de-passe` | authentifié | Changer son mot de passe (exige l'actuel, politique 12 caractères) |
 | GET | `/auth/moi` | authentifié | Utilisateur courant |
 | GET | `/utilisateurs` | syndic | Liste des copropriétaires |
 | POST | `/utilisateurs` | syndic | Créer un copropriétaire (F-03, US-10) |

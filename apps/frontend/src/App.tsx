@@ -9,6 +9,7 @@ import AssembleeDetail from './screens/AssembleeDetail.js'
 import ListeIncidents from './screens/ListeIncidents.js'
 import ListeCharges from './screens/ListeCharges.js'
 import Coproprietaires from './screens/Coproprietaires.js'
+import Compte from './screens/Compte.js'
 
 function Accueil() {
   const { utilisateur } = useAuth()
@@ -70,6 +71,14 @@ export default function App() {
               element={
                 <RouteProtegee roles={['SYNDIC']}>
                   <Coproprietaires />
+                </RouteProtegee>
+              }
+            />
+            <Route
+              path="/compte"
+              element={
+                <RouteProtegee>
+                  <Compte />
                 </RouteProtegee>
               }
             />

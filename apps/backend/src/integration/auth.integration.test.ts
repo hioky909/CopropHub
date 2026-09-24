@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import request from 'supertest';
 import { createApp } from '../app.js';
 import { prisma, viderBase } from './support.js';
+import { motDePasseService } from '../services/mot-de-passe.service.js';
 
 /**
  * T-05 (F-01) — inscription et connexion sur une vraie base.
@@ -169,5 +170,72 @@ describe('connexion, session et déconnexion', () => {
     await request(app).post('/auth/deconnexion').set('Cookie', cookie);
 
     expect((await request(app).get('/auth/moi').set('Cookie', cookie)).status).toBe(401);
+  });
+});
+
+describe('POST /auth/mot-de-passe — changement de mot de passe', () => {
+  const NOUVEAU = 'un-autre-mot-de-passe-solide-2';
+
+  async function inscrit() {
+    const reponse = await request(app)
+      .post('/auth/inscription')
+      .send({ nom: 'Alice', email: 'alice@test.local', motDePasse: MOT_DE_PASSE });
+    return cookieDe(reponse);
+  }
+  const changer = (cookie: string, corps: object) =>
+    request(app).post('/auth/mot-de-passe').set('Cookie', cookie).send(corps);
+
+  it("change le mot de passe : l'ancien ne connecte plus, le nouveau oui", async () => {
+    const cookie = await inscrit();
+
+    const reponse = await changer(cookie, {
+      motDePasseActuel: MOT_DE_PASSE,
+      nouveauMotDePasse: NOUVEAU,
+    });
+
+    expect(reponse.status).toBe(204);
+    // Vérifié en base plutôt que par /auth/connexion, dont la limite (5/15 min) est partagée par tout ce fichier.
+    const { motDePasseHash } = await prisma.utilisateur.findUniqueOrThrow({
+      where: { email: 'alice@test.local' },
+    });
+    expect(await motDePasseService.verifier(MOT_DE_PASSE, motDePasseHash)).toBe(false);
+    expect(await motDePasseService.verifier(NOUVEAU, motDePasseHash)).toBe(true);
+  });
+
+  it('refuse un mauvais mot de passe actuel (403) sans rien modifier', async () => {
+    const cookie = await inscrit();
+
+    const reponse = await changer(cookie, {
+      motDePasseActuel: 'ce-nest-pas-le-bon-mot-de-passe',
+      nouveauMotDePasse: NOUVEAU,
+    });
+
+    expect(reponse.status).toBe(403);
+    const { motDePasseHash } = await prisma.utilisateur.findUniqueOrThrow({
+      where: { email: 'alice@test.local' },
+    });
+    expect(await motDePasseService.verifier(MOT_DE_PASSE, motDePasseHash)).toBe(true);
+  });
+
+  it('applique la politique (12 caractères) et refuse un mot de passe identique : 422', async () => {
+    const cookie = await inscrit();
+
+    expect(
+      (await changer(cookie, { motDePasseActuel: MOT_DE_PASSE, nouveauMotDePasse: 'court' })).status,
+    ).toBe(422);
+    expect(
+      (await changer(cookie, { motDePasseActuel: MOT_DE_PASSE, nouveauMotDePasse: MOT_DE_PASSE }))
+        .status,
+    ).toBe(422);
+  });
+
+  it('401 sans session', async () => {
+    expect(
+      (
+        await request(app)
+          .post('/auth/mot-de-passe')
+          .send({ motDePasseActuel: MOT_DE_PASSE, nouveauMotDePasse: NOUVEAU })
+      ).status,
+    ).toBe(401);
   });
 });

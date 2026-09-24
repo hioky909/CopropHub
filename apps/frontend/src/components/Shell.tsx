@@ -82,7 +82,13 @@ export default function Shell({ children }: { children: ReactNode }) {
 
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ textAlign: 'right' }}>
-                <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>{utilisateur.email}</p>
+                <NavLink
+                  to="/compte"
+                  title="Mon compte"
+                  style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', textDecoration: 'none' }}
+                >
+                  {utilisateur.email}
+                </NavLink>
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: '#1E4B8F' }}>
                   {utilisateur.typeCompte === 'SYNDIC'
                     ? 'Syndic'

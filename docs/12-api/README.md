@@ -9,6 +9,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | POST | `/auth/inscription` | public | `{nom, email, motDePasse}` → 201 `{utilisateur}`. Auto-inscription copropriétaire uniquement (F-01). |
 | POST | `/auth/connexion` | public | `{email, motDePasse}` → 200 `{utilisateur}`. Limité à 5 tentatives/15 min (NF-05, configurable via `AUTH_RATE_LIMIT_MAX`). |
 | POST | `/auth/deconnexion` | authentifié | 204, efface le cookie **et révoque le jeton côté serveur** : un cookie copié avant la déconnexion est refusé ensuite (401). Révocation en mémoire du processus (mono-instance, perdue au redémarrage). |
+| POST | `/auth/mot-de-passe` | authentifié | `{motDePasseActuel, nouveauMotDePasse}` → 204. Exige le mot de passe actuel (403 sinon), applique la politique (12 caractères, 422) et refuse un mot de passe identique (422). Limité par utilisateur (mêmes seuils que la connexion). Les autres jetons déjà émis restent valides jusqu'à expiration (sessions sans état). |
 | GET | `/auth/moi` | authentifié | 200 `{utilisateur}`. |
 
 `utilisateur` = `{id, email, typeCompte: 'SYNDIC'|'COPROPRIETAIRE', estMembreConseilSyndical}`.

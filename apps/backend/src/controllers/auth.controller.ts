@@ -5,6 +5,8 @@ import {
   authService,
   EmailDejaUtiliseError,
   IdentifiantsInvalidesError,
+  MotDePasseActuelIncorrectError,
+  NouveauMotDePasseIdentiqueError,
 } from '../services/auth.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { sessionService } from '../services/session.service.js';
@@ -130,6 +132,58 @@ authRouter.post('/deconnexion', exigerAuthentification, (req, res) => {
   supprimerCookieSession(res);
   res.status(204).send();
 });
+
+// Changement de mot de passe : limité par utilisateur (même seuil que la
+// connexion) pour qu'une session volée ne serve pas à deviner le mot de passe actuel.
+const limiteurMotDePasse = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  keyGenerator: (req) => `mdp:${req.utilisateur?.id ?? 'anonyme'}`,
+});
+
+const changerMotDePasseSchema = z.object({
+  motDePasseActuel: z.string().max(128),
+  nouveauMotDePasse: z.string().max(128),
+});
+
+authRouter.post(
+  '/mot-de-passe',
+  exigerAuthentification,
+  limiteurMotDePasse,
+  asyncHandler(async (req, res) => {
+    const analyse = changerMotDePasseSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      await authService.changerMotDePasse(
+        req.utilisateur!.id,
+        analyse.data.motDePasseActuel,
+        analyse.data.nouveauMotDePasse,
+      );
+      journalService.journaliser('MOT_DE_PASSE_MODIFIE', req.utilisateur!.id);
+      res.status(204).send();
+    } catch (erreur) {
+      if (erreur instanceof MotDePasseActuelIncorrectError) {
+        res.status(403).json({ erreur: erreur.message });
+        return;
+      }
+      if (
+        erreur instanceof NouveauMotDePasseIdentiqueError ||
+        erreur instanceof MotDePasseInvalideError
+      ) {
+        res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
 
 authRouter.get('/moi', exigerAuthentification, (req, res) => {
   res.status(200).json({ utilisateur: req.utilisateur });
