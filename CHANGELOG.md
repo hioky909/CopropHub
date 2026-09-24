@@ -56,6 +56,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Changed
 
+- Limite globale de débit assouplie sans être supprimée : 1000 requêtes / 15 min (au lieu de 300 par IP), comptées **par utilisateur connecté** (jeton signé vérifié sans accès base) et par IP seulement pour les anonymes, `/health` exclu, configurable (`RATE_LIMIT_MAX`). Les limites strictes anti-force-brute (connexion, changement de mot de passe) sont inchangées. Un test vérifie qu'un utilisateur qui épuise son quota ne bloque pas un autre derrière la même IP.
+
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.
 - `TypeCompte` est importé du client Prisma généré au lieu d'être recopié.
 - `schema.prisma` réaligné sur le MPD : identifiants générés par la base (`gen_random_uuid()`), `date_debut` à `CURRENT_DATE`, `ON UPDATE NO ACTION`, quatre index déclarés (sans quoi `prisma migrate dev` les aurait supprimés).
@@ -64,6 +66,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - CI : `prisma generate` avant lint et typecheck, tests d'intégration et vérification de dérive ajoutés.
 
 ### Fixed
+
+- Un 429 (trop de requêtes) ou une erreur serveur au contrôle de session au démarrage était traité comme « pas connecté » : l'utilisateur était renvoyé à la connexion en pleine navigation. Seul un 401 signifie désormais « pas de session » ; le reste s'affiche comme une indisponibilité temporaire. Test dédié.
 
 - Lint en échec sur `prisma/seed.ts` (hors du tsconfig) : `tsconfig.json` couvre désormais `prisma/` et `tsconfig.build.json` porte le build.
 - L'étape `npm run test -- --coverage` du CI ne produisait aucune couverture (l'option n'était pas transmise à Vitest).
