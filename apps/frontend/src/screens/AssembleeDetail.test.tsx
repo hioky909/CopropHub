@@ -12,6 +12,8 @@ vi.mock('../api/ags.js', () => ({
     ordreDuJour: vi.fn(),
     resultats: vi.fn(),
     voter: vi.fn(),
+    mesVotes: vi.fn(),
+    modifierVote: vi.fn(),
     ouvrir: vi.fn(),
     cloturer: vi.fn(),
   },
@@ -55,6 +57,8 @@ beforeEach(() => {
   vi.resetAllMocks();
   vi.mocked(agsApi.ordreDuJour).mockResolvedValue({ ag: AG_OUVERTE, resolutions: RESOLUTIONS } as never);
   vi.mocked(agsApi.voter).mockResolvedValue({ vote: {} } as never);
+  vi.mocked(agsApi.modifierVote).mockResolvedValue({ vote: {} } as never);
+  vi.mocked(agsApi.mesVotes).mockResolvedValue({ votes: [] });
 });
 
 describe('AssembleeDetail — vote d’un copropriétaire', () => {
@@ -128,6 +132,104 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     expect(await screen.findByText('Votes enregistrés')).toBeInTheDocument();
     expect(agsApi.voter).toHaveBeenCalledWith('r-1', 'OUI');
     expect(agsApi.voter).toHaveBeenCalledWith('r-2', 'ABSTENTION');
+  });
+});
+
+describe('AssembleeDetail — retrouver et modifier son vote', () => {
+  beforeEach(() => connecteEnTant('COPROPRIETAIRE'));
+
+  it('reprend à la première résolution sans vote et affiche les votes déjà exprimés', async () => {
+    vi.mocked(agsApi.mesVotes).mockResolvedValue({ votes: [{ idResolution: 'r-1', valeur: 'OUI' }] });
+    rendre();
+
+    expect(await screen.findByText('Installation de la vidéosurveillance')).toBeInTheDocument();
+    expect(screen.getByText('Résolution 2 sur 2')).toBeInTheDocument();
+  });
+
+  it('un vote déjà exprimé s’affiche en lecture seule avec un bouton « Modifier mon vote »', async () => {
+    vi.mocked(agsApi.mesVotes).mockResolvedValue({
+      votes: [
+        { idResolution: 'r-1', valeur: 'OUI' },
+        { idResolution: 'r-2', valeur: 'NON' },
+      ],
+    });
+    rendre();
+
+    expect(await screen.findByText('Renouvellement du mandat du syndic')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Modifier mon vote' })).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Pour' })).not.toBeInTheDocument();
+  });
+
+  it('modifier son vote appelle PUT (pas POST) et reste sur la même résolution', async () => {
+    vi.mocked(agsApi.mesVotes).mockResolvedValue({
+      votes: [
+        { idResolution: 'r-1', valeur: 'OUI' },
+        { idResolution: 'r-2', valeur: 'NON' },
+      ],
+    });
+    const user = userEvent.setup();
+    rendre();
+    await screen.findByText('Renouvellement du mandat du syndic');
+
+    await user.click(screen.getByRole('button', { name: 'Modifier mon vote' }));
+    await user.click(screen.getByRole('button', { name: 'Contre' }));
+
+    expect(agsApi.modifierVote).toHaveBeenCalledWith('r-1', 'NON');
+    expect(agsApi.voter).not.toHaveBeenCalled();
+    expect(await screen.findByRole('button', { name: 'Modifier mon vote' })).toBeInTheDocument();
+    expect(screen.getByText('Résolution 1 sur 2')).toBeInTheDocument();
+  });
+
+  it('garder le même vote en mode modification n’appelle pas l’API', async () => {
+    vi.mocked(agsApi.mesVotes).mockResolvedValue({
+      votes: [
+        { idResolution: 'r-1', valeur: 'OUI' },
+        { idResolution: 'r-2', valeur: 'NON' },
+      ],
+    });
+    const user = userEvent.setup();
+    rendre();
+    await screen.findByText('Renouvellement du mandat du syndic');
+
+    await user.click(screen.getByRole('button', { name: 'Modifier mon vote' }));
+    await user.click(screen.getByRole('button', { name: 'Pour' }));
+
+    expect(agsApi.modifierVote).not.toHaveBeenCalled();
+    expect(agsApi.voter).not.toHaveBeenCalled();
+  });
+
+  it('un vote qui échoue ne fait pas avancer à la résolution suivante', async () => {
+    vi.mocked(agsApi.voter).mockRejectedValue(new ApiError(500, 'Une erreur interne est survenue.'));
+    const user = userEvent.setup();
+    rendre();
+    await screen.findByText('Renouvellement du mandat du syndic');
+
+    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await screen.findByText('Une erreur interne est survenue.');
+    await new Promise((resolve) => setTimeout(resolve, 700));
+
+    expect(screen.getByText('Résolution 1 sur 2')).toBeInTheDocument();
+  });
+
+  it('sur une AG clôturée, affiche le vote du copropriétaire à côté du résultat', async () => {
+    vi.mocked(agsApi.ordreDuJour).mockResolvedValue({
+      ag: { ...AG_OUVERTE, statut: 'CLOTUREE' },
+      resolutions: RESOLUTIONS,
+    } as never);
+    vi.mocked(agsApi.resultats).mockResolvedValue({
+      ag: { ...AG_OUVERTE, statut: 'CLOTUREE' },
+      resolutions: RESOLUTIONS.map((r) => ({
+        ...r,
+        statutResultat: 'ADOPTEE',
+        decomptes: { oui: 2, non: 1, abstention: 0 },
+      })),
+    } as never);
+    vi.mocked(agsApi.mesVotes).mockResolvedValue({ votes: [{ idResolution: 'r-1', valeur: 'NON' }] });
+    rendre();
+
+    expect(await screen.findAllByText(/Mon vote/)).toHaveLength(2);
+    expect(screen.getByText('Contre')).toBeInTheDocument();
+    expect(screen.getByText('vous n’avez pas voté sur cette résolution')).toBeInTheDocument();
   });
 });
 

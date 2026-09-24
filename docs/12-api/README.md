@@ -8,7 +8,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 |---|---|---|---|
 | POST | `/auth/inscription` | public | `{nom, email, motDePasse}` → 201 `{utilisateur}`. Auto-inscription copropriétaire uniquement (F-01). |
 | POST | `/auth/connexion` | public | `{email, motDePasse}` → 200 `{utilisateur}`. Limité à 5 tentatives/15 min (NF-05, configurable via `AUTH_RATE_LIMIT_MAX`). |
-| POST | `/auth/deconnexion` | authentifié | 204, invalide le cookie. |
+| POST | `/auth/deconnexion` | authentifié | 204, efface le cookie **et révoque le jeton côté serveur** : un cookie copié avant la déconnexion est refusé ensuite (401). Révocation en mémoire du processus (mono-instance, perdue au redémarrage). |
 | GET | `/auth/moi` | authentifié | 200 `{utilisateur}`. |
 
 `utilisateur` = `{id, email, typeCompte: 'SYNDIC'|'COPROPRIETAIRE', estMembreConseilSyndical}`.
@@ -33,6 +33,8 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | GET | `/ags` | authentifié | 200 `{ags}` — les plus récentes en premier. |
 | GET | `/ags/:idAg` | authentifié | 200 `{ag, resolutions: [{id, libelle, typeMajorite}]}`. Ordre du jour SANS décompte ni résultat, quel que soit le statut — nécessaire à l'écran de vote avant clôture. |
 | GET | `/ags/:idAg/resolutions` | authentifié | 200 `{ag, resolutions: [{..., statutResultat, decomptes}]}` sur une AG **clôturée** uniquement (409 sinon, RM-04). Décomptes anonymes, jamais l'identité des votants (US-04). |
+| GET | `/ags/:idAg/mes-votes` | copropriétaire (403 sinon) | 200 `{votes: [{idResolution, valeur}]}` — uniquement les votes de l'utilisateur courant sur cette AG (aucun identifiant d'utilisateur accepté, anti-IDOR) ; 404 si AG inconnue. |
+| PUT | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | `{valeur}` → 200. Modifie un vote déjà exprimé, tant que l'AG est ouverte (409 après clôture, RM-04) ; 404 si aucun vote n'existe encore (le PUT ne crée pas). |
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | `{valeur: 'OUI'|'NON'|'ABSTENTION'}` → 201. Une voix par résolution (RM-02), identité issue de la session. |
 
 ## Incidents — `/incidents`
@@ -54,4 +56,4 @@ Consultation seule : aucune route de création (écart documenté, données alim
 
 ## Codes d'erreur communs
 
-400 (corps JSON malformé), 413 (corps trop volumineux), 400 (corps JSON malformé), 413 (corps trop volumineux), 401 (non authentifié), 403 (autorisé mais interdit sur cette ressource), 404 (introuvable ou masqué — anti-IDOR selon les cas), 409 (conflit d'état : double clôture, AG non ouverte, transition invalide), 422 (validation).
+400 (corps JSON malformé), 413 (corps trop volumineux), 401 (non authentifié), 403 (autorisé mais interdit sur cette ressource), 404 (introuvable ou masqué — anti-IDOR selon les cas), 409 (conflit d'état : double clôture, AG non ouverte, transition invalide), 422 (validation).

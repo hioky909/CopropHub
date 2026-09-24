@@ -61,14 +61,14 @@ Le périmètre MVP retient les **4 mêmes types de résolution**, pour rester fi
 ### RM-01 à RM-04 — Votes de résolution
 
 - **RM-01** : chaque résolution est créée avec un type parmi { simple, absolue, double majorité, unanimité }, choisi par le syndic à la création de l'AG.
-- **RM-02** : un copropriétaire dispose d'une seule voix par résolution, quel que soit le nombre de lots qu'il possède (simplification MVP documentée).
+- **RM-02** : un copropriétaire dispose d'une seule voix par résolution, quel que soit le nombre de lots qu'il possède (simplification MVP documentée). Un copropriétaire peut **modifier** son vote tant que l'AG est ouverte (le nombre de voix reste de un par résolution) ; la consultation de ses propres votes est toujours possible, y compris après clôture.
 - **RM-03** : le résultat d'une résolution est calculé automatiquement à la clôture du vote selon son type :
   - *simple* : voix « oui » > voix « non » parmi les votants (abstentions exclues du calcul) ;
   - *absolue* : voix « oui » > la moitié du nombre total de copropriétaires inscrits (votants et non-votants) ;
   - *double majorité* : voix « oui » ≥ deux tiers du nombre total de copropriétaires inscrits ;
   - *unanimité* : tous les copropriétaires inscrits ont voté « oui ».
   - Le nombre de copropriétaires **inscrits** est figé à l'ouverture du vote (`ag.nombre_inscrits_geles`) : un transfert de lot pendant que l'AG est ouverte ne modifie pas le dénominateur d'une AG déjà en cours.
-- **RM-04** : une fois l'AG clôturée par le syndic, aucun vote ne peut plus être modifié ni ajouté (immutabilité du résultat).
+- **RM-04** : une fois l'AG clôturée par le syndic, aucun vote ne peut plus être modifié ni ajouté (immutabilité du résultat) — la modification d'un vote est refusée après la clôture, atomiquement vis-à-vis de celle-ci.
 
 ### RM-05 à RM-07 — AG et participation
 

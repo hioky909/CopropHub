@@ -16,23 +16,42 @@ export default function Assemblees() {
   const [chargement, setChargement] = useState(true)
   const [erreur, setErreur] = useState<string | null>(null)
 
+  const [dejaVotees, setDejaVotees] = useState<Set<string>>(new Set())
+
   useEffect(() => {
-    agsApi
-      .lister()
-      .then((r) => {
-        // Comme dans le proto (VoteResolution.tsx) : un copropriétaire est
-        // envoyé directement sur l'AG en cours de vote, sans passer par une
-        // liste — la liste ne reste utile qu'au syndic (gestion) ou à un
-        // copropriétaire sans AG ouverte (consultation de l'historique).
-        const ouverte = r.ags.find((ag) => ag.statut === 'OUVERTE')
-        if (utilisateur?.typeCompte === 'COPROPRIETAIRE' && ouverte) {
-          navigate(`/assemblees/${ouverte.id}`, { replace: true })
-          return
+    async function charger() {
+      try {
+        const r = await agsApi.lister()
+        if (utilisateur?.typeCompte === 'COPROPRIETAIRE') {
+          // Comme dans le proto (VoteResolution.tsx) : un copropriétaire est
+          // envoyé directement sur l'AG en cours de vote — mais seulement
+          // tant qu'il lui reste des résolutions à voter. Une AG déjà
+          // entièrement votée n'y est plus poussée : elle reste accessible
+          // depuis la liste (consultation, et modification tant qu'elle est ouverte).
+          const etats = await Promise.all(
+            r.ags
+              .filter((ag) => ag.statut === 'OUVERTE')
+              .map(async (ag) => {
+                const [detail, mes] = await Promise.all([agsApi.ordreDuJour(ag.id), agsApi.mesVotes(ag.id)])
+                const votees = new Set(mes.votes.map((v) => v.idResolution))
+                return { id: ag.id, toutVote: detail.resolutions.every((res) => votees.has(res.id)) }
+              }),
+          )
+          const aVoter = etats.find((e) => !e.toutVote)
+          if (aVoter) {
+            navigate(`/assemblees/${aVoter.id}`, { replace: true })
+            return
+          }
+          setDejaVotees(new Set(etats.map((e) => e.id)))
         }
         setAgs(r.ags)
-      })
-      .catch((err) => setErreur(err instanceof ApiError ? err.message : 'Impossible de charger les assemblées.'))
-      .finally(() => setChargement(false))
+      } catch (err) {
+        setErreur(err instanceof ApiError ? err.message : 'Impossible de charger les assemblées.')
+      } finally {
+        setChargement(false)
+      }
+    }
+    void charger()
   }, [navigate, utilisateur])
 
   return (
@@ -43,7 +62,7 @@ export default function Assemblees() {
       <p style={{ margin: '0 0 24px', fontSize: 13, color: '#5C5C5C' }}>
         {utilisateur?.typeCompte === 'SYNDIC'
           ? 'Cliquez sur une AG pour gérer son vote et ses résolutions.'
-          : 'Cliquez sur une AG ouverte pour voter, ou une AG clôturée pour consulter les résultats.'}
+          : 'Retrouvez vos assemblées : consultez ou modifiez votre vote tant qu’une AG est ouverte, et les résultats des AG clôturées.'}
       </p>
 
       {erreur && (
@@ -80,7 +99,10 @@ export default function Assemblees() {
               <span style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>
                 Assemblée générale du {formaterDate(ag.dateAg)}
               </span>
-              <Badge {...STATUT_BADGE[ag.statut]} />
+              <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {dejaVotees.has(ag.id) && <Badge variant="success" label="Voté" />}
+                <Badge {...STATUT_BADGE[ag.statut]} />
+              </span>
             </button>
           ))
         )}

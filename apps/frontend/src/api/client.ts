@@ -37,4 +37,5 @@ export const api = {
   get: <T>(chemin: string) => requete<T>(chemin),
   post: <T>(chemin: string, corps?: unknown) => requete<T>(chemin, { methode: 'POST', corps: corps ?? {} }),
   patch: <T>(chemin: string, corps?: unknown) => requete<T>(chemin, { methode: 'PATCH', corps: corps ?? {} }),
+  put: <T>(chemin: string, corps?: unknown) => requete<T>(chemin, { methode: 'PUT', corps: corps ?? {} }),
 };

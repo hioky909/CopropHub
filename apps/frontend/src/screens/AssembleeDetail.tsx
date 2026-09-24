@@ -25,6 +25,8 @@ export default function AssembleeDetail() {
   const [action, setAction] = useState(false)
   const [votesEnregistres, setVotesEnregistres] = useState<Record<string, VoteChoice | 'DEJA_VOTE'>>({})
 
+  const estCopro = utilisateur?.typeCompte === 'COPROPRIETAIRE'
+
   const charger = useCallback(async () => {
     if (!idAg) return
     setChargement(true)
@@ -39,29 +41,43 @@ export default function AssembleeDetail() {
       } else {
         setResultats(null)
       }
+      // Un copropriétaire retrouve ses votes déjà exprimés (rechargement de
+      // page, retour sur l'AG plus tard) au lieu de repartir d'un écran vierge.
+      if (estCopro && detail.ag.statut !== 'PLANIFIEE') {
+        const mes = await agsApi.mesVotes(idAg)
+        setVotesEnregistres(Object.fromEntries(mes.votes.map((v) => [v.idResolution, v.valeur])))
+      }
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : "Impossible de charger l'assemblée.")
     } finally {
       setChargement(false)
     }
-  }, [idAg])
+  }, [idAg, estCopro])
 
   useEffect(() => {
     void charger()
   }, [charger])
 
-  async function handleVoter(idResolution: string, valeur: VoteChoice) {
+  /** Vote (première fois) ou modification (vote déjà connu). Retourne `true` si l'état affiché est à jour. */
+  async function handleVoter(idResolution: string, valeur: VoteChoice): Promise<boolean> {
     setErreur(null)
     setAction(true)
     try {
-      await agsApi.voter(idResolution, valeur)
-      setVotesEnregistres((prev) => ({ ...prev, [idResolution]: valeur }))
-    } catch (err) {
-      if (err instanceof ApiError && err.status === 409) {
-        setVotesEnregistres((prev) => ({ ...prev, [idResolution]: 'DEJA_VOTE' }))
+      const dejaVote = votesEnregistres[idResolution]
+      if (dejaVote && dejaVote !== 'DEJA_VOTE') {
+        await agsApi.modifierVote(idResolution, valeur)
       } else {
-        setErreur(err instanceof ApiError ? err.message : 'Impossible d’enregistrer le vote.')
+        await agsApi.voter(idResolution, valeur)
       }
+      setVotesEnregistres((prev) => ({ ...prev, [idResolution]: valeur }))
+      return true
+    } catch (err) {
+      if (err instanceof ApiError && err.status === 409 && !votesEnregistres[idResolution]) {
+        setVotesEnregistres((prev) => ({ ...prev, [idResolution]: 'DEJA_VOTE' }))
+        return true
+      }
+      setErreur(err instanceof ApiError ? err.message : 'Impossible d’enregistrer le vote.')
+      return false
     } finally {
       setAction(false)
     }
@@ -168,6 +184,16 @@ export default function AssembleeDetail() {
                 <span style={{ color: '#B3261E', fontWeight: 600 }}>Non : {r.decomptes.non}</span>
                 <span style={{ color: '#5C5C5C', fontWeight: 600 }}>Abstention : {r.decomptes.abstention}</span>
               </div>
+              {estCopro && (
+                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C', display: 'flex', alignItems: 'center', gap: 8 }}>
+                  Mon vote :
+                  {votesEnregistres[r.id] ? (
+                    <VoteLabel choix={votesEnregistres[r.id]} />
+                  ) : (
+                    <span>vous n’avez pas voté sur cette résolution</span>
+                  )}
+                </p>
+              )}
             </div>
           ))}
         </div>
@@ -237,17 +263,36 @@ function EcranVote({
   resolutions: ResolutionOrdreDuJour[]
   votes: Record<string, VoteChoice | 'DEJA_VOTE'>
   action: boolean
-  onVoter: (idResolution: string, valeur: VoteChoice) => Promise<void>
+  onVoter: (idResolution: string, valeur: VoteChoice) => Promise<boolean>
   onRetour: () => void
 }) {
-  const [index, setIndex] = useState(0)
+  // On reprend à la première résolution encore sans vote (0 si tout est voté).
+  const [index, setIndex] = useState(() => {
+    const premiereSansVote = resolutions.findIndex((r) => votes[r.id] === undefined)
+    return premiereSansVote === -1 ? 0 : premiereSansVote
+  })
   const [showSuccess, setShowSuccess] = useState(false)
+  const [enModification, setEnModification] = useState(false)
   const resolution = resolutions[index]!
   const confirmee = votes[resolution.id] !== undefined
   const toutesVotees = resolutions.every((r) => votes[r.id] !== undefined)
 
+  useEffect(() => {
+    setEnModification(false)
+  }, [index])
+
   async function confirmer(valeur: VoteChoice) {
-    await onVoter(resolution.id, valeur)
+    const choixActuel = votes[resolution.id]
+    if (choixActuel === valeur) {
+      setEnModification(false) // même choix : rien à modifier côté serveur
+      return
+    }
+    const ok = await onVoter(resolution.id, valeur)
+    if (!ok) return
+    if (choixActuel !== undefined) {
+      setEnModification(false) // simple changement d'avis : on reste sur la résolution
+      return
+    }
     if (index < resolutions.length - 1) {
       setTimeout(() => setIndex((i) => i + 1), 500)
     }
@@ -311,7 +356,7 @@ function EcranVote({
       </header>
 
       <div style={{ maxWidth: 600, margin: '0 auto', padding: '24px 16px 0' }}>
-        {confirmee && (
+        {confirmee && !enModification && (
           <div style={{ marginBottom: 16 }}>
             <Notification variant="success" title="Vote enregistré">
               {votes[resolution.id] === 'DEJA_VOTE'
@@ -342,7 +387,7 @@ function EcranVote({
 
           <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #F2F2F2' }}>
             <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>Mon vote</p>
-            {confirmee ? (
+            {confirmee && !enModification ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {OPTIONS_VOTE.map((opt) => {
                   const monChoix = votes[resolution.id]
@@ -377,9 +422,9 @@ function EcranVote({
                     style={{
                       padding: '14px 8px',
                       borderRadius: 8,
-                      border: '2px solid #E0E0E0',
-                      backgroundColor: '#FFFFFF',
-                      color: '#5C5C5C',
+                      border: `2px solid ${enModification && votes[resolution.id] === opt.value ? opt.border : '#E0E0E0'}`,
+                      backgroundColor: enModification && votes[resolution.id] === opt.value ? opt.bg : '#FFFFFF',
+                      color: enModification && votes[resolution.id] === opt.value ? opt.color : '#5C5C5C',
                       fontSize: 14,
                       fontWeight: 600,
                       cursor: action ? 'not-allowed' : 'pointer',
@@ -401,6 +446,18 @@ function EcranVote({
                   </button>
                 ))}
               </div>
+            )}
+            {confirmee && !enModification && (
+              <div style={{ marginTop: 12 }}>
+                <Button variant="secondary" fullWidth onClick={() => setEnModification(true)}>
+                  Modifier mon vote
+                </Button>
+              </div>
+            )}
+            {enModification && (
+              <p style={{ margin: '10px 0 0', fontSize: 12, color: '#5C5C5C' }}>
+                Choisissez votre nouveau vote, ou gardez le même pour annuler la modification.
+              </p>
             )}
           </div>
         </div>

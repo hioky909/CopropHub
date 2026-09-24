@@ -35,6 +35,17 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await page.getByRole('button', { name: 'Pour' }).click()
   await expect(page.getByText('Votre vote a été pris en compte pour cette résolution.')).toBeVisible()
 
+  // Le vote est retrouvé après rechargement, puis modifié (Pour → Contre) tant que l'AG est ouverte.
+  await page.reload()
+  await expect(page.getByRole('button', { name: 'Modifier mon vote' })).toBeVisible()
+  await page.getByRole('button', { name: 'Modifier mon vote' }).click()
+  await page.getByRole('button', { name: 'Contre' }).click()
+  await expect(page.getByRole('button', { name: 'Modifier mon vote' })).toBeVisible()
+
+  // AG entièrement votée : plus de redirection automatique, la liste affiche « Voté ».
+  await page.goto('/assemblees')
+  await expect(page.getByText('Voté', { exact: true })).toBeVisible()
+
   await logout(page)
 
   // Le syndic clôture l'AG : le résultat réel (calculé côté serveur) s'affiche.
@@ -44,7 +55,7 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
 
   await expect(page.getByText('Clôturée')).toBeVisible()
   await expect(page.getByText(libelle)).toBeVisible()
-  await expect(page.getByText('Adoptée')).toBeVisible()
-  await expect(page.getByText('Oui : 1')).toBeVisible()
-  await expect(page.getByText('Non : 0')).toBeVisible()
+  await expect(page.getByText('Rejetée')).toBeVisible()
+  await expect(page.getByText('Oui : 0')).toBeVisible()
+  await expect(page.getByText('Non : 1')).toBeVisible()
 })

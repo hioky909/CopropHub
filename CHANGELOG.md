@@ -40,6 +40,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - Script de démonstration `npm run demo:seed --workspace=apps/backend` (`apps/backend/scripts/seed-demo.ts`) : 6 copropriétaires avec lots, charges, incidents et 3 AG (planifiée, ouverte, clôturée avec résultats calculés par le vrai moteur métier), séparé du seed minimal.
 - Écran de vote AG copropriétaire refait à l'identique du proto Figma (une résolution à la fois, barre de progression, gros boutons Pour/Contre/Abstention, récapitulatif, écran final) ; un copropriétaire arrivant sur « Assemblées » est envoyé directement sur l'AG ouverte, sans liste.
 
+- Modifier et consulter son vote d'AG : `PUT /resolutions/:idResolution/votes` (tant que l'AG est ouverte, même verrou anti-clôture que le vote initial) et `GET /ags/:idAg/mes-votes` (uniquement ses propres votes). Écran : les votes déjà exprimés sont retrouvés après rechargement, bouton « Modifier mon vote », reprise à la première résolution non votée, vote affiché à côté du résultat d'une AG clôturée. Un copropriétaire n'est plus redirigé automatiquement vers une AG qu'il a entièrement votée ; la liste des assemblées (badge « Voté ») permet de la retrouver. Corrige aussi l'avance automatique à la résolution suivante qui se déclenchait même quand le vote avait échoué.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.
