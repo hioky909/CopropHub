@@ -28,10 +28,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       .then((reponse) => setUtilisateur(reponse.utilisateur))
       .catch((err: unknown) => {
         setUtilisateur(null);
-        // Un ApiError (401 : pas de session, ou autre statut connu) est un
-        // état normal, pas une panne. Toute autre erreur (fetch qui rejette
-        // : serveur injoignable, réseau coupé) est une vraie panne.
-        setErreurServeur(!(err instanceof ApiError));
+        // Seul un 401 signifie « pas de session » (état normal). Tout le reste
+        // — serveur injoignable, 5xx, et surtout 429 (trop de requêtes) — est
+        // une indisponibilité temporaire : on ne doit JAMAIS traiter cela comme
+        // une déconnexion, sinon un simple ralentissement expulserait l'utilisateur.
+        setErreurServeur(!(err instanceof ApiError && err.status === 401));
       })
       .finally(() => setChargement(false));
   }, []);

@@ -38,6 +38,7 @@ npm run demo:seed --workspace=apps/backend
 | `SESSION_SECRET` | Signature du cookie de session |
 | `FRONTEND_ORIGIN` | Origine autorisée par CORS côté backend |
 | `VITE_API_URL` | Origine de l'API consommée par le frontend (optionnelle, défaut `http://localhost:3000`) |
+| `RATE_LIMIT_MAX` | Plafond global de requêtes par fenêtre de 15 min (défaut 1000 ; par utilisateur connecté, par IP pour un visiteur anonyme) |
 | `AUTH_RATE_LIMIT_MAX` | Seuil du rate limiter de connexion (défaut 5, relevé uniquement pour le backend E2E) |
 
 ## Secrets

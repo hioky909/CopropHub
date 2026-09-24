@@ -12,6 +12,7 @@ import { incidentRouter } from './controllers/incident.controller.js';
 import { chargeRouter } from './controllers/charge.controller.js';
 import { sessionMiddleware } from './middleware/session.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
+import { sessionService } from './services/session.service.js';
 
 /**
  * Assemblage de l'application Express — reste la couche Presentation/API
@@ -31,19 +32,35 @@ export function createApp(): Express {
       credentials: true,
     }),
   );
+  app.use(cookieParser());
+
+  // Contrôle de santé : hors plafond, une sonde de supervision ne doit jamais
+  // consommer le quota d'un utilisateur ni être elle-même bloquée.
+  app.use('/health', healthRouter);
+
+  // Plafond global anti-abus (NF-05, DoS). Une SPA enchaîne plusieurs appels
+  // par écran, l'ancien seuil (300/15 min par IP) bloquait des utilisateurs
+  // normaux : il est relevé (configurable via RATE_LIMIT_MAX) et compté PAR
+  // UTILISATEUR CONNECTÉ (jeton signé vérifié sans accès base) plutôt que par
+  // IP, pour qu'un réseau partagé (bureau, NAT) ne se bloque pas
+  // mutuellement. Un visiteur non connecté ou un jeton falsifié reste compté
+  // par IP. Les limites strictes de la connexion et du changement de mot de
+  // passe (contre la force brute) sont inchangées.
   app.use(
     rateLimit({
       windowMs: 15 * 60 * 1000,
-      limit: 300,
+      limit: Number(process.env.RATE_LIMIT_MAX ?? 1000),
       standardHeaders: true,
       legacyHeaders: false,
+      message: { erreur: 'Trop de requêtes, réessayez dans quelques instants.' },
+      keyGenerator: (req) => {
+        const session = sessionService.verifierJeton(req.cookies?.session as string | undefined);
+        return session ? `u:${session.utilisateurId}` : (req.ip ?? 'inconnu');
+      },
     }),
   );
 
   app.use(express.json());
-  app.use(cookieParser());
-
-  app.use('/health', healthRouter);
 
   // sessionMiddleware renseigne req.utilisateur si un cookie de session
   // valide est présent ; il ne bloque rien lui-même (cf. middleware).

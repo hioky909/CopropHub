@@ -1,6 +1,8 @@
-import { describe, it, expect, beforeAll } from 'vitest';
+import { describe, it, expect, beforeAll, vi } from 'vitest';
 import request from 'supertest';
 import { createApp } from './app.js';
+import { authService } from './services/auth.service.js';
+import { sessionService } from './services/session.service.js';
 
 /**
  * T-25 (NF-01–NF-14, Doc 5 § Sécurité transverse) : en-têtes de sécurité,
@@ -70,9 +72,37 @@ describe('Gestion des erreurs de parsing du corps de requête', () => {
 });
 
 describe('Rate limiting global', () => {
-  it('annonce sa limite via les en-têtes standard (RateLimit-*)', async () => {
-    const reponse = await request(createApp()).get('/health');
-    expect(reponse.headers['ratelimit-limit']).toBe('300');
+  it('annonce sa limite via les en-têtes standard (RateLimit-*), à 1000 par défaut', async () => {
+    const reponse = await request(createApp()).get('/auth/moi');
+    expect(reponse.headers['ratelimit-limit']).toBe('1000');
     expect(reponse.headers['ratelimit-remaining']).toBeDefined();
+  });
+
+  it('ne compte pas /health (supervision)', async () => {
+    const reponse = await request(createApp()).get('/health');
+    expect(reponse.headers['ratelimit-limit']).toBeUndefined();
+  });
+
+  it('compte par utilisateur connecté : épuiser son quota ne bloque pas un autre utilisateur derrière la même IP', async () => {
+    process.env.SESSION_SECRET = 'secret-de-test-pour-les-tests-uniquement';
+    process.env.RATE_LIMIT_MAX = '2';
+    vi.spyOn(authService, 'utilisateurCourant').mockResolvedValue(null);
+    try {
+      const app = createApp();
+      const cookieA = `session=${sessionService.emettreJeton('utilisateur-a')}`;
+      const cookieB = `session=${sessionService.emettreJeton('utilisateur-b')}`;
+
+      const statutsA = [];
+      for (let i = 0; i < 3; i += 1) {
+        statutsA.push((await request(app).get('/auth/moi').set('Cookie', cookieA)).status);
+      }
+      const reponseB = await request(app).get('/auth/moi').set('Cookie', cookieB);
+
+      expect(statutsA).toEqual([401, 401, 429]); // A : 2 requêtes passent, la 3e est limitée
+      expect(reponseB.status).toBe(401); // B n'est pas touché (401 = non authentifié, pas 429)
+    } finally {
+      delete process.env.RATE_LIMIT_MAX;
+      vi.restoreAllMocks();
+    }
   });
 });
