@@ -77,7 +77,7 @@ Correctifs de l'audit pré-production (2026-09-23) :
 - Test d'intégration du double vote simultané (20 requêtes, un seul vote enregistré).
 - `.env.example` : placeholders restaurés (une modification locale y avait mis des valeurs ressemblant à de vrais secrets ; jamais commitée).
 
-Volontairement laissé de côté : l'énumération de comptes sur `POST /auth/inscription` (409 si l'email existe) est le comportement standard d'une inscription libre — la masquer exigerait un flux de confirmation par email, hors périmètre MVP ; à arbitrer côté produit.
+Choix assumé (validé avec l'utilisateur) : l'énumération de comptes sur `POST /auth/inscription` (409 si l'email existe) est conservée — comportement standard d'une inscription libre, risque faible pour cette application, et la connexion ne révèle rien ; la masquer aurait supprimé la connexion automatique après inscription.
 ### Notes
 
 - `vote-cloture-concurrence.integration.test.ts` : les deux assertions de correction (aucun vote perdu, résultat figé exact) passent sur toutes les itérations, y compris exécutées contre un PostgreSQL dans un conteneur Docker ; seule l'auto-vérification statistique (la fenêtre de 20 ms produit-elle assez de chevauchement réel) devient marginale sous la latence réseau Docker par rapport à un PostgreSQL natif — sensibilité de timing à l'environnement, pas une régression.
