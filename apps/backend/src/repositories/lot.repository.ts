@@ -75,6 +75,19 @@ export const lotRepository = {
     }
   },
 
+  /** Tous les lots avec leur propriétaire actuel (rattachement actif), pour l'écran de gestion du syndic. */
+  listerAvecProprietaireActif() {
+    return prisma.lot.findMany({
+      orderBy: { numero: 'asc' },
+      include: {
+        rattachements: {
+          where: { dateFin: null },
+          include: { utilisateur: { select: { id: true, nom: true } } },
+        },
+      },
+    });
+  },
+
   lotsRattachesAUtilisateur(idUtilisateur: string) {
     return prisma.lot.findMany({
       where: {

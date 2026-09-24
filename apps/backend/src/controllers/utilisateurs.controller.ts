@@ -101,6 +101,13 @@ utilisateursRouter.post(
   }),
 );
 
+utilisateursRouter.get(
+  '/lots',
+  asyncHandler(async (_req, res) => {
+    res.status(200).json({ lots: await lotService.listerLots() });
+  }),
+);
+
 const creerLotSchema = z.object({
   numero: z.string().trim().min(1).max(20),
   typeLot: z.string().trim().min(1).max(50),

@@ -30,6 +30,7 @@ beforeEach(async () => {
 describe('autorisation (RM-14) sur /utilisateurs', () => {
   const routes = [
     ['get', '/utilisateurs'],
+    ['get', '/utilisateurs/lots'],
     ['post', '/utilisateurs'],
     ['post', '/utilisateurs/lots'],
     ['post', '/utilisateurs/lots/rattachement'],
@@ -271,5 +272,35 @@ describe('GET /utilisateurs/moi/lots — mes propres lots (US-03), sans exiger l
 
   it('401 sans session', async () => {
     expect((await request(app).get('/utilisateurs/moi/lots')).status).toBe(401);
+  });
+});
+
+describe('GET /utilisateurs/lots — lots et propriétaire actuel (réservé au syndic)', () => {
+  it("liste chaque lot avec son propriétaire actif, et null pour un lot sans rattachement ; un ancien propriétaire n'apparaît pas", async () => {
+    const proprietaire = await creerUtilisateur({ email: 'proprio@test.local' });
+    const ancien = await creerUtilisateur({ email: 'ancien@test.local' });
+    await creerLot(immeuble.id, '1', proprietaire.id);
+    await creerLot(immeuble.id, '2');
+    const lotCede = await creerLot(immeuble.id, '3', ancien.id);
+    await prisma.rattachement.updateMany({
+      where: { idLot: lotCede.id },
+      data: { dateDebut: new Date('2020-01-01'), dateFin: new Date('2021-01-01') },
+    });
+
+    const reponse = await request(app).get('/utilisateurs/lots').set('Cookie', cookieSyndic);
+
+    expect(reponse.status).toBe(200);
+    expect(reponse.body.lots).toEqual([
+      expect.objectContaining({ numero: '1', proprietaire: { id: proprietaire.id, nom: proprietaire.nom } }),
+      expect.objectContaining({ numero: '2', proprietaire: null }),
+      expect.objectContaining({ numero: '3', proprietaire: null }),
+    ]);
+  });
+
+  it('403 pour un copropriétaire', async () => {
+    const copro = await creerUtilisateur();
+    expect(
+      (await request(app).get('/utilisateurs/lots').set('Cookie', cookieSession(copro.id))).status,
+    ).toBe(403);
   });
 });

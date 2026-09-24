@@ -27,6 +27,17 @@ export const lotService = {
     return lotRepository.lotsRattachesAUtilisateur(idUtilisateur);
   },
 
+  /** Les lots de l'immeuble et leur propriétaire actuel (`null` si aucun rattachement actif). */
+  async listerLots() {
+    const lots = await lotRepository.listerAvecProprietaireActif();
+    return lots.map((lot) => ({
+      id: lot.id,
+      numero: lot.numero,
+      typeLot: lot.typeLot,
+      proprietaire: lot.rattachements[0]?.utilisateur ?? null,
+    }));
+  },
+
   async creerLot(donnees: { numero: string; typeLot: string }) {
     const immeuble = await immeubleRepository.unique();
     if (!immeuble) {
