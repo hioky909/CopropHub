@@ -33,6 +33,7 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await page.goto(`/assemblees/${ag.id}`)
   await expect(page.getByText(libelle)).toBeVisible()
   await page.getByRole('button', { name: 'Pour' }).click()
+  await page.getByRole('button', { name: /Valider mon vote/ }).click()
 
   // Dernier (ici unique) vote : retour direct à la liste, où « Voté » confirme — pas d'écran intermédiaire.
   await expect(page.getByText('Voté', { exact: true })).toBeVisible()
@@ -42,6 +43,7 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await expect(page.getByRole('button', { name: 'Modifier mon vote' })).toBeVisible()
   await page.getByRole('button', { name: 'Modifier mon vote' }).click()
   await page.getByRole('button', { name: 'Contre' }).click()
+  await page.getByRole('button', { name: /Valider mon vote/ }).click()
   await expect(page.getByRole('button', { name: 'Modifier mon vote' })).toBeVisible()
 
   await logout(page)

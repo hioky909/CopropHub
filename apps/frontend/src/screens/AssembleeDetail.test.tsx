@@ -42,6 +42,11 @@ function connecteEnTant(typeCompte: 'COPROPRIETAIRE' | 'SYNDIC') {
   } as unknown as ReturnType<typeof useAuth>);
 }
 
+async function choisirEtValider(user: ReturnType<typeof userEvent.setup>, choix: 'Pour' | 'Contre' | 'Abstention') {
+  await user.click(screen.getByRole('button', { name: choix }));
+  await user.click(screen.getByRole('button', { name: new RegExp(`Valider mon vote — ${choix}`) }));
+}
+
 function rendre() {
   return render(
     <MemoryRouter initialEntries={['/assemblees/ag-1']}>
@@ -72,12 +77,24 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     expect(screen.queryByText('Installation de la vidéosurveillance')).not.toBeInTheDocument();
   });
 
+  it('choisir une option n’envoie rien : le bouton « Valider mon vote » est requis', async () => {
+    const user = userEvent.setup();
+    rendre();
+    await screen.findByText('Renouvellement du mandat du syndic');
+
+    expect(screen.getByRole('button', { name: 'Sélectionnez un vote' })).toBeDisabled();
+    await user.click(screen.getByRole('button', { name: 'Contre' }));
+
+    expect(agsApi.voter).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: /Valider mon vote — Contre/ })).toBeEnabled();
+  });
+
   it('envoie le vote choisi à l’API puis confirme à l’utilisateur', async () => {
     const user = userEvent.setup();
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Contre' }));
+    await choisirEtValider(user, 'Contre');
 
     expect(agsApi.voter).toHaveBeenCalledWith('r-1', 'NON');
     expect(await screen.findByText('Votre vote a été pris en compte pour cette résolution.')).toBeInTheDocument();
@@ -88,7 +105,7 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await choisirEtValider(user, 'Pour');
 
     expect(await screen.findByText('Installation de la vidéosurveillance')).toBeInTheDocument();
     expect(screen.getByText('Résolution 2 sur 2')).toBeInTheDocument();
@@ -100,7 +117,7 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await choisirEtValider(user, 'Pour');
 
     expect(await screen.findByText('Vous avez déjà voté pour cette résolution.')).toBeInTheDocument();
   });
@@ -111,7 +128,7 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await choisirEtValider(user, 'Pour');
 
     expect(await screen.findByText('Une erreur interne est survenue.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Pour' })).toBeEnabled();
@@ -122,11 +139,11 @@ describe('AssembleeDetail — vote d’un copropriétaire', () => {
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await choisirEtValider(user, 'Pour');
     await screen.findByText('Installation de la vidéosurveillance');
     expect(screen.queryByText('Liste des assemblées')).not.toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: 'Abstention' }));
+    await choisirEtValider(user, 'Abstention');
 
     expect(await screen.findByText('Liste des assemblées')).toBeInTheDocument();
     expect(screen.queryByText('Votes enregistrés')).not.toBeInTheDocument();
@@ -172,7 +189,7 @@ describe('AssembleeDetail — retrouver et modifier son vote', () => {
     await screen.findByText('Renouvellement du mandat du syndic');
 
     await user.click(screen.getByRole('button', { name: 'Modifier mon vote' }));
-    await user.click(screen.getByRole('button', { name: 'Contre' }));
+    await choisirEtValider(user, 'Contre');
 
     expect(agsApi.modifierVote).toHaveBeenCalledWith('r-1', 'NON');
     expect(agsApi.voter).not.toHaveBeenCalled();
@@ -180,7 +197,7 @@ describe('AssembleeDetail — retrouver et modifier son vote', () => {
     expect(screen.getByText('Résolution 1 sur 2')).toBeInTheDocument();
   });
 
-  it('garder le même vote en mode modification n’appelle pas l’API', async () => {
+  it('garder le même vote en mode modification ne permet pas de valider et n’appelle pas l’API', async () => {
     vi.mocked(agsApi.mesVotes).mockResolvedValue({
       votes: [
         { idResolution: 'r-1', valeur: 'OUI' },
@@ -194,6 +211,7 @@ describe('AssembleeDetail — retrouver et modifier son vote', () => {
     await user.click(screen.getByRole('button', { name: 'Modifier mon vote' }));
     await user.click(screen.getByRole('button', { name: 'Pour' }));
 
+    expect(screen.getByRole('button', { name: /Valider mon vote — Pour/ })).toBeDisabled();
     expect(agsApi.modifierVote).not.toHaveBeenCalled();
     expect(agsApi.voter).not.toHaveBeenCalled();
   });
@@ -204,7 +222,7 @@ describe('AssembleeDetail — retrouver et modifier son vote', () => {
     rendre();
     await screen.findByText('Renouvellement du mandat du syndic');
 
-    await user.click(screen.getByRole('button', { name: 'Pour' }));
+    await choisirEtValider(user, 'Pour');
     await screen.findByText('Une erreur interne est survenue.');
     await new Promise((resolve) => setTimeout(resolve, 700));
 

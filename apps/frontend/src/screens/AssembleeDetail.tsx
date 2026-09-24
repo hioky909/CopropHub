@@ -281,11 +281,13 @@ function EcranVote({
     return premiereSansVote === -1 ? 0 : premiereSansVote
   })
   const [enModification, setEnModification] = useState(false)
+  const [choix, setChoix] = useState<VoteChoice | null>(null)
   const resolution = resolutions[index]!
   const confirmee = votes[resolution.id] !== undefined
 
   useEffect(() => {
     setEnModification(false)
+    setChoix(null)
   }, [index])
 
   async function confirmer(valeur: VoteChoice) {
@@ -296,6 +298,7 @@ function EcranVote({
     }
     const ok = await onVoter(resolution.id, valeur)
     if (!ok) return
+    setChoix(null)
     if (choixActuel !== undefined) {
       setEnModification(false) // simple changement d'avis : on reste sur la résolution
       return
@@ -396,51 +399,62 @@ function EcranVote({
                 })}
               </div>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
-                {OPTIONS_VOTE.map((opt) => (
-                  <button
-                    key={opt.value}
-                    onClick={() => void confirmer(opt.value)}
-                    disabled={action}
-                    style={{
-                      padding: '14px 8px',
-                      borderRadius: 8,
-                      border: `2px solid ${enModification && votes[resolution.id] === opt.value ? opt.border : '#E0E0E0'}`,
-                      backgroundColor: enModification && votes[resolution.id] === opt.value ? opt.bg : '#FFFFFF',
-                      color: enModification && votes[resolution.id] === opt.value ? opt.color : '#5C5C5C',
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: action ? 'not-allowed' : 'pointer',
-                      transition: 'all 0.15s',
-                      fontFamily: 'inherit',
-                    }}
-                    onMouseEnter={(e) => {
-                      ;(e.currentTarget as HTMLElement).style.borderColor = opt.border
-                      ;(e.currentTarget as HTMLElement).style.backgroundColor = opt.bg
-                      ;(e.currentTarget as HTMLElement).style.color = opt.color
-                    }}
-                    onMouseLeave={(e) => {
-                      ;(e.currentTarget as HTMLElement).style.borderColor = '#E0E0E0'
-                      ;(e.currentTarget as HTMLElement).style.backgroundColor = '#FFFFFF'
-                      ;(e.currentTarget as HTMLElement).style.color = '#5C5C5C'
-                    }}
+              <>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                  {OPTIONS_VOTE.map((opt) => {
+                    const selectionne = choix === opt.value
+                    return (
+                      <button
+                        key={opt.value}
+                        onClick={() => setChoix(opt.value)}
+                        disabled={action}
+                        aria-pressed={selectionne}
+                        style={{
+                          padding: '14px 8px',
+                          borderRadius: 8,
+                          border: `2px solid ${selectionne ? opt.border : '#E0E0E0'}`,
+                          backgroundColor: selectionne ? opt.bg : '#FFFFFF',
+                          color: selectionne ? opt.color : '#5C5C5C',
+                          fontSize: 14,
+                          fontWeight: 600,
+                          cursor: action ? 'not-allowed' : 'pointer',
+                          transition: 'all 0.15s',
+                          fontFamily: 'inherit',
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    )
+                  })}
+                </div>
+                <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <Button
+                    variant="primary"
+                    fullWidth
+                    disabled={action || choix === null || (enModification && choix === votes[resolution.id])}
+                    onClick={() => choix && void confirmer(choix)}
                   >
-                    {opt.label}
-                  </button>
-                ))}
-              </div>
+                    {choix
+                      ? `Valider mon vote — ${OPTIONS_VOTE.find((o) => o.value === choix)!.label}`
+                      : 'Sélectionnez un vote'}
+                  </Button>
+                  {enModification && (
+                    <Button variant="secondary" fullWidth onClick={() => setEnModification(false)}>
+                      Annuler la modification
+                    </Button>
+                  )}
+                </div>
+              </>
             )}
             {confirmee && !enModification && (
               <div style={{ marginTop: 12 }}>
-                <Button variant="secondary" fullWidth onClick={() => setEnModification(true)}>
+                <Button variant="secondary" fullWidth onClick={() => {
+                    setChoix(null)
+                    setEnModification(true)
+                  }}>
                   Modifier mon vote
                 </Button>
               </div>
-            )}
-            {enModification && (
-              <p style={{ margin: '10px 0 0', fontSize: 12, color: '#5C5C5C' }}>
-                Choisissez votre nouveau vote, ou gardez le même pour annuler la modification.
-              </p>
             )}
           </div>
         </div>
