@@ -148,7 +148,14 @@ agRouter.get(
   '/',
   asyncHandler(async (_req, res) => {
     const ags = await agService.listerAgs();
-    res.status(200).json({ ags });
+    res.status(200).json({
+      ags: ags.map((ag) => ({
+        id: ag.id,
+        dateAg: ag.dateAg,
+        statut: ag.statut,
+        nombreResolutions: ag._count.resolutions,
+      })),
+    });
   }),
 );
 

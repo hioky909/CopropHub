@@ -68,7 +68,9 @@ describe('GET /ags (T-11)', () => {
   ])(
     '200 pour %s : la liste des AG (lecture ouverte aux trois rôles, Doc 5)',
     async (_libelle, utilisateur) => {
-      vi.spyOn(agRepository, 'listerToutes').mockResolvedValue([agClotureeAvecDecomptes()]);
+      vi.spyOn(agRepository, 'listerToutes').mockResolvedValue([
+        { ...agClotureeAvecDecomptes(), _count: { resolutions: 1 } },
+      ]);
       const reponse = await request(createApp()).get('/ags').set('Cookie', cookieDe(utilisateur));
       expect(reponse.status).toBe(200);
       expect(reponse.body.ags).toHaveLength(1);

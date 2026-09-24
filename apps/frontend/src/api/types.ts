@@ -15,6 +15,8 @@ export interface Ag {
   id: string;
   dateAg: string;
   statut: StatutAg;
+  /** Présent dans la liste `GET /ags` uniquement. */
+  nombreResolutions?: number;
 }
 
 export interface ResolutionOrdreDuJour {

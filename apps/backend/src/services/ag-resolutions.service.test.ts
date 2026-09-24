@@ -33,7 +33,7 @@ describe('agService.listerAgs (T-11, F-07)', () => {
   it('délègue au dépôt', async () => {
     const lister = vi
       .spyOn(agRepository, 'listerToutes')
-      .mockResolvedValue([agAvecDecomptes('CLOTUREE')]);
+      .mockResolvedValue([{ ...agAvecDecomptes('CLOTUREE'), _count: { resolutions: 1 } }]);
     const ags = await agService.listerAgs();
     expect(lister).toHaveBeenCalledTimes(1);
     expect(ags).toHaveLength(1);

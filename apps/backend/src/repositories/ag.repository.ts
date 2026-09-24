@@ -42,7 +42,10 @@ export const agRepository = {
 
   /** Liste toutes les AG (T-11, F-07), les plus récentes en premier. */
   listerToutes() {
-    return prisma.aG.findMany({ orderBy: { dateAg: 'desc' } });
+    return prisma.aG.findMany({
+      orderBy: { dateAg: 'desc' },
+      include: { _count: { select: { resolutions: true } } },
+    });
   },
 
   /**
