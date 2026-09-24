@@ -25,7 +25,7 @@ $ npm run build
 
 $ npm audit --audit-level=high
 > 0 vulnérabilité haute/critique
-# (2 vulnérabilités modérées connues sur react-router-dom, documentées, non bloquantes)
+# (react-router-dom passé en 7.18.4 : 0 vulnérabilité)
 
 $ npm run test:e2e --workspace=apps/frontend   (backend + frontend + PostgreSQL réellement démarrés)
   7 passed (25.4s)

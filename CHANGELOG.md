@@ -61,7 +61,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 - `FormField.tsx` (Badge/Button/FormField/Notification, T-18) : les `<label>` n'étaient jamais associés à leur champ (`htmlFor`/`id` manquants, un défaut de la maquette Figma repris tel quel) — trouvé en écrivant les sélecteurs Playwright (T-17), corrigé pour tous les champs (`TextField`, `SelectField`, `TextareaField`).
 - Une panne réseau au démarrage (backend injoignable) était traitée en silence comme une session absente : redirection immédiate vers `/connexion` sans aucun message, l'utilisateur ne pouvant pas distinguer « pas connecté » de « le serveur ne répond pas ». Trouvé en coupant réellement le backend pendant l'audit T-23, corrigé (`RouteProtegee.tsx`, `AuthContext.tsx`).
 
-- `react-router-dom` (moderate, GHSA-wrjc-x8rr-h8h6 / GHSA-337j-9hxr-rhxg) : correctif disponible uniquement en 7.18.4 (changement majeur depuis 6.x) ; `npm audit --audit-level=high` reste à 0 (le seuil du projet), non bloquant, à traiter avec la migration React Router v7 planifiée.
+- `react-router-dom` 6 → 7.18.4 (GHSA-wrjc-x8rr-h8h6 / GHSA-337j-9hxr-rhxg corrigées) : `npm audit` passe à 0 vulnérabilité ; typecheck, lint, build, tests frontend et 7 scénarios E2E inchangés et verts.
 
 Correctifs de l'audit pré-production (2026-09-23) :
 
@@ -75,8 +75,7 @@ Correctifs de l'audit pré-production (2026-09-23) :
 - Test d'intégration du double vote simultané (20 requêtes, un seul vote enregistré).
 - `.env.example` : placeholders restaurés (une modification locale y avait mis des valeurs ressemblant à de vrais secrets ; jamais commitée).
 
-Volontairement laissé de côté : l'énumération de comptes sur `POST /auth/inscription` (409 si l'email existe) est le comportement standard d'une inscription libre — la masquer exigerait un flux de confirmation par email, hors périmètre MVP ; à arbitrer côté produit. La montée `react-router-dom` 6→7 (changement majeur) reste à planifier séparément, aucun vecteur d'exploitation n'ayant été identifié dans le code actuel.
-
+Volontairement laissé de côté : l'énumération de comptes sur `POST /auth/inscription` (409 si l'email existe) est le comportement standard d'une inscription libre — la masquer exigerait un flux de confirmation par email, hors périmètre MVP ; à arbitrer côté produit.
 ### Notes
 
 - `vote-cloture-concurrence.integration.test.ts` : les deux assertions de correction (aucun vote perdu, résultat figé exact) passent sur toutes les itérations, y compris exécutées contre un PostgreSQL dans un conteneur Docker ; seule l'auto-vérification statistique (la fenêtre de 20 ms produit-elle assez de chevauchement réel) devient marginale sous la latence réseau Docker par rapport à un PostgreSQL natif — sensibilité de timing à l'environnement, pas une régression.
