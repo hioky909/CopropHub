@@ -42,6 +42,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 - Modifier et consulter son vote d'AG : `PUT /resolutions/:idResolution/votes` (tant que l'AG est ouverte, même verrou anti-clôture que le vote initial) et `GET /ags/:idAg/mes-votes` (uniquement ses propres votes). Écran : les votes déjà exprimés sont retrouvés après rechargement, bouton « Modifier mon vote », reprise à la première résolution non votée, vote affiché à côté du résultat d'une AG clôturée. Un copropriétaire n'est plus redirigé automatiquement vers une AG qu'il a entièrement votée ; la liste des assemblées (badge « Voté ») permet de la retrouver. Corrige aussi l'avance automatique à la résolution suivante qui se déclenchait même quand le vote avait échoué.
 
+- Écran « Copropriétaires » du syndic (`/coproprietaires`, réservé au rôle syndic) : créer un copropriétaire, créer un lot, rattacher un lot à un copropriétaire (transfert inclus), voir qui possède quels lots. Jusqu'ici ces actions n'existaient que par l'API, si bien qu'un compte neuf ne pouvait ni voter ni déclarer d'incident sur son lot depuis l'interface. Nouvelle lecture `GET /utilisateurs/lots` (syndic) ; parcours E2E complet (création → rattachement → le copropriétaire retrouve son lot).
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

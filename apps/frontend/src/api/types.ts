@@ -55,3 +55,14 @@ export interface Lot {
   numero: string;
   typeLot: string;
 }
+
+export interface Coproprietaire {
+  id: string;
+  nom: string;
+  email: string;
+  estMembreConseilSyndical: boolean;
+}
+
+export interface LotAvecProprietaire extends Lot {
+  proprietaire: { id: string; nom: string } | null;
+}

@@ -8,6 +8,7 @@ import Assemblees from './screens/Assemblees.js'
 import AssembleeDetail from './screens/AssembleeDetail.js'
 import ListeIncidents from './screens/ListeIncidents.js'
 import ListeCharges from './screens/ListeCharges.js'
+import Coproprietaires from './screens/Coproprietaires.js'
 
 function Accueil() {
   const { utilisateur } = useAuth()
@@ -61,6 +62,14 @@ export default function App() {
               element={
                 <RouteProtegee>
                   <ListeCharges />
+                </RouteProtegee>
+              }
+            />
+            <Route
+              path="/coproprietaires"
+              element={
+                <RouteProtegee roles={['SYNDIC']}>
+                  <Coproprietaires />
                 </RouteProtegee>
               }
             />

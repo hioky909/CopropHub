@@ -5,6 +5,7 @@ import type { TypeCompte } from '../api/types.js'
 
 const NAV_ITEMS: { to: string; label: string; roles: TypeCompte[] }[] = [
   { to: '/', label: 'Tableau de bord', roles: ['SYNDIC'] },
+  { to: '/coproprietaires', label: 'Copropriétaires', roles: ['SYNDIC'] },
   { to: '/assemblees', label: 'Assemblées', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
   { to: '/incidents', label: 'Incidents', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
   { to: '/charges', label: 'Charges', roles: ['SYNDIC', 'COPROPRIETAIRE'] },

@@ -21,6 +21,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | POST | `/utilisateurs` | syndic | `{nom, email, motDePasse}` → 201. Crée un compte COPROPRIETAIRE (type jamais accepté du client). |
 | POST | `/utilisateurs/lots` | syndic | `{numero, typeLot}` → 201 `{lot}`. |
 | POST | `/utilisateurs/lots/rattachement` | syndic | `{idLot, idUtilisateur}` → 201. Idempotent ; clôture (pas suppression) l'ancien rattachement sauf s'il a débuté le jour même. |
+| GET | `/utilisateurs/lots` | syndic | 200 `{lots: [{id, numero, typeLot, proprietaire: {id, nom} \| null}]}` — tous les lots avec leur rattachement actif (jamais l'historique). |
 | GET | `/utilisateurs/moi/lots` | authentifié (tout rôle) | 200 `{lots}`. Lots de l'appelant lui-même uniquement (anti-IDOR). |
 
 ## Assemblées générales — `/ags`, `/resolutions`
