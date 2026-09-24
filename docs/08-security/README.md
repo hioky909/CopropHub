@@ -22,7 +22,7 @@ Décision (`ADR-002-authentification`) : cookie de session signé **HttpOnly/Sec
 | Ressource | Syndic | Conseil syndical | Copropriétaire |
 |---|---|---|---|
 | Charges d'un lot | Lecture/écriture, tous les lots | Lecture, tous les lots | Lecture, ses lots uniquement |
-| Incidents | Lecture/écriture (statut), tous | Lecture, tous | Lecture/création, les siens uniquement (visibilité des incidents « partie commune » d'autrui : point resté ouvert, non implémenté — documenté dans Doc 10) |
+| Incidents | Lecture/écriture (statut), tous | Lecture, tous | Lecture/création : les siens et ceux des parties communes (jamais ceux du lot d'un autre, jamais l'identité du déclarant d'autrui — point ouvert tranché) |
 | Résolutions / votes | Création, clôture ; lecture des résultats agrégés | Lecture des résultats agrégés | Vote (le sien uniquement), lecture des résultats agrégés |
 | Copropriétaires / lots | Lecture/écriture, tous | Lecture, tous | Lecture, son propre profil uniquement |
 

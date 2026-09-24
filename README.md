@@ -66,7 +66,7 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | GET | `/utilisateurs/lots` | syndic | Tous les lots avec leur propriétaire actuel (rattachement actif), `null` si aucun. |
 | GET | `/utilisateurs/moi/lots` | authentifié (tout rôle) | Lots rattachés à l'appelant lui-même — jamais ceux d'un autre utilisateur (anti-IDOR) ; nécessaire à l'écran de déclaration d'incident pour proposer les lots réels du copropriétaire |
 | POST | `/incidents` | copropriétaire | Déclarer un incident sur son propre lot ou une partie commune (`idLot` absent), statut « déclaré » (T-12, F-08 partiel, US-03) |
-| GET | `/incidents` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des incidents : tous pour le syndic et le conseil syndical, seulement « les siens » pour un copropriétaire (T-13, RM-12) |
+| GET | `/incidents` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des incidents : tous pour le syndic et le conseil syndical, les siens et ceux des parties communes pour un copropriétaire, sans jamais le déclarant d'autrui (T-13, RM-12) |
 | PATCH | `/incidents/:idIncident/statut` | syndic | Faire progresser le statut d'un incident : déclaré → en cours → résolu uniquement, jamais de saut d'étape ni de retour en arrière (T-13, RM-11, RM-13, US-09) |
 | GET | `/charges` | authentifié (syndic, conseil syndical, copropriétaire) | Liste des charges : toutes pour le syndic et le conseil syndical, seulement celles de ses propres lots pour un copropriétaire (T-14, F-09, US-01, US-05, RM-10) |
 | GET | `/charges/:idCharge` | authentifié (syndic, conseil syndical, copropriétaire) | Une charge : 403 explicite si elle appartient au lot d'un autre copropriétaire (T-14, US-01) |

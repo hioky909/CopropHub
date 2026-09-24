@@ -45,7 +45,7 @@ describe('incidentService.lister (T-13, RM-12)', () => {
     const tous = vi
       .spyOn(incidentRepository, 'listerTous')
       .mockResolvedValue([incident('DECLARE')]);
-    const pourDeclarant = vi.spyOn(incidentRepository, 'listerPourDeclarant');
+    const pourDeclarant = vi.spyOn(incidentRepository, 'listerPourCoproprietaire');
     const resultat = await incidentService.lister(SYNDIC);
     expect(tous).toHaveBeenCalledTimes(1);
     expect(pourDeclarant).not.toHaveBeenCalled();
@@ -61,7 +61,7 @@ describe('incidentService.lister (T-13, RM-12)', () => {
   it('renvoie uniquement les incidents déclarés par un copropriétaire ordinaire (« les siens »)', async () => {
     const tous = vi.spyOn(incidentRepository, 'listerTous');
     const pourDeclarant = vi
-      .spyOn(incidentRepository, 'listerPourDeclarant')
+      .spyOn(incidentRepository, 'listerPourCoproprietaire')
       .mockResolvedValue([incident('DECLARE')]);
     await incidentService.lister(COPRO);
     expect(pourDeclarant).toHaveBeenCalledWith(COPRO.id);

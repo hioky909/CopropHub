@@ -137,3 +137,33 @@ describe('POST /incidents', () => {
     expect(await prisma.incident.count()).toBe(0);
   });
 });
+
+describe('GET /incidents — visibilité d’un copropriétaire', () => {
+  it("voit ses incidents et ceux des parties communes, jamais ceux du lot d'un autre, et jamais le déclarant d'autrui", async () => {
+    const a = await creerUtilisateur({ email: 'a@test.local' });
+    const b = await creerUtilisateur({ email: 'b@test.local' });
+    const lotB = await creerLot(immeuble.id, '2', b.id);
+    await creerLot(immeuble.id, '1', a.id);
+    const cookieA = cookieSession(a.id);
+    const cookieB = cookieSession(b.id);
+    await request(app).post('/incidents').set('Cookie', cookieA).send({ titre: 'Ampoule du hall' });
+    await request(app)
+      .post('/incidents')
+      .set('Cookie', cookieB)
+      .send({ titre: 'Fuite chez B', idLot: lotB.id });
+
+    const vueA = await request(app).get('/incidents').set('Cookie', cookieA);
+    const vueB = await request(app).get('/incidents').set('Cookie', cookieB);
+
+    expect(vueA.body.incidents.map((i: { titre: string }) => i.titre)).toEqual(['Ampoule du hall']);
+    expect(vueA.body.incidents[0].idUtilisateurDeclarant).toBe(a.id);
+    expect(vueB.body.incidents.map((i: { titre: string }) => i.titre).sort()).toEqual([
+      'Ampoule du hall',
+      'Fuite chez B',
+    ]);
+    const duHall = vueB.body.incidents.find((i: { titre: string }) => i.titre === 'Ampoule du hall');
+    expect(duHall.idUtilisateurDeclarant).toBeNull();
+    const fuite = vueB.body.incidents.find((i: { titre: string }) => i.titre === 'Fuite chez B');
+    expect(fuite.idUtilisateurDeclarant).toBe(b.id);
+  });
+});

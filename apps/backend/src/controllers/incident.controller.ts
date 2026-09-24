@@ -81,18 +81,23 @@ incidentRouter.post(
 
 /**
  * RM-12 : syndic et conseil syndical voient tous les incidents ; un
- * copropriétaire ne voit que ceux qu'il a déclarés (cf. `incidentService.lister`).
+ * copropriétaire voit les siens et ceux des parties communes, sans jamais
+ * connaître le déclarant d'un incident d'autrui (cf. `incidentService.lister`).
  */
 incidentRouter.get(
   '/',
   asyncHandler(async (req, res) => {
     // exigerAuthentification garantit req.utilisateur.
-    const incidents = await incidentService.lister(req.utilisateur!);
+    const utilisateur = req.utilisateur!;
+    const voitTout = utilisateur.typeCompte === 'SYNDIC' || utilisateur.estMembreConseilSyndical;
+    const incidents = await incidentService.lister(utilisateur);
     res.status(200).json({
       incidents: incidents.map((i) => ({
         id: i.id,
         idLot: i.idLot,
-        idUtilisateurDeclarant: i.idUtilisateurDeclarant,
+        // Un copropriétaire ne voit jamais qui a déclaré l'incident d'un autre.
+        idUtilisateurDeclarant:
+          voitTout || i.idUtilisateurDeclarant === utilisateur.id ? i.idUtilisateurDeclarant : null,
         titre: i.titre,
         description: i.description,
         statut: i.statut,

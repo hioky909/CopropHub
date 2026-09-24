@@ -33,7 +33,7 @@ export type StatutIncident = 'DECLARE' | 'EN_COURS' | 'RESOLU';
 export interface Incident {
   id: string;
   idLot: string | null;
-  idUtilisateurDeclarant: string;
+  idUtilisateurDeclarant: string | null;
   titre: string;
   description: string | null;
   statut: StatutIncident;

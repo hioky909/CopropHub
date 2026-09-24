@@ -43,7 +43,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | Méthode | Route | Rôle | Description |
 |---|---|---|---|
 | POST | `/incidents` | copropriétaire | `{titre, description?, idLot?}` → 201. `idLot` absent = partie commune ; fourni, doit appartenir à un lot rattaché au déclarant. |
-| GET | `/incidents` | authentifié | 200 `{incidents}`. Tous pour syndic/conseil syndical, « les siens » pour un copropriétaire. |
+| GET | `/incidents` | authentifié | 200 `{incidents}`. Tous pour syndic/conseil syndical ; pour un copropriétaire : les siens et ceux des parties communes (`idLot` nul), avec `idUtilisateurDeclarant` à `null` sur ceux d'autrui. |
 | PATCH | `/incidents/:idIncident/statut` | syndic | `{statut: 'EN_COURS'|'RESOLU'}` → 200. `DECLARE`→`EN_COURS`→`RESOLU` uniquement, jamais de saut ni de retour arrière (422 sinon). |
 
 ## Charges — `/charges`

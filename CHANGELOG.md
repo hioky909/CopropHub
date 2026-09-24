@@ -44,6 +44,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 - Écran « Copropriétaires » du syndic (`/coproprietaires`, réservé au rôle syndic) : créer un copropriétaire, créer un lot, rattacher un lot à un copropriétaire (transfert inclus), voir qui possède quels lots. Jusqu'ici ces actions n'existaient que par l'API, si bien qu'un compte neuf ne pouvait ni voter ni déclarer d'incident sur son lot depuis l'interface. Nouvelle lecture `GET /utilisateurs/lots` (syndic) ; parcours E2E complet (création → rattachement → le copropriétaire retrouve son lot).
 
+- Visibilité des incidents de partie commune (point ouvert du Doc 5, tranché) : un copropriétaire voit désormais ses incidents ET ceux des parties communes (`id_lot` nul), qui concernent tout l'immeuble ; il ne voit jamais un incident portant sur le lot d'un autre, ni l'identité du déclarant d'un incident d'autrui (`idUtilisateurDeclarant` masqué). Test d'intégration dédié.
+
 ### Changed
 
 - Node.js ≥ 22.12 (Node 20 est en fin de vie ; requis par Vitest 5). Montée de `bcrypt` (6), `vitest` (5), `vite` (8) : `npm audit --audit-level=high` passe de 5 vulnérabilités élevées ou critiques à 0.

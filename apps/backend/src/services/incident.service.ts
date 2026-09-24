@@ -54,15 +54,17 @@ export const incidentService = {
    * RM-12 : le syndic et le conseil syndical consultent tous les incidents
    * (droit de regard étendu, sans condition d'appartenance) ; un
    * copropriétaire ne consulte que ceux qu'il a lui-même déclarés. La
-   * visibilité des incidents « partie commune » déclarés par un AUTRE
-   * copropriétaire reste un point ouvert non tranché (Doc 5 le marque
-   * explicitement « à trancher en conception détaillée ») : non implémentée.
+   * visibilité : un copropriétaire consulte aussi les incidents des parties
+   * communes (`id_lot` nul), qui concernent tout l'immeuble — décision prise
+   * pour lever le point ouvert du Doc 5. L'identité du déclarant d'un
+   * incident d'autrui n'est jamais exposée (cf. le contrôleur). Un incident
+   * sur le lot d'un AUTRE copropriétaire reste invisible.
    */
   async lister(utilisateur: UtilisateurAuthentifie) {
     if (utilisateur.typeCompte === 'SYNDIC' || utilisateur.estMembreConseilSyndical) {
       return incidentRepository.listerTous();
     }
-    return incidentRepository.listerPourDeclarant(utilisateur.id);
+    return incidentRepository.listerPourCoproprietaire(utilisateur.id);
   },
 
   /**

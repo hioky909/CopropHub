@@ -71,7 +71,7 @@ describe('GET /incidents (T-13, RM-12)', () => {
 
   it('200 pour un copropriétaire : uniquement « les siens »', async () => {
     const pourDeclarant = vi
-      .spyOn(incidentRepository, 'listerPourDeclarant')
+      .spyOn(incidentRepository, 'listerPourCoproprietaire')
       .mockResolvedValue([incident('DECLARE')]);
     const reponse = await request(createApp()).get('/incidents').set('Cookie', cookieDe(COPRO));
     expect(reponse.status).toBe(200);

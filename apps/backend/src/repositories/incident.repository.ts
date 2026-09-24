@@ -25,10 +25,10 @@ export const incidentRepository = {
     return prisma.incident.findMany({ orderBy: { dateCreation: 'desc' } });
   },
 
-  /** Les incidents déclarés par cet utilisateur (copropriétaire consultant « les siens », RM-12). */
-  listerPourDeclarant(idUtilisateurDeclarant: string) {
+  /** Les incidents visibles d'un copropriétaire : les siens et ceux des parties communes (`id_lot` nul), qui concernent tout l'immeuble. */
+  listerPourCoproprietaire(idUtilisateur: string) {
     return prisma.incident.findMany({
-      where: { idUtilisateurDeclarant },
+      where: { OR: [{ idUtilisateurDeclarant: idUtilisateur }, { idLot: null }] },
       orderBy: { dateCreation: 'desc' },
     });
   },

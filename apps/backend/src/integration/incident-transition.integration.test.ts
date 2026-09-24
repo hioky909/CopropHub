@@ -30,7 +30,8 @@ describe('parcours complet : déclaration → en cours → résolu', () => {
     const autreCopro = await creerUtilisateur({ email: 'autre@test.local' });
     const idIncident = await declarer(declarant.id);
 
-    // RM-12 : le déclarant voit son incident, un autre copropriétaire ne le voit pas.
+    // RM-12 : le déclarant voit son incident ; il porte sur une partie commune, donc un autre
+    // copropriétaire le voit aussi, mais sans jamais savoir qui l'a déclaré.
     const listeDeclarant = await request(app)
       .get('/incidents')
       .set('Cookie', cookieSession(declarant.id));
@@ -39,7 +40,9 @@ describe('parcours complet : déclaration → en cours → résolu', () => {
     const listeAutre = await request(app)
       .get('/incidents')
       .set('Cookie', cookieSession(autreCopro.id));
-    expect(listeAutre.body.incidents.map((i: { id: string }) => i.id)).not.toContain(idIncident);
+    const vuParAutre = listeAutre.body.incidents.find((i: { id: string }) => i.id === idIncident);
+    expect(vuParAutre).toBeDefined();
+    expect(vuParAutre.idUtilisateurDeclarant).toBeNull();
 
     // RM-12 : le syndic voit tous les incidents.
     const listeSyndic = await request(app)
