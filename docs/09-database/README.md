@@ -16,6 +16,7 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 | `resolution` | Résolutions d'une AG, type de majorité (`SIMPLE`/`ABSOLUE`/`DOUBLE_MAJORITE`/`UNANIMITE`), résultat figé à la clôture |
 | `vote` | Un vote par `(id_resolution, id_utilisateur)` — clé primaire composite, une seule voix par résolution |
 | `incident` | Déclaré par un copropriétaire, `id_lot` nul = partie commune, machine à états `DECLARE`→`EN_COURS`→`RESOLU` |
+| `reinitialisation_mot_de_passe` | Demandes de « mot de passe oublié » (migration `0004`) : **empreinte SHA-256** du jeton uniquement (jamais le jeton), expiration, date d'utilisation (usage unique) |
 | `charge` | Charges par lot et période ; `date_echeance` optionnelle (RM-09, migration `0003`) dont dépend le statut « en retard », calculé à la lecture |
 
 ## Points d'attention réels (trouvés en implémentant, pas en concevant)

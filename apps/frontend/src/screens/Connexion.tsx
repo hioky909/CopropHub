@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { Link, Navigate, useLocation } from 'react-router-dom'
 import Button from '../components/Button.js'
 import { TextField } from '../components/FormField.js'
 import Notification from '../components/Notification.js'
@@ -138,6 +138,13 @@ export default function Connexion() {
               {envoi ? 'Veuillez patienter…' : mode === 'connexion' ? 'Se connecter' : 'Créer mon compte'}
             </Button>
           </form>
+          {mode === 'connexion' && (
+            <p style={{ margin: '16px 0 0', fontSize: 13, textAlign: 'center' }}>
+              <Link to="/mot-de-passe-oublie" style={{ color: '#1E4B8F' }}>
+                Mot de passe oublié ?
+              </Link>
+            </p>
+          )}
         </div>
 
         {mode === 'inscription' && (

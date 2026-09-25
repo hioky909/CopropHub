@@ -11,7 +11,7 @@ Kanban simple : `BACKLOG → EN COURS → REVUE → TERMINÉ`, une tâche à la 
 ## Jalons
 
 - **MVP** : F-01 à F-10, NF-01 à NF-06/NF-11/NF-12 — 27 tâches (T-01 à T-26, plus T-38 ajoutée en cours de route), **toutes terminées**.
-- **V1** : notifications email (F-12), export PDF (F-13), réinitialisation de mot de passe (F-14), déploiement cloud (F-15) — non commencé.
+- **V1** : notifications email (F-12), export PDF (F-13), déploiement cloud (F-15) — non commencé. La réinitialisation de mot de passe (F-14) a été livrée après le MVP.
 - **V1.1** : améliorations diverses (pondération des votes par tantièmes, multi-immeubles…) — non commencé.
 
 ## Backlog MVP — état réel final

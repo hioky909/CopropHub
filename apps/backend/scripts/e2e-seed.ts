@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { prisma } from '../src/repositories/prisma-client.js';
 import { motDePasseService } from '../src/services/mot-de-passe.service.js';
 
@@ -28,6 +29,12 @@ export const E2E_COPRO = {
   email: 'e2e-copro@coprophub.local',
   motDePasse: 'un-mot-de-passe-e2e-copro-1',
 };
+export const E2E_RESET = {
+  email: 'e2e-reset@coprophub.local',
+  motDePasse: 'un-mot-de-passe-e2e-reset-1',
+  // Jeton en clair d'un lien de réinitialisation valide (seule son empreinte est stockée, comme en production).
+  jeton: 'e2e-jeton-de-reinitialisation-0123456789abcdef',
+};
 export const E2E_LOT_NUMERO = 'E2E-1';
 export const E2E_CHARGE_PERIODE = '2026-E2E';
 
@@ -55,6 +62,22 @@ async function main() {
       email: E2E_COPRO.email,
       motDePasseHash: await motDePasseService.hacher(E2E_COPRO.motDePasse),
       typeCompte: 'COPROPRIETAIRE',
+    },
+  });
+
+  const utilisateurReset = await prisma.utilisateur.create({
+    data: {
+      nom: 'Copropriétaire Reset E2E',
+      email: E2E_RESET.email,
+      motDePasseHash: await motDePasseService.hacher(E2E_RESET.motDePasse),
+      typeCompte: 'COPROPRIETAIRE',
+    },
+  });
+  await prisma.reinitialisationMotDePasse.create({
+    data: {
+      idUtilisateur: utilisateurReset.id,
+      jetonHash: createHash('sha256').update(E2E_RESET.jeton).digest('hex'),
+      dateExpiration: new Date(Date.now() + 24 * 60 * 60 * 1000),
     },
   });
 

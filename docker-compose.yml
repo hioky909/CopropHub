@@ -31,6 +31,13 @@ services:
         condition: service_healthy
     restart: "no"
 
+  # Boîte mail de développement : capture tous les emails envoyés par le backend
+  # (mot de passe oublié) sans rien expédier réellement. Interface : http://localhost:8025
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "8025:8025"
+
   backend:
     build:
       context: .
@@ -41,9 +48,15 @@ services:
       SESSION_SECRET: ${SESSION_SECRET:-change-me-to-a-long-random-string}
       PORT: 3000
       NODE_ENV: production
+      SMTP_HOST: mailpit
+      SMTP_PORT: 1025
+      MAIL_FROM: "CopropHub <no-reply@coprophub.local>"
+      APP_URL: http://localhost:5173
     depends_on:
       db:
         condition: service_healthy
+      mailpit:
+        condition: service_started
       migrate:
         condition: service_completed_successfully
     ports:

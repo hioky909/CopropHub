@@ -39,8 +39,15 @@ npm run demo:seed --workspace=apps/backend
 | `FRONTEND_ORIGIN` | Origine autorisée par CORS côté backend |
 | `VITE_API_URL` | Origine de l'API consommée par le frontend (optionnelle, défaut `http://localhost:3000`) |
 | `RATE_LIMIT_MAX` | Plafond global de requêtes par fenêtre de 15 min (défaut 1000 ; par utilisateur connecté, par IP pour un visiteur anonyme) |
+| `SMTP_HOST` / `SMTP_PORT` / `SMTP_SECURE` / `SMTP_USER` / `SMTP_PASS` | Serveur SMTP utilisé pour les emails de réinitialisation de mot de passe (aucun service tiers imposé). Sans `SMTP_HOST`, la demande est traitée mais aucun email ne part (erreur journalisée sans donnée personnelle) |
+| `MAIL_FROM` | Expéditeur des emails (défaut `CopropHub <no-reply@coprophub.local>`) |
+| `APP_URL` | Origine publique utilisée dans les liens des emails (défaut : `FRONTEND_ORIGIN`, puis `http://localhost:5173`) |
 | `AUTH_RATE_LIMIT_MAX` | Seuil du rate limiter de connexion (défaut 5, relevé uniquement pour le backend E2E) |
+
+## Emails (mot de passe oublié)
+
+Le backend envoie ses emails par **SMTP** (bibliothèque `nodemailer`), vers le serveur de votre choix : aucun service tiers n'est imposé. Le Docker Compose local démarre **Mailpit** (`http://localhost:8025`), une boîte de réception de développement qui capture tout sans rien expédier : c'est là qu'on lit le lien de réinitialisation. En production, renseigner `SMTP_HOST` (et `SMTP_PORT`, `SMTP_SECURE`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM`, `APP_URL`).
 
 ## Secrets
 
-Aucun secret n'est committé (`.env` dans `.gitignore`, `.env.example` documente les clés sans valeurs réelles). Le compte syndic créé par le seed a un mot de passe par défaut, **modifiable depuis « Mon compte » (la réinitialisation en cas d'oubli reste prévue en V1)** — à ne pas utiliser tel quel hors développement.
+Aucun secret n'est committé (`.env` dans `.gitignore`, `.env.example` documente les clés sans valeurs réelles). Le compte syndic créé par le seed a un mot de passe par défaut, **modifiable depuis « Mon compte » (en cas d'oubli, lien de réinitialisation par email)** — à ne pas utiliser tel quel hors développement.

@@ -10,6 +10,8 @@ import ListeIncidents from './screens/ListeIncidents.js'
 import ListeCharges from './screens/ListeCharges.js'
 import Coproprietaires from './screens/Coproprietaires.js'
 import Compte from './screens/Compte.js'
+import MotDePasseOublie from './screens/MotDePasseOublie.js'
+import Reinitialisation from './screens/Reinitialisation.js'
 
 function Accueil() {
   const { utilisateur } = useAuth()
@@ -26,6 +28,8 @@ export default function App() {
         <Shell>
           <Routes>
             <Route path="/connexion" element={<Connexion />} />
+            <Route path="/mot-de-passe-oublie" element={<MotDePasseOublie />} />
+            <Route path="/reinitialisation" element={<Reinitialisation />} />
             <Route
               path="/"
               element={

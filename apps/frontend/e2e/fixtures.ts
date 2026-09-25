@@ -7,6 +7,11 @@ import type { Page } from '@playwright/test'
  */
 export const SYNDIC = { email: 'e2e-syndic@coprophub.local', motDePasse: 'un-mot-de-passe-e2e-syndic-1' }
 export const COPRO = { email: 'e2e-copro@coprophub.local', motDePasse: 'un-mot-de-passe-e2e-copro-1' }
+export const RESET = {
+  email: 'e2e-reset@coprophub.local',
+  motDePasse: 'un-mot-de-passe-e2e-reset-1',
+  jeton: 'e2e-jeton-de-reinitialisation-0123456789abcdef',
+}
 export const LOT_NUMERO = 'E2E-1'
 export const CHARGE_PERIODE = '2026-E2E'
 
