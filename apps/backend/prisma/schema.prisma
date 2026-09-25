@@ -87,6 +87,7 @@ model Utilisateur {
   rattachements     Rattachement[]
   votes             Vote[]
   incidentsDeclares Incident[]
+  reinitialisations ReinitialisationMotDePasse[]
 
   @@map("utilisateur")
 }
@@ -209,4 +210,20 @@ model Incident {
 
   @@index([idImmeuble, statut], map: "idx_incident_immeuble_statut")
   @@map("incident")
+}
+
+/// Réinitialisation du mot de passe par email : seule l'empreinte SHA-256 du
+/// jeton est stockée (jamais le jeton lui-même), à usage unique et expirante.
+model ReinitialisationMotDePasse {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @map("id_reinitialisation") @db.Uuid
+  idUtilisateur   String    @map("id_utilisateur") @db.Uuid
+  jetonHash       String    @unique @map("jeton_hash") @db.VarChar(64)
+  dateCreation    DateTime  @default(now()) @map("date_creation") @db.Timestamptz
+  dateExpiration  DateTime  @map("date_expiration") @db.Timestamptz
+  dateUtilisation DateTime? @map("date_utilisation") @db.Timestamptz
+
+  utilisateur Utilisateur @relation(fields: [idUtilisateur], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([idUtilisateur], map: "idx_reinitialisation_utilisateur")
+  @@map("reinitialisation_mot_de_passe")
 }

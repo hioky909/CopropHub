@@ -7,6 +7,7 @@ import {
   IdentifiantsInvalidesError,
   MotDePasseActuelIncorrectError,
   NouveauMotDePasseIdentiqueError,
+  LienReinitialisationInvalideError,
 } from '../services/auth.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { sessionService } from '../services/session.service.js';
@@ -177,6 +178,83 @@ authRouter.post(
         erreur instanceof NouveauMotDePasseIdentiqueError ||
         erreur instanceof MotDePasseInvalideError
       ) {
+        res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+// Mot de passe oublié : limité par IP ET par adresse visée (3 demandes / 15 min),
+// pour qu'on ne puisse pas utiliser cette route pour inonder la boîte d'un tiers.
+const limiteurOubliIp = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+});
+const limiteurOubliAdresse = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: Math.max(3, Math.floor(Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5) / 2)),
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  skip: (req) => typeof req.body?.email !== 'string',
+  keyGenerator: (req) => `oubli:${String(req.body.email).trim().toLowerCase()}`,
+});
+
+const motDePasseOublieSchema = z.object({ email: z.string().trim().toLowerCase().email().max(255) });
+
+authRouter.post(
+  '/mot-de-passe-oublie',
+  limiteurOubliIp,
+  limiteurOubliAdresse,
+  asyncHandler(async (req, res) => {
+    const analyse = motDePasseOublieSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+    const idUtilisateur = await authService.demanderReinitialisation(analyse.data.email);
+    if (idUtilisateur) {
+      journalService.journaliser('REINITIALISATION_DEMANDEE', idUtilisateur);
+    }
+    // Réponse identique que le compte existe ou non (aucune énumération).
+    res.status(202).json({
+      message: 'Si un compte existe pour cette adresse, un email de réinitialisation vient d’être envoyé.',
+    });
+  }),
+);
+
+const reinitialiserSchema = z.object({
+  jeton: z.string().min(20).max(200),
+  nouveauMotDePasse: z.string().max(128),
+});
+
+authRouter.post(
+  '/reinitialiser-mot-de-passe',
+  limiteurOubliIp,
+  asyncHandler(async (req, res) => {
+    const analyse = reinitialiserSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+    try {
+      const idUtilisateur = await authService.reinitialiserMotDePasse(
+        analyse.data.jeton,
+        analyse.data.nouveauMotDePasse,
+      );
+      journalService.journaliser('MOT_DE_PASSE_REINITIALISE', idUtilisateur);
+      res.status(204).send();
+    } catch (erreur) {
+      if (erreur instanceof LienReinitialisationInvalideError) {
+        res.status(400).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof MotDePasseInvalideError) {
         res.status(422).json({ erreur: erreur.message });
         return;
       }

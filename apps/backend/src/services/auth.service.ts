@@ -1,4 +1,7 @@
+import { createHash, randomBytes } from 'node:crypto';
 import { utilisateurRepository } from '../repositories/utilisateur.repository.js';
+import { reinitialisationRepository } from '../repositories/reinitialisation.repository.js';
+import { mailService } from './mail.service.js';
 import { motDePasseService } from './mot-de-passe.service.js';
 import { sessionService } from './session.service.js';
 import type { TypeCompte, UtilisateurAuthentifie } from '../types/auth.js';
@@ -37,6 +40,21 @@ export class NouveauMotDePasseIdentiqueError extends Error {
     super('Le nouveau mot de passe doit être différent de l’actuel.');
     this.name = 'NouveauMotDePasseIdentiqueError';
   }
+}
+
+export class LienReinitialisationInvalideError extends Error {
+  constructor() {
+    // Même message pour un lien inconnu, déjà utilisé ou expiré : n'aide pas à deviner.
+    super('Ce lien de réinitialisation est invalide ou a expiré.');
+    this.name = 'LienReinitialisationInvalideError';
+  }
+}
+
+const DUREE_LIEN_MS = 60 * 60 * 1000; // 1 heure
+
+/** Empreinte SHA-256 du jeton : seule elle est stockée en base. */
+function empreinte(jeton: string): string {
+  return createHash('sha256').update(jeton).digest('hex');
 }
 
 function versUtilisateurAuthentifie(utilisateur: {
@@ -128,6 +146,61 @@ export const authService = {
     }
     const nouveauHash = await motDePasseService.hacher(nouveau); // applique la politique
     await utilisateurRepository.mettreAJourMotDePasse(utilisateurId, nouveauHash);
+  },
+
+  /**
+   * Mot de passe oublié. Retourne l'identifiant de l'utilisateur si un email a
+   * été émis, sinon `null` — l'appelant répond pourtant IDENTIQUEMENT dans les
+   * deux cas (aucune énumération de comptes). Un échec d'envoi SMTP est
+   * journalisé sans donnée personnelle mais n'est jamais renvoyé au client,
+   * pour la même raison.
+   */
+  async demanderReinitialisation(email: string): Promise<string | null> {
+    const utilisateur = await utilisateurRepository.parEmail(email);
+    if (!utilisateur) {
+      return null;
+    }
+
+    const jeton = randomBytes(32).toString('base64url');
+    await reinitialisationRepository.creer(
+      utilisateur.id,
+      empreinte(jeton),
+      new Date(Date.now() + DUREE_LIEN_MS),
+    );
+
+    const base = process.env.APP_URL ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
+    try {
+      await mailService.envoyer({
+        a: utilisateur.email,
+        sujet: 'CopropHub — réinitialisation de votre mot de passe',
+        texte: [
+          `Bonjour ${utilisateur.nom},`,
+          '',
+          'Vous avez demandé à réinitialiser votre mot de passe CopropHub.',
+          `Cliquez sur ce lien (valable 1 heure, à usage unique) : ${base}/reinitialisation?jeton=${jeton}`,
+          '',
+          "Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe reste inchangé.",
+        ].join('\n'),
+      });
+    } catch (erreur) {
+      process.stderr.write(
+        `${JSON.stringify({ type: 'erreur', evenement: 'reinitialisation-email-echec', cause: erreur instanceof Error ? erreur.name : 'inconnue' })}\n`,
+      );
+    }
+    return utilisateur.id;
+  },
+
+  /** Applique un nouveau mot de passe grâce au jeton reçu par email (politique de mot de passe appliquée AVANT de consommer le jeton). */
+  async reinitialiserMotDePasse(jeton: string, nouveauMotDePasse: string): Promise<string> {
+    const nouveauHash = await motDePasseService.hacher(nouveauMotDePasse);
+    const idUtilisateur = await reinitialisationRepository.consommerEtChangerMotDePasse(
+      empreinte(jeton),
+      nouveauHash,
+    );
+    if (!idUtilisateur) {
+      throw new LienReinitialisationInvalideError();
+    }
+    return idUtilisateur;
   },
 
   async utilisateurCourant(utilisateurId: string): Promise<UtilisateurAuthentifie | null> {
