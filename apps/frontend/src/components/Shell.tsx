@@ -95,7 +95,6 @@ export default function Shell({ children }: { children: ReactNode }) {
               </div>
               <NavLink to="/compte" className="bouton-entete" aria-label="Mon compte" title="Mon compte">
                 <Icone nom="compte" />
-                <span className="libelle-bouton">Mon compte</span>
               </NavLink>
               <button
                 type="button"
@@ -107,7 +106,6 @@ export default function Shell({ children }: { children: ReactNode }) {
                 }}
               >
                 <Icone nom="deconnexion" />
-                <span className="libelle-bouton">Déconnexion</span>
               </button>
             </div>
           </div>

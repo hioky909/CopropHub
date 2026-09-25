@@ -104,3 +104,30 @@ test('le favicon est le logo (icône d’application) et il est bien servi', asy
   expect(svg.match(/<circle/g)).toHaveLength(7) // le hub : centre + 6 points
   expect(svg).toContain('#1E4B8F') // bleu d'origine : un favicon ne peut pas suivre le thème
 })
+
+for (const largeur of [1280, 1920]) {
+  test(`à ${largeur} px, le compte et la déconnexion restent sur la même ligne que la navigation, à droite, en icônes`, async ({ page }) => {
+    await page.setViewportSize({ width: largeur, height: 900 })
+    await login(page, COPRO.email, COPRO.motDePasse)
+    await page.goto('/charges')
+    const entete = page.getByRole('banner')
+    const lien = (await entete.getByRole('navigation').getByRole('link', { name: 'Charges' }).boundingBox())!
+    const compte = entete.getByRole('link', { name: 'Mon compte' })
+    const deconnexion = entete.getByRole('button', { name: 'Déconnexion' })
+    const boiteCompte = (await compte.boundingBox())!
+    const boiteDeconnexion = (await deconnexion.boundingBox())!
+
+    // Même ligne : les centres verticaux sont alignés et l'en-tête reste bas.
+    expect(Math.abs(boiteCompte.y + boiteCompte.height / 2 - (lien.y + lien.height / 2))).toBeLessThan(6)
+    expect((await entete.boundingBox())!.height).toBeLessThan(80)
+    // À droite de la navigation, et la déconnexion en dernier.
+    expect(boiteCompte.x).toBeGreaterThan(lien.x + lien.width)
+    expect(boiteDeconnexion.x).toBeGreaterThan(boiteCompte.x)
+    // Icônes seules : pas de texte visible dans les boutons (le nom accessible reste).
+    await expect(compte).toHaveText('')
+    await expect(deconnexion).toHaveText('')
+    await expect(compte).toHaveAttribute('title', 'Mon compte')
+    await expect(deconnexion).toHaveAttribute('title', 'Déconnexion')
+    expect(boiteCompte.width).toBeLessThanOrEqual(40)
+  })
+}

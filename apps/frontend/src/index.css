@@ -92,7 +92,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  flex-wrap: wrap;
+  flex-wrap: nowrap; /* une seule ligne sur ordinateur : navigation à gauche, compte à droite */
   gap: 8px;
   min-height: 60px;
   padding: 6px 0;
@@ -164,6 +164,10 @@ body {
   min-width: 0;
 }
 .identite-email {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 13px;
   font-weight: 500;
   color: var(--color-neutral-900);
@@ -176,9 +180,11 @@ body {
 .bouton-entete {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 36px; /* icône seule : le nom est dans l'infobulle et l'étiquette accessible */
   height: 36px;
-  padding: 0 12px;
+  padding: 0;
   border-radius: 8px;
   border: 1px solid var(--color-neutral-200);
   background-color: var(--color-surface);
@@ -306,18 +312,8 @@ main:focus {
   align-items: end;
 }
 
-/* En-tête : le texte des boutons puis l'identité s'effacent quand la place manque ; sous 1000 px,
-   logo et compte sont sur la 1re ligne et la navigation défile sur la 2e. */
-@media (max-width: 1399px) {
-  .libelle-bouton {
-    display: none;
-  }
-  .bouton-entete {
-    width: 36px;
-    padding: 0;
-    justify-content: center;
-  }
-}
+/* En-tête : l'identité (email, rôle) s'efface quand la place manque ; sous 1000 px, logo et compte
+   sont sur la 1re ligne et la navigation défile sur la 2e. */
 @media (max-width: 1099px) {
   .identite-texte {
     display: none;
@@ -326,6 +322,9 @@ main:focus {
 @media (max-width: 999px) {
   .entete-contenu {
     padding: 0 16px;
+  }
+  .entete-rangee {
+    flex-wrap: wrap;
   }
   .entete-gauche {
     display: contents;
