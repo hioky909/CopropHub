@@ -41,8 +41,9 @@ function signer(donnees: string): string {
 const jetonsRevoques = new Map<string, number>();
 
 export const sessionService = {
-  emettreJeton(utilisateurId: string): string {
-    const payload: SessionPayload = { utilisateurId, emisLe: Date.now() };
+  /** `emisLe` n'est fourni que pour émettre un jeton juste après une invalidation de sessions (cf. `changerMotDePasse`). */
+  emettreJeton(utilisateurId: string, emisLe: number = Date.now()): string {
+    const payload: SessionPayload = { utilisateurId, emisLe };
     const corps = Buffer.from(JSON.stringify(payload)).toString('base64url');
     const signature = signer(corps);
     return `${corps}.${signature}`;

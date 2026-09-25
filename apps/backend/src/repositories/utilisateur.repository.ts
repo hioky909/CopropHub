@@ -35,8 +35,14 @@ export const utilisateurRepository = {
     await prisma.utilisateur.update({ where: { id }, data: { themeTeinte: null, themeIntensite: null } });
   },
 
-  async mettreAJourMotDePasse(id: string, motDePasseHash: string): Promise<void> {
-    await prisma.utilisateur.update({ where: { id }, data: { motDePasseHash } });
+  /**
+   * Change le mot de passe ET invalide toutes les sessions déjà ouvertes (jetons émis avant maintenant).
+   * Retourne l'instant d'invalidation, pour émettre un nouveau jeton à la session qui vient d'agir.
+   */
+  async mettreAJourMotDePasse(id: string, motDePasseHash: string): Promise<number> {
+    const depuis = new Date();
+    await prisma.utilisateur.update({ where: { id }, data: { motDePasseHash, sessionsValidesDepuis: depuis } });
+    return depuis.getTime();
   },
 
   /**

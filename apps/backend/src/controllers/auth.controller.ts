@@ -162,11 +162,13 @@ authRouter.post(
     }
 
     try {
-      await authService.changerMotDePasse(
+      // Les autres sessions sont fermées ; celle-ci reçoit un nouveau cookie et reste connectée.
+      const jeton = await authService.changerMotDePasse(
         req.utilisateur!.id,
         analyse.data.motDePasseActuel,
         analyse.data.nouveauMotDePasse,
       );
+      poserCookieSession(res, jeton);
       journalService.journaliser('MOT_DE_PASSE_MODIFIE', req.utilisateur!.id);
       res.status(204).send();
     } catch (erreur) {

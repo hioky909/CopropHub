@@ -14,7 +14,7 @@ export async function sessionMiddleware(req: Request, _res: Response, next: Next
   const jeton = req.cookies?.[NOM_COOKIE] as string | undefined;
   const payload = sessionService.verifierJeton(jeton);
   if (payload) {
-    const utilisateur = await authService.utilisateurCourant(payload.utilisateurId);
+    const utilisateur = await authService.utilisateurCourant(payload.utilisateurId, payload.emisLe);
     if (utilisateur) {
       req.utilisateur = utilisateur;
     }

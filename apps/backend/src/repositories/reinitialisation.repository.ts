@@ -32,7 +32,8 @@ export const reinitialisationRepository = {
       const demande = await tx.reinitialisationMotDePasse.findUniqueOrThrow({ where: { jetonHash } });
       await tx.utilisateur.update({
         where: { id: demande.idUtilisateur },
-        data: { motDePasseHash: nouveauMotDePasseHash },
+        // Une réinitialisation ferme aussi toutes les sessions ouvertes (mot de passe possiblement compromis).
+        data: { motDePasseHash: nouveauMotDePasseHash, sessionsValidesDepuis: new Date() },
       });
       return demande.idUtilisateur;
     });

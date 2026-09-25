@@ -9,7 +9,7 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 | Table | Rôle |
 |---|---|
 | `immeuble` | Immeuble unique du MVP (Doc 2 § Périmètre : mono-immeuble) |
-| `utilisateur` | Comptes (syndic, copropriétaire), `est_membre_conseil_syndical` optionnel sur un compte copropriétaire. `theme_teinte` (0–359) et `theme_intensite` (0–100), migration `0005` : thème de couleur personnalisé, **deux entiers, jamais une couleur ni du CSS** ; nuls ensemble = thème CopropHub d'origine (contraintes CHECK de bornes et « les deux ou aucun ») |
+| `utilisateur` | Comptes (syndic, copropriétaire), `est_membre_conseil_syndical` optionnel sur un compte copropriétaire. `theme_teinte` (0–359) et `theme_intensite` (0–100), migration `0005` : thème de couleur personnalisé, **deux entiers, jamais une couleur ni du CSS** ; nuls ensemble = thème CopropHub d'origine (contraintes CHECK de bornes et « les deux ou aucun »). `sessions_valides_depuis` (migration `0006`) : les jetons de session émis avant cet instant sont refusés (changement ou réinitialisation du mot de passe) |
 | `lot` | Lots de l'immeuble, unique par `(id_immeuble, numero)` |
 | `rattachement` | Historique des rattachements copropriétaire ↔ lot ; un seul rattachement actif (`date_fin IS NULL`) par lot, garanti par un index unique partiel |
 | `ag` | Assemblées générales, statut `PLANIFIEE` → `OUVERTE` → `CLOTUREE`. `nombre_inscrits_geles` (migration `0002`) : nombre de copropriétaires inscrits figé à l'ouverture du vote, réutilisé tel quel à la clôture pour les majorités (RM-03) |

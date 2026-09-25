@@ -139,7 +139,11 @@ export const authService = {
    * applique la même politique que l'inscription. Les autres jetons déjà
    * émis restent valides jusqu'à leur expiration (sessions sans état).
    */
-  async changerMotDePasse(utilisateurId: string, actuel: string, nouveau: string): Promise<void> {
+  /**
+   * Change le mot de passe. Toutes les sessions ouvertes sont invalidées ; retourne un nouveau jeton
+   * pour la session qui vient d'agir, qui reste ainsi connectée.
+   */
+  async changerMotDePasse(utilisateurId: string, actuel: string, nouveau: string): Promise<string> {
     const utilisateur = await utilisateurRepository.parId(utilisateurId);
     if (!utilisateur) {
       throw new MotDePasseActuelIncorrectError();
@@ -151,7 +155,8 @@ export const authService = {
       throw new NouveauMotDePasseIdentiqueError();
     }
     const nouveauHash = await motDePasseService.hacher(nouveau); // applique la politique
-    await utilisateurRepository.mettreAJourMotDePasse(utilisateurId, nouveauHash);
+    const depuis = await utilisateurRepository.mettreAJourMotDePasse(utilisateurId, nouveauHash);
+    return sessionService.emettreJeton(utilisateurId, depuis + 1);
   },
 
   /**
@@ -209,8 +214,16 @@ export const authService = {
     return idUtilisateur;
   },
 
-  async utilisateurCourant(utilisateurId: string): Promise<UtilisateurAuthentifie | null> {
+  /**
+   * `emisLe` : instant d'émission du jeton de session. Un jeton émis avant (ou à l'instant de) la
+   * dernière invalidation de sessions du compte est refusé : `null`, comme un compte inconnu.
+   */
+  async utilisateurCourant(utilisateurId: string, emisLe?: number): Promise<UtilisateurAuthentifie | null> {
     const utilisateur = await utilisateurRepository.parId(utilisateurId);
-    return utilisateur ? versUtilisateurAuthentifie(utilisateur) : null;
+    if (!utilisateur) return null;
+    if (emisLe !== undefined && utilisateur.sessionsValidesDepuis && emisLe <= utilisateur.sessionsValidesDepuis.getTime()) {
+      return null;
+    }
+    return versUtilisateurAuthentifie(utilisateur);
   },
 };
