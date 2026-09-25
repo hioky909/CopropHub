@@ -13,6 +13,7 @@ import { ImmeubleNonInitialiseError } from '../services/lot.service.js';
 import { voteService, VoteInterditError } from '../services/vote.service.js';
 import { journalService } from '../services/journal.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { secondVoteArt251Possible } from '../services/resultat-calculateur.js';
 
 /**
  * Controller — T-08 (F-04, US-07), T-38, T-09/T-10 (routes AG), T-11 (F-07).
@@ -221,6 +222,12 @@ agRouter.get(
           typeMajorite: r.typeMajorite,
           statutResultat: r.statutResultat,
           decomptes: r.decomptes,
+          secondVoteArt251Possible: secondVoteArt251Possible(
+            r.typeMajorite,
+            r.statutResultat,
+            r.decomptes,
+            ag.nombreInscritsGeles,
+          ),
         })),
       });
     } catch (erreur) {

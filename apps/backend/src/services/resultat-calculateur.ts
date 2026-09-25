@@ -53,3 +53,24 @@ export function calculerResultat(
 
   return adoptee ? 'ADOPTEE' : 'REJETEE';
 }
+
+/**
+ * Art. 25-1 de la loi du 10 juillet 1965 : une résolution de l'art. 25 qui échoue mais recueille
+ * au moins le tiers des voix de tous les copropriétaires peut faire l'objet, dans la même
+ * assemblée, d'un second vote immédiat à la majorité simple (art. 24).
+ *
+ * Volontairement un simple indicateur : la clôture reste définitive (RM-04) et le second vote se
+ * tient sous forme d'une nouvelle résolution de majorité simple — l'application ne rouvre jamais
+ * une AG. Une voix par copropriétaire (RM-02), donc le « tiers des voix » est un tiers des inscrits.
+ */
+export function secondVoteArt251Possible(
+  type: TypeMajorite,
+  statut: StatutResolution | null,
+  comptes: ComptesVotes,
+  nombreInscrits: number | null,
+): boolean {
+  if (type !== 'ABSOLUE' || statut !== 'REJETEE' || nombreInscrits === null || nombreInscrits <= 0) {
+    return false;
+  }
+  return comptes.oui * 3 >= nombreInscrits;
+}

@@ -192,6 +192,15 @@ export default function AssembleeDetail() {
                   {nombreInscrits} copropriétaire(s) inscrit(s)
                 </p>
               )}
+              {r.secondVoteArt251Possible && (
+                <div style={{ marginTop: 12 }}>
+                  <Notification variant="info" title="Second vote possible (art. 25-1)">
+                    Cette résolution a recueilli au moins un tiers des voix de tous les copropriétaires sans atteindre la
+                    majorité absolue : la loi permet un second vote immédiat à la majorité simple (art. 24). L&apos;application ne
+                    rouvre pas une assemblée clôturée : ce second vote se tient séance tenante, avant la clôture.
+                  </Notification>
+                </div>
+              )}
               {estCopro && (
                 <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C', display: 'flex', alignItems: 'center', gap: 8 }}>
                   Mon vote :

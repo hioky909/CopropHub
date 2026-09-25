@@ -28,6 +28,8 @@ export interface ResolutionOrdreDuJour {
 export interface ResolutionResultat extends ResolutionOrdreDuJour {
   statutResultat: StatutResultat;
   decomptes: { oui: number; non: number; abstention: number };
+  /** Art. 25-1 : art. 25 rejeté avec au moins un tiers des voix — un second vote à la majorité simple est permis. */
+  secondVoteArt251Possible?: boolean;
 }
 
 export type StatutIncident = 'DECLARE' | 'EN_COURS' | 'RESOLU';

@@ -6,6 +6,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Added
 
+- Second vote de l'art. 25-1 signalé (D, décision « faire tout ») : `GET /ags/:idAg/resolutions` renvoie `secondVoteArt251Possible` (art. 25 rejeté avec au moins un tiers des inscrits « oui », arithmétique entière) et l'écran des résultats l'affiche. Indicateur seulement : la clôture reste définitive (RM-04), l'application ne rouvre pas une AG ; une voix par copropriétaire, donc « un tiers des voix » = un tiers des inscrits (pas de tantièmes).
 - Audit d'accessibilité complet (WCAG 2.1 AA) : test e2e axe-core sur tous les écrans, focus visible partout, champs reliés à leurs erreurs, notifications annoncées, lien « Aller au contenu », titre et focus à chaque changement de page, barre de progression du vote en boutons nommés, modale avec piège de focus, contraste des textes secondaires. Détail et limites dans `docs/04-ux-ui/README.md`.
 - Socle technique initial du monorepo (T-01) : dépôts `apps/frontend` et `apps/backend` en TypeScript, ESLint, Prettier.
 - Docker Compose pour l'environnement local (T-02) : PostgreSQL, backend, frontend.

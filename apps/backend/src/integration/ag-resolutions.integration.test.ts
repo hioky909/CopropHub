@@ -67,6 +67,53 @@ describe('GET /ags/:idAg/resolutions — décomptes réels', () => {
     expect(corps).not.toMatch(/idUtilisateur/i);
   });
 
+  it("signale qu'un second vote (art. 25-1) est possible quand l'art. 25 échoue avec au moins un tiers des voix", async () => {
+    const syndic = await creerUtilisateur({ typeCompte: 'SYNDIC', email: 'syndic251@test.local' });
+    const ag = await creerAg(immeuble.id, 'PLANIFIEE', [
+      { libelle: 'Travaux importants', typeMajorite: 'ABSOLUE' },
+      { libelle: 'Autre travaux', typeMajorite: 'ABSOLUE' },
+    ]);
+    const [a, b, c] = await Promise.all(
+      ['1', '2', '3'].map((numero) => creerCoproprietaireHabilite(immeuble.id, numero)),
+    );
+    // L'électorat est figé à l'ouverture (3 inscrits) : on ouvre par la vraie route.
+    const ouverture = await request(app)
+      .post(`/ags/${ag.id}/ouverture`)
+      .set('Cookie', cookieSession(syndic.id));
+    expect(ouverture.status).toBe(200);
+
+    const [premiere, seconde] = [ag.resolutions[0]!.id, ag.resolutions[1]!.id];
+    await prisma.vote.createMany({
+      data: [
+        // 1 oui sur 3 : rejetée (1 × 2 < 3) mais 1 × 3 ≥ 3 → un tiers atteint.
+        { idResolution: premiere, idUtilisateur: a!.id, valeur: 'OUI' },
+        { idResolution: premiere, idUtilisateur: b!.id, valeur: 'NON' },
+        { idResolution: premiere, idUtilisateur: c!.id, valeur: 'NON' },
+        // 0 oui : rejetée, sous le tiers.
+        { idResolution: seconde, idUtilisateur: a!.id, valeur: 'NON' },
+        { idResolution: seconde, idUtilisateur: b!.id, valeur: 'NON' },
+        { idResolution: seconde, idUtilisateur: c!.id, valeur: 'NON' },
+      ],
+    });
+    await request(app).post(`/ags/${ag.id}/cloture`).set('Cookie', cookieSession(syndic.id)).expect(200);
+
+    const reponse = await request(app)
+      .get(`/ags/${ag.id}/resolutions`)
+      .set('Cookie', cookieSession(a!.id));
+    expect(reponse.status).toBe(200);
+    const parLibelle = Object.fromEntries(
+      reponse.body.resolutions.map((r: { libelle: string }) => [r.libelle, r]),
+    );
+    expect(parLibelle['Travaux importants']).toMatchObject({
+      statutResultat: 'REJETEE',
+      secondVoteArt251Possible: true,
+    });
+    expect(parLibelle['Autre travaux']).toMatchObject({
+      statutResultat: 'REJETEE',
+      secondVoteArt251Possible: false,
+    });
+  });
+
   it('refuse la consultation avant clôture (409), avec de vrais votes déjà en base', async () => {
     const votant = await creerCoproprietaireHabilite(immeuble.id, '1');
     const ag = await creerAg(immeuble.id, 'OUVERTE', [{ libelle: 'R', typeMajorite: 'SIMPLE' }]);

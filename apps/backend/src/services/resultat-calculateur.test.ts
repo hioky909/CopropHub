@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import type { TypeMajorite } from '@prisma/client';
-import { calculerResultat } from './resultat-calculateur.js';
+import { calculerResultat, secondVoteArt251Possible } from './resultat-calculateur.js';
 
 type Cas = [
   libelle: string,
@@ -89,5 +89,32 @@ describe('calculerResultat — cas dégénérés', () => {
     expect(calculerResultat('DOUBLE_MAJORITE', { oui: 0, non: 0, abstention: 0 }, -1)).toBe(
       'REJETEE',
     );
+  });
+});
+
+describe('secondVoteArt251Possible — art. 25-1 (au moins un tiers des voix, art. 25 rejeté)', () => {
+  const c = (oui: number, non = 0, abstention = 0) => ({ oui, non, abstention });
+
+  it('pile un tiers des inscrits, art. 25 rejeté : second vote possible', () => {
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(4, 8), 12)).toBe(true);
+  });
+  it('une voix sous le tiers : impossible', () => {
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(3, 9), 12)).toBe(false);
+  });
+  it('un tiers non entier (10 inscrits) : 4 voix suffisent, 3 non', () => {
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(4), 10)).toBe(true);
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(3), 10)).toBe(false);
+  });
+  it('résolution adoptée : rien à rejouer', () => {
+    expect(secondVoteArt251Possible('ABSOLUE', 'ADOPTEE', c(7), 12)).toBe(false);
+  });
+  it('autres majorités (art. 24, 26, unanimité) : jamais concernées', () => {
+    for (const type of ['SIMPLE', 'DOUBLE_MAJORITE', 'UNANIMITE'] as TypeMajorite[]) {
+      expect(secondVoteArt251Possible(type, 'REJETEE', c(5), 12)).toBe(false);
+    }
+  });
+  it('électorat inconnu ou vide : impossible', () => {
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(5), null)).toBe(false);
+    expect(secondVoteArt251Possible('ABSOLUE', 'REJETEE', c(0), 0)).toBe(false);
   });
 });

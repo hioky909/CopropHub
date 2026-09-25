@@ -262,3 +262,22 @@ describe('AssembleeDetail — syndic', () => {
     expect(screen.queryByRole('button', { name: 'Pour' })).not.toBeInTheDocument();
   });
 });
+
+describe('AssembleeDetail — résultats et art. 25-1', () => {
+  beforeEach(() => connecteEnTant('SYNDIC'));
+
+  it('signale le second vote possible uniquement sur la résolution concernée', async () => {
+    const cloturee = { ...AG_OUVERTE, statut: 'CLOTUREE' as const, nombreInscrits: 3 };
+    vi.mocked(agsApi.ordreDuJour).mockResolvedValue({ ag: cloturee, resolutions: RESOLUTIONS } as never);
+    vi.mocked(agsApi.resultats).mockResolvedValue({
+      ag: cloturee,
+      resolutions: [
+        { ...RESOLUTIONS[0], statutResultat: 'REJETEE', decomptes: { oui: 1, non: 2, abstention: 0 }, secondVoteArt251Possible: true },
+        { ...RESOLUTIONS[1], statutResultat: 'REJETEE', decomptes: { oui: 0, non: 3, abstention: 0 }, secondVoteArt251Possible: false },
+      ],
+    } as never);
+    rendre();
+    expect(await screen.findByText('Second vote possible (art. 25-1)')).toBeInTheDocument();
+    expect(screen.getAllByText('Second vote possible (art. 25-1)')).toHaveLength(1);
+  });
+});
