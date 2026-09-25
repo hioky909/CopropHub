@@ -49,3 +49,18 @@ test('le lien d’évitement amène au contenu et chaque page a son titre', asyn
   await page.keyboard.press('Enter')
   await expect(page.locator('main')).toBeFocused()
 })
+
+test('les onglets ont le même gabarit : le titre est à la même place, sans barre intermédiaire', async ({ page }) => {
+  await login(page, COPRO.email, COPRO.motDePasse)
+  const positions: { chemin: string; x: number; y: number }[] = []
+  for (const chemin of ['/assemblees', '/incidents', '/charges']) {
+    await page.goto(chemin)
+    const titre = page.getByRole('heading', { level: 1 })
+    await expect(titre).toBeVisible()
+    const boite = (await titre.boundingBox())!
+    positions.push({ chemin, x: Math.round(boite.x), y: Math.round(boite.y) })
+  }
+  // Passer d'un onglet à l'autre ne doit pas faire « sauter » le contenu vers le bas (pas de bandeau
+  // propre à un seul écran). La position horizontale peut différer : Charges est plus large (tableau).
+  expect(new Set(positions.map((p) => p.y)).size, JSON.stringify(positions)).toBe(1)
+})

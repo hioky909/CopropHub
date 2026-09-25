@@ -37,7 +37,8 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await page.getByRole('button', { name: /Valider mon vote/ }).click()
 
   // Dernier (ici unique) vote : retour direct à la liste, où « Voté » confirme — pas d'écran intermédiaire.
-  await expect(page.getByText('Voté', { exact: true })).toBeVisible()
+  await expect(page).toHaveURL(/\/assemblees$/)
+  await expect(page.getByText('Voté', { exact: true }).first()).toBeVisible() // .first() : d'autres assemblées votées par d'autres tests peuvent figurer dans la liste
 
   // Le vote est retrouvé en rouvrant l'AG, puis modifié (Pour → Contre) tant qu'elle est ouverte.
   await page.goto(`/assemblees/${ag.id}`)

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import Badge from '../components/Badge.js'
 import Notification from '../components/Notification.js'
 import { agsApi } from '../api/ags.js'
@@ -18,6 +18,8 @@ const FILTRES: { cle: 'tous' | Ag['statut']; libelle: string }[] = [
 
 export default function Assemblees() {
   const navigate = useNavigate()
+  // Posé par l'écran de vote quand l'utilisateur revient volontairement à la liste (fin des votes, retour).
+  const sansRedirection = (useLocation().state as { sansRedirection?: boolean } | null)?.sansRedirection === true
   const { utilisateur } = useAuth()
   const estSyndic = utilisateur?.typeCompte === 'SYNDIC'
   const [ags, setAgs] = useState<Ag[]>([])
@@ -47,11 +49,11 @@ export default function Assemblees() {
               }),
           )
           const aVoter = etats.find((e) => !e.toutVote)
-          if (aVoter) {
+          if (aVoter && !sansRedirection) {
             navigate(`/assemblees/${aVoter.id}`, { replace: true })
             return
           }
-          setDejaVotees(new Set(etats.map((e) => e.id)))
+          setDejaVotees(new Set(etats.filter((e) => e.toutVote).map((e) => e.id)))
         }
         setAgs(r.ags)
       } catch (err) {
@@ -61,7 +63,7 @@ export default function Assemblees() {
       }
     }
     void charger()
-  }, [navigate, utilisateur])
+  }, [navigate, utilisateur, sansRedirection])
 
   const visibles = filtre === 'tous' ? ags : ags.filter((ag) => ag.statut === filtre)
   const compte = (cle: 'tous' | Ag['statut']) => (cle === 'tous' ? ags.length : ags.filter((ag) => ag.statut === cle).length)

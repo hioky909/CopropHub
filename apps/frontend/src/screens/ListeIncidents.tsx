@@ -101,26 +101,21 @@ export default function ListeIncidents() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
-      <header style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-neutral-200)', padding: '16px 16px' }}>
-        <div style={{ maxWidth: 960, margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-            <div>
-              <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
-                Incidents
-              </h1>
-              <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>{incidents.length} incident(s) enregistré(s)</p>
-            </div>
-            {estCopro && (
-              <Button variant="primary" onClick={() => setShowForm(true)}>
-                Déclarer un incident
-              </Button>
-            )}
-          </div>
+    <main style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+        <div>
+          <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
+            Incidents
+          </h1>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-500)' }}>{incidents.length} incident(s) enregistré(s)</p>
         </div>
-      </header>
+        {estCopro && (
+          <Button variant="primary" onClick={() => setShowForm(true)}>
+            Déclarer un incident
+          </Button>
+        )}
+      </div>
 
-      <div style={{ maxWidth: 960, margin: '0 auto', padding: '24px 16px' }}>
         {success && (
           <div style={{ marginBottom: 16 }}>
             <Notification variant="success" title="Incident déclaré" onDismiss={() => setSuccess(false)}>
@@ -260,7 +255,6 @@ export default function ListeIncidents() {
             })
           )}
         </div>
-      </div>
-    </div>
+    </main>
   )
 }

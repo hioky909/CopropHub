@@ -78,17 +78,12 @@ export default function ListeCharges() {
   const tauxRecouvrement = total > 0 ? Math.round((totalPaye / total) * 100) : 0
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
-      <header style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-neutral-200)', padding: '16px 24px' }}>
-        <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
-            Charges
-          </h1>
-          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>{charges.length} ligne(s) de charge</p>
-        </div>
-      </header>
+    <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
+      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
+        Charges
+      </h1>
+      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>{charges.length} ligne(s) de charge</p>
 
-      <main style={{ maxWidth: 1200, margin: '0 auto', padding: '24px 24px' }}>
         {erreur && (
           <div style={{ marginBottom: 16 }}>
             <Notification variant="error">{erreur}</Notification>
@@ -251,7 +246,6 @@ export default function ListeCharges() {
             </table>
           )}
         </div>
-      </main>
-    </div>
+    </main>
   )
 }

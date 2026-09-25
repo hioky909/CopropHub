@@ -7,7 +7,11 @@ test('mot de passe oublié : la demande ne révèle rien, puis le lien reçu per
   // Demande depuis la page de connexion : même message pour une adresse inconnue.
   await page.goto('/connexion')
   await page.getByRole('link', { name: 'Mot de passe oublié ?' }).click()
-  await page.getByLabel('Email').fill('personne-ne-connait-cette-adresse@coprophub.local')
+  // La page de connexion a aussi un champ « Email » : on attend la nouvelle page avant de saisir.
+  await expect(page.getByRole('heading', { name: 'Mot de passe oublié' })).toBeVisible()
+  const adresse = 'personne-ne-connait-cette-adresse@coprophub.local'
+  await page.getByLabel('Email').fill(adresse)
+  await expect(page.getByLabel('Email')).toHaveValue(adresse)
   await page.getByRole('button', { name: 'Envoyer le lien' }).click()
   await expect(page.getByText(/Si un compte existe pour cette adresse/)).toBeVisible()
 

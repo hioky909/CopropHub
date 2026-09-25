@@ -13,6 +13,12 @@ import { formaterDate } from '../utils/format.js'
 
 type VoteChoice = 'OUI' | 'NON' | 'ABSTENTION'
 
+/**
+ * Retour à la liste demandé par l'utilisateur (fin des votes, bouton retour) : la liste ne doit pas
+ * le renvoyer aussitôt vers une autre assemblée ouverte qu'il lui reste à voter.
+ */
+const SANS_REDIRECTION = { sansRedirection: true }
+
 export default function AssembleeDetail() {
   const { idAg } = useParams<{ idAg: string }>()
   const navigate = useNavigate()
@@ -132,7 +138,7 @@ export default function AssembleeDetail() {
     <main style={{ maxWidth: modeVoteCopro ? 600 : 700, margin: '0 auto', padding: modeVoteCopro ? '0 0 48px' : '32px 24px 48px' }}>
       {!modeVoteCopro && (
         <button
-          onClick={() => navigate('/assemblees')}
+          onClick={() => navigate('/assemblees', { state: SANS_REDIRECTION })}
           style={{ marginBottom: 16, fontSize: 13, color: 'var(--color-neutral-500)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
         >
           ← Toutes les assemblées
@@ -221,7 +227,7 @@ export default function AssembleeDetail() {
           votes={votesEnregistres}
           action={action}
           onVoter={handleVoter}
-          onRetour={() => navigate('/assemblees')}
+          onRetour={() => navigate('/assemblees', { state: SANS_REDIRECTION })}
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

@@ -81,6 +81,8 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Fixed
 
+- Après le dernier « Valider mon vote » d'une assemblée, le copropriétaire revient bien sur la liste `/assemblees` : la liste le renvoyait aussitôt vers **une autre** assemblée ouverte qu'il lui restait à voter (cas de plusieurs AG ouvertes en même temps), et il ne pouvait plus atteindre la liste depuis le bouton retour de l'écran de vote. Un retour volontaire (fin des votes, bouton retour) passe maintenant un état de navigation qui désactive cette redirection ; la redirection d'arrivée (connexion, menu) est inchangée. La liste ne marque plus « voté sur toutes les résolutions » que les assemblées réellement terminées. Test e2e avec deux AG ouvertes.
+- Écrans Incidents et Charges : suppression du bandeau blanc sous la barre de navigation (il ne servait qu'à afficher le nombre de lignes et faisait « sauter » le contenu d'un onglet à l'autre). Le titre est maintenant dans le contenu, comme les autres écrans, avec le nombre en sous-titre ; un test vérifie que le titre est à la même hauteur sur Assemblées, Incidents et Charges. Le test e2e « mot de passe oublié » est rendu déterministe (il saisissait parfois l'email dans le champ de la page précédente).
 - Un 429 (trop de requêtes) ou une erreur serveur au contrôle de session au démarrage était traité comme « pas connecté » : l'utilisateur était renvoyé à la connexion en pleine navigation. Seul un 401 signifie désormais « pas de session » ; le reste s'affiche comme une indisponibilité temporaire. Test dédié.
 
 - Lint en échec sur `prisma/seed.ts` (hors du tsconfig) : `tsconfig.json` couvre désormais `prisma/` et `tsconfig.build.json` porte le build.
