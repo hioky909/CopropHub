@@ -5,6 +5,8 @@ export interface Utilisateur {
   email: string;
   typeCompte: TypeCompte;
   estMembreConseilSyndical: boolean;
+  /** Thème de couleur personnalisé ; `null` ou absent = thème CopropHub d'origine. */
+  theme?: { teinte: number; intensite: number } | null;
 }
 
 export type StatutAg = 'PLANIFIEE' | 'OUVERTE' | 'CLOTUREE';
