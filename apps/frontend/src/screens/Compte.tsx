@@ -5,7 +5,9 @@ import Notification from "../components/Notification.js";
 import { authApi } from "../api/auth.js";
 import { ApiError } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.js";
+import AvatarProfil from "../components/AvatarProfil.js";
 import EditeurApparence from "../components/EditeurApparence.js";
+import { libelleRole } from "../utils/format.js";
 
 /** Mon compte : changement de son propre mot de passe (le mot de passe actuel est exigé) et apparence. */
 export default function Compte() {
@@ -56,15 +58,15 @@ export default function Compte() {
       >
         Mon compte
       </h1>
-      <p
-        style={{
-          margin: "0 0 24px",
-          fontSize: 14,
-          color: "var(--color-neutral-500)",
-        }}
-      >
-        {utilisateur?.email}
-      </p>
+      {utilisateur && (
+        <div style={{ display: "flex", alignItems: "center", gap: 14, margin: "4px 0 24px" }}>
+          <AvatarProfil graine={utilisateur.id} taille={56} />
+          <div>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 500, color: "var(--color-neutral-900)" }}>{utilisateur.email}</p>
+            <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: "var(--color-primary)" }}>{libelleRole(utilisateur)}</p>
+          </div>
+        </div>
+      )}
 
       <form
         onSubmit={soumettre}

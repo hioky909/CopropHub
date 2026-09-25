@@ -14,7 +14,7 @@ test('un utilisateur change son mot de passe, puis se reconnecte avec le nouveau
   await page.getByRole('button', { name: 'Créer mon compte' }).click()
   await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
 
-  await page.getByRole('link', { name: email }).click()
+  await page.getByRole('link', { name: 'Mon compte' }).click() // bouton dédié de l'en-tête
   await expect(page.getByRole('heading', { name: 'Mon compte' })).toBeVisible()
 
   // Mauvais mot de passe actuel : refusé, message clair.
@@ -31,5 +31,5 @@ test('un utilisateur change son mot de passe, puis se reconnecte avec le nouveau
 
   await logout(page)
   await login(page, email, nouveau)
-  await expect(page.getByRole('link', { name: email })).toBeVisible() // connecté avec le nouveau mot de passe
+  await expect(page.getByText(email).first()).toBeVisible() // connecté avec le nouveau mot de passe
 })

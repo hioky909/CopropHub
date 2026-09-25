@@ -1,0 +1,94 @@
+import { expect, test, type Page } from '@playwright/test'
+import { COPRO, SYNDIC, login, logout } from './fixtures.js'
+
+/**
+ * En-tête de l'application : navigation à icônes, identité (avatar généré + email + rôle), bouton
+ * « Mon compte » distinct de l'identité, bouton « Déconnexion ».
+ */
+const MOT_DE_PASSE = 'un-mot-de-passe-suffisamment-long'
+
+async function creerCompte(page: Page): Promise<void> {
+  const email = `entete-e2e-${Date.now()}-${Math.floor(Math.random() * 1e6)}@coprophub.local`
+  await page.goto('/connexion')
+  await page.getByRole('button', { name: 'Créer un compte' }).click()
+  await page.getByLabel('Nom').fill('Entete E2E')
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Mot de passe').fill(MOT_DE_PASSE)
+  await page.getByRole('button', { name: 'Créer mon compte' }).click()
+  await expect(page.getByRole('button', { name: 'Déconnexion' })).toBeVisible()
+}
+
+const contourAvatar = (page: Page) => page.locator('header [data-avatar] [data-corps]').getAttribute('d')
+
+test('l’en-tête affiche l’identité et un bouton « Mon compte » dédié qui ouvre la page', async ({ page }) => {
+  await login(page, COPRO.email, COPRO.motDePasse)
+  await page.goto('/charges')
+  const entete = page.getByRole('banner')
+  await expect(entete.locator('[data-avatar]')).toBeVisible()
+  await expect(entete.getByText(COPRO.email)).toBeVisible()
+  await expect(entete.getByText('Copropriétaire')).toBeVisible()
+
+  // Le bouton dédié (et non l'email) mène aux paramètres.
+  await entete.getByRole('link', { name: 'Mon compte' }).click()
+  await expect(page.getByRole('heading', { name: 'Mon compte' })).toBeVisible()
+  await expect(entete.getByRole('link', { name: 'Mon compte' })).toHaveClass(/active/)
+  await expect(page.getByRole('main').locator('[data-avatar]')).toBeVisible() // avatar aussi sur la page
+
+  await entete.getByRole('button', { name: 'Déconnexion' }).click()
+  await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
+})
+
+test('la navigation indique la page active et propose une icône par onglet', async ({ page }) => {
+  await login(page, SYNDIC.email, SYNDIC.motDePasse)
+  await page.goto('/incidents')
+  const nav = page.getByRole('navigation', { name: 'Navigation principale' })
+  await expect(nav.getByRole('link')).toHaveCount(5)
+  await expect(nav.locator('svg')).toHaveCount(5)
+  await expect(nav.getByRole('link', { name: 'Incidents' })).toHaveClass(/active/)
+  await expect(nav.getByRole('link', { name: 'Charges' })).not.toHaveClass(/active/)
+  await expect(page.getByRole('banner').getByText('Syndic', { exact: true })).toBeVisible()
+  await logout(page)
+})
+
+test('chaque utilisateur a son avatar, qui suit la couleur du thème choisi', async ({ page }) => {
+  await creerCompte(page)
+  const avatarA = await contourAvatar(page)
+  expect(avatarA).toMatch(/^M/)
+
+  // Le corps de la créature prend la couleur principale du thème (ici : classique).
+  const couleurCorps = () => page.locator('header [data-avatar] [data-corps]').evaluate((el) => getComputedStyle(el).fill)
+  expect(await couleurCorps()).toBe('rgb(30, 75, 143)')
+
+  // Après le choix d'un thème vert, la même créature devient verte.
+  await page.goto('/compte')
+  await page.getByRole('radio', { name: /Personnalisé/ }).click()
+  await page.locator('label.pastille', { hasText: 'Vert' }).click()
+  await page.getByRole('button', { name: 'Enregistrer' }).click()
+  await expect(page.getByText('Apparence enregistrée.')).toBeVisible()
+  await expect.poll(couleurCorps).not.toBe('rgb(30, 75, 143)')
+  expect(await contourAvatar(page)).toBe(avatarA) // même forme : seule la couleur change
+
+  // Un autre utilisateur a une autre créature.
+  await logout(page)
+  await creerCompte(page)
+  expect(await contourAvatar(page)).not.toBe(avatarA)
+})
+
+test('sur un écran de téléphone, l’en-tête garde avatar, compte et déconnexion sans déborder', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 812 })
+  await login(page, COPRO.email, COPRO.motDePasse)
+  await page.goto('/charges')
+  const entete = page.getByRole('banner')
+  await expect(entete.locator('[data-avatar]')).toBeVisible()
+  const compte = entete.getByRole('link', { name: 'Mon compte' })
+  const deconnexion = entete.getByRole('button', { name: 'Déconnexion' })
+  await expect(compte).toBeVisible()
+  await expect(deconnexion).toBeVisible()
+  for (const bouton of [compte, deconnexion]) {
+    const boite = (await bouton.boundingBox())!
+    expect(boite.width).toBeGreaterThanOrEqual(36)
+    expect(boite.height).toBeGreaterThanOrEqual(36)
+  }
+  const debordement = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
+  expect(debordement).toBeLessThanOrEqual(0)
+})

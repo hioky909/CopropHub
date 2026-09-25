@@ -3,13 +3,17 @@ import { useEffect, useRef } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.js'
 import type { TypeCompte } from '../api/types.js'
+import { libelleRole } from '../utils/format.js'
+import AvatarProfil from './AvatarProfil.js'
+import Icone, { type NomIcone } from './Icones.js'
+import LogoMarque from './LogoMarque.js'
 
-const NAV_ITEMS: { to: string; label: string; roles: TypeCompte[] }[] = [
-  { to: '/', label: 'Tableau de bord', roles: ['SYNDIC'] },
-  { to: '/coproprietaires', label: 'Copropriétaires', roles: ['SYNDIC'] },
-  { to: '/assemblees', label: 'Assemblées', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
-  { to: '/incidents', label: 'Incidents', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
-  { to: '/charges', label: 'Charges', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
+const NAV_ITEMS: { to: string; label: string; icone: NomIcone; roles: TypeCompte[] }[] = [
+  { to: '/', label: 'Tableau de bord', icone: 'tableau-de-bord', roles: ['SYNDIC'] },
+  { to: '/coproprietaires', label: 'Copropriétaires', icone: 'coproprietaires', roles: ['SYNDIC'] },
+  { to: '/assemblees', label: 'Assemblées', icone: 'assemblees', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
+  { to: '/incidents', label: 'Incidents', icone: 'incidents', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
+  { to: '/charges', label: 'Charges', icone: 'charges', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
 ]
 
 export default function Shell({ children }: { children: ReactNode }) {
@@ -62,101 +66,49 @@ export default function Shell({ children }: { children: ReactNode }) {
       >
         Aller au contenu
       </a>
-      <header
-        style={{
-          backgroundColor: 'var(--color-surface)',
-          borderBottom: '1px solid var(--color-neutral-200)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 20,
-        }}
-      >
-        <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, minHeight: 56, padding: '6px 0' }}>
-            <div className="entete-gauche" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div className="entete-marque" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <div
-                  style={{
-                    width: 28,
-                    height: 28,
-                    backgroundColor: 'var(--color-primary)',
-                    borderRadius: 6,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                  }}
-                >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                    <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
-                    <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
-                    <rect x="3" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-                    <rect x="6" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-                    <rect x="9" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-                  </svg>
-                </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
-                  CopropHub
-                </span>
+      <header className="entete">
+        <div className="entete-contenu">
+          <div className="entete-rangee">
+            <div className="entete-gauche">
+              <div className="entete-marque">
+                <LogoMarque taille={30} />
+                <span>CopropHub</span>
               </div>
+              <span className="entete-separateur" aria-hidden="true" />
 
-              <nav aria-label="Navigation principale" className="entete-nav" style={{ display: 'flex', gap: 4 }}>
+              <nav aria-label="Navigation principale" className="entete-nav">
                 {items.map((item) => (
-                  <NavLink
-                    key={item.to}
-                    to={item.to}
-                    end={item.to === '/'}
-                    style={({ isActive }) => ({
-                      padding: '6px 12px',
-                      fontSize: 13,
-                      fontWeight: isActive ? 600 : 400,
-                      color: isActive ? 'var(--color-primary)' : 'var(--color-neutral-500)',
-                      backgroundColor: isActive ? 'var(--color-primary-light)' : 'transparent',
-                      borderRadius: 6,
-                      textDecoration: 'none',
-                      flexShrink: 0,
-                    })}
-                  >
-                    {item.label}
+                  <NavLink key={item.to} to={item.to} end={item.to === '/'} className="nav-lien">
+                    <Icone nom={item.icone} />
+                    <span>{item.label}</span>
                   </NavLink>
                 ))}
               </nav>
             </div>
 
-            <div className="entete-utilisateur" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ textAlign: 'right' }}>
-                <NavLink
-                  to="/compte"
-                  title="Mon compte"
-                  style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)', textDecoration: 'none' }}
-                >
-                  <span className="libelle-long">{utilisateur.email}</span>
-                  <span className="libelle-court">Mon compte</span>
-                </NavLink>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)' }}>
-                  {utilisateur.typeCompte === 'SYNDIC'
-                    ? 'Syndic'
-                    : utilisateur.estMembreConseilSyndical
-                      ? 'Conseil syndical'
-                      : 'Copropriétaire'}
-                </p>
+            <div className="entete-utilisateur">
+              <div className="identite">
+                <AvatarProfil graine={utilisateur.id} taille={34} />
+                <div className="identite-texte">
+                  <span className="identite-email">{utilisateur.email}</span>
+                  <span className="identite-role">{libelleRole(utilisateur)}</span>
+                </div>
               </div>
+              <NavLink to="/compte" className="bouton-entete" aria-label="Mon compte" title="Mon compte">
+                <Icone nom="compte" />
+                <span className="libelle-bouton">Mon compte</span>
+              </NavLink>
               <button
+                type="button"
+                className="bouton-entete"
+                aria-label="Déconnexion"
+                title="Déconnexion"
                 onClick={() => {
                   void deconnecter().then(() => navigate('/connexion'))
                 }}
-                style={{
-                  fontSize: 12,
-                  fontWeight: 500,
-                  color: 'var(--color-neutral-500)',
-                  background: 'none',
-                  border: '1px solid var(--color-neutral-200)',
-                  borderRadius: 6,
-                  padding: '6px 10px',
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                }}
               >
-                Déconnexion
+                <Icone nom="deconnexion" />
+                <span className="libelle-bouton">Déconnexion</span>
               </button>
             </div>
           </div>

@@ -1,3 +1,4 @@
+import LogoMarque from '../components/LogoMarque.js'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import Button from '../components/Button.js'
@@ -52,25 +53,7 @@ export default function Connexion() {
       <div style={{ width: '100%', maxWidth: 400 }}>
         <h1 className="sr-only">{mode === 'connexion' ? 'Connexion' : 'Créer un compte'}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
-          <div
-            style={{
-              width: 32,
-              height: 32,
-              backgroundColor: 'var(--color-primary)',
-              borderRadius: 7,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
-              <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
-              <rect x="3" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-              <rect x="6" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-              <rect x="9" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
-            </svg>
-          </div>
+          <LogoMarque taille={32} />
           <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
             CopropHub
           </span>

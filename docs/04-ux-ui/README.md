@@ -61,6 +61,12 @@ Cible WCAG 2.1 niveau AA, vérifiée sur les écrans clés (pas promise app-wide
 
 **Limites assumées** : axe-core ne détecte qu'une partie des défauts — pas de test avec un vrai lecteur d'écran (NVDA/VoiceOver) ; les bordures des champs (`#E0E0E0`, 1,3:1) restent celles du design system d'origine, sous les 3:1 du critère 1.4.11 : à trancher avec le design system plutôt que de s'en écarter ici.
 
+## En-tête, compte et avatar
+
+**En-tête** (`Shell.tsx`, styles dans `index.css`) : marque (`LogoMarque.tsx`, une seule source à remplacer quand le logo définitif sera prêt), navigation à icônes avec survol et page active en pastille teintée (`--color-primary-light`), puis à droite l'identité (avatar, email, rôle), un bouton **« Mon compte »** (icône engrenage, distinct de l'identité — on ne clique plus sur l'email) et un bouton **« Déconnexion »**. Les libellés des boutons s'effacent sous 1400 px (icônes seules, nom accessible conservé par `aria-label` et infobulle), le texte d'identité sous 1100 px, et sous 1000 px la navigation passe sur une seconde ligne défilante. Les icônes (`Icones.tsx`) sont en SVG en ligne, sans dépendance, et suivent la couleur du texte donc le thème.
+
+**Avatar de profil** (`AvatarProfil.tsx`, `utils/avatar.ts`) : une petite **créature-bulle** organique — forme molle au contour irrégulier (spline lissée à 8 points), visage (5 styles d'yeux, 4 de bouches, joues), parfois une pousse, une antenne ou une mèche. Ni photo, ni forme géométrique : chacun a la sienne, dérivée de l'identifiant de l'utilisateur (déterministe : même identifiant, même créature ; aucune donnée stockée, aucune route). Elle n'utilise que les variables du thème (`--color-primary`, `-light`, `-foreground`, `-border`) : elle prend la couleur choisie par l'utilisateur, en Classique comme en Personnalisé. Affichée dans l'en-tête (34 px) et sur la page Mon compte (56 px) ; décorative (`aria-hidden`), le nom est toujours à côté. Vérifié en navigateur réel, dont la variété (1 000 identifiants donnent plus de 100 visages différents, testé) et la couleur qui suit le thème.
+
 ## Personnalisation des couleurs
 
 Chaque utilisateur peut choisir la couleur principale de l'interface (carte **Apparence** de la page Mon compte, `EditeurApparence.tsx`). Décisions : [ADR-003](../13-decisions/ADR-003-theme-entrees-pas-couleurs.md) (ce qui est stocké) et [ADR-004](../13-decisions/ADR-004-tokens-css-oklch-sans-dependance.md) (tokens, OKLCH, contraste).

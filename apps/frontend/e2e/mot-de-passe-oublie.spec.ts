@@ -36,5 +36,5 @@ test('mot de passe oublié : la demande ne révèle rien, puis le lien reçu per
 
   // Connexion réelle avec le nouveau mot de passe.
   await login(page, RESET.email, nouveau)
-  await expect(page.getByRole('link', { name: RESET.email })).toBeVisible()
+  await expect(page.getByText(RESET.email).first()).toBeVisible()
 })

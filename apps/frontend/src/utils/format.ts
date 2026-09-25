@@ -24,3 +24,9 @@ export function partiesDate(date: string | Date): { jour: string; mois: string }
     mois: d.toLocaleDateString('fr-FR', { month: 'short', timeZone: 'UTC' }).replace('.', ''),
   }
 }
+
+/** Libellé du rôle affiché à côté de l'avatar (en-tête, page Mon compte). */
+export function libelleRole(u: { typeCompte: 'SYNDIC' | 'COPROPRIETAIRE'; estMembreConseilSyndical: boolean }): string {
+  if (u.typeCompte === 'SYNDIC') return 'Syndic'
+  return u.estMembreConseilSyndical ? 'Conseil syndical' : 'Copropriétaire'
+}
