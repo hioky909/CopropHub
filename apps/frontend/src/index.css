@@ -75,6 +75,34 @@ body {
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+.pastilles {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pastille {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+.pastille-couleur {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 3px solid var(--color-surface);
+  box-shadow: 0 0 0 1px var(--color-neutral-300);
+}
+.pastille input:checked + .pastille-couleur {
+  box-shadow: 0 0 0 2px var(--color-neutral-900);
+}
+.pastille input:focus-visible + .pastille-couleur {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+.selecteur-teinte:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 4px;
+}
 .bouton-primary:hover:not(:disabled) {
   background-color: var(--color-primary-hover) !important; /* le fond posé en ligne l'emporterait sinon */
   border-color: var(--color-primary-hover) !important;
