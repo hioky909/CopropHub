@@ -14,7 +14,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | POST | `/auth/reinitialiser-mot-de-passe` | public | `{jeton, nouveauMotDePasse}` → 204. 400 si le lien est inconnu, déjà utilisé ou expiré ; 422 si le mot de passe ne respecte pas la politique (le lien reste alors utilisable). |
 | GET | `/auth/moi` | authentifié | 200 `{utilisateur}`. |
 
-`utilisateur` = `{id, email, typeCompte: 'SYNDIC'|'COPROPRIETAIRE', estMembreConseilSyndical}`.
+`utilisateur` = `{id, email, typeCompte: 'SYNDIC'|'COPROPRIETAIRE', estMembreConseilSyndical, theme}` où `theme` = `{teinte, intensite}` ou `null` (thème CopropHub d'origine) ; renvoyé par `/auth/moi`, la connexion et l'inscription, sans requête supplémentaire.
 
 ## Utilisateurs et lots — `/utilisateurs`
 
@@ -29,6 +29,8 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | POST | `/utilisateurs/lots/rattachement` | syndic | `{idLot, idUtilisateur}` → 201. Idempotent ; clôture (pas suppression) l'ancien rattachement sauf s'il a débuté le jour même. |
 | GET | `/utilisateurs/lots` | syndic | 200 `{lots: [{id, numero, typeLot, proprietaire: {id, nom} \| null}]}` — tous les lots avec leur rattachement actif (jamais l'historique). |
 | GET | `/utilisateurs/moi/lots` | authentifié (tout rôle) | 200 `{lots}`. Lots de l'appelant lui-même uniquement (anti-IDOR). |
+| PUT | `/utilisateurs/moi/theme` | authentifié (tout rôle) | `{teinte, intensite}` (entiers, teinte 0–359, intensité 0–100, aucun autre champ) → 200 `{theme}`. Thème de couleur de l'appelant lui-même ; 422 pour toute entrée invalide (rien n'est stocké). |
+| DELETE | `/utilisateurs/moi/theme` | authentifié (tout rôle) | → 204. Remet le thème CopropHub d'origine (idempotent). |
 
 ## Assemblées générales — `/ags`, `/resolutions`
 

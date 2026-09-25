@@ -16,6 +16,7 @@ import {
 } from '../services/lot.service.js';
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { themeService, ThemeInvalideError } from '../services/theme.service.js';
 import { journalService } from '../services/journal.service.js';
 
 /**
@@ -41,6 +42,50 @@ utilisateursRouter.get(
     res.status(200).json({
       lots: lots.map((lot) => ({ id: lot.id, numero: lot.numero, typeLot: lot.typeLot })),
     });
+  }),
+);
+
+/**
+ * Thème de couleur de l'utilisateur courant — ouvert à tout compte authentifié, comme `/moi/lots` :
+ * la cible est toujours l'utilisateur de la session, aucun identifiant n'est accepté (anti-IDOR).
+ * Seuls deux entiers bornés sont acceptés (`.strict()` : tout autre champ, y compris un rôle, est
+ * refusé) ; aucune couleur ni CSS n'entre jamais en base. Préférence non sensible : pas d'audit.
+ */
+const themeSchema = z
+  .object({
+    teinte: z.number().int().min(0).max(359),
+    intensite: z.number().int().min(0).max(100),
+  })
+  .strict();
+
+utilisateursRouter.put(
+  '/moi/theme',
+  exigerAuthentification,
+  asyncHandler(async (req, res) => {
+    const corps = themeSchema.safeParse(req.body);
+    if (!corps.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+    try {
+      const theme = await themeService.definir(req.utilisateur!.id, corps.data);
+      res.status(200).json({ theme });
+    } catch (erreur) {
+      if (erreur instanceof ThemeInvalideError) {
+        res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+utilisateursRouter.delete(
+  '/moi/theme',
+  exigerAuthentification,
+  asyncHandler(async (req, res) => {
+    await themeService.reinitialiser(req.utilisateur!.id);
+    res.status(204).send();
   }),
 );
 

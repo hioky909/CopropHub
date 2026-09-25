@@ -23,6 +23,18 @@ export const utilisateurRepository = {
     return prisma.utilisateur.findUnique({ where: { id } });
   },
 
+  /** Thème de l'utilisateur lui-même (l'appelant fournit toujours l'id de sa session). */
+  async definirTheme(id: string, teinte: number, intensite: number): Promise<void> {
+    await prisma.utilisateur.update({
+      where: { id },
+      data: { themeTeinte: teinte, themeIntensite: intensite },
+    });
+  },
+
+  async reinitialiserTheme(id: string): Promise<void> {
+    await prisma.utilisateur.update({ where: { id }, data: { themeTeinte: null, themeIntensite: null } });
+  },
+
   async mettreAJourMotDePasse(id: string, motDePasseHash: string): Promise<void> {
     await prisma.utilisateur.update({ where: { id }, data: { motDePasseHash } });
   },

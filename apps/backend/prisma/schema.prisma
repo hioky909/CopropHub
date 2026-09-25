@@ -83,6 +83,9 @@ model Utilisateur {
   typeCompte               TypeCompte @map("type_compte")
   estMembreConseilSyndical Boolean    @default(false) @map("est_membre_conseil_syndical")
   dateCreation             DateTime   @default(now()) @map("date_creation") @db.Timestamptz
+  // Thème de couleur personnalisé (migration 0005) : les deux ou aucun ; NULL = thème CopropHub d'origine.
+  themeTeinte              Int?       @map("theme_teinte") @db.SmallInt
+  themeIntensite           Int?       @map("theme_intensite") @db.SmallInt
 
   rattachements     Rattachement[]
   votes             Vote[]

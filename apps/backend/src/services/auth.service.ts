@@ -62,12 +62,18 @@ function versUtilisateurAuthentifie(utilisateur: {
   email: string;
   typeCompte: TypeCompte;
   estMembreConseilSyndical: boolean;
+  themeTeinte: number | null;
+  themeIntensite: number | null;
 }): UtilisateurAuthentifie {
   return {
     id: utilisateur.id,
     email: utilisateur.email,
     typeCompte: utilisateur.typeCompte,
     estMembreConseilSyndical: utilisateur.estMembreConseilSyndical,
+    theme:
+      utilisateur.themeTeinte !== null && utilisateur.themeIntensite !== null
+        ? { teinte: utilisateur.themeTeinte, intensite: utilisateur.themeIntensite }
+        : null,
   };
 }
 
