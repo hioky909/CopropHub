@@ -13,6 +13,10 @@ export const lotRepository = {
     return prisma.lot.findUnique({ where: { id } });
   },
 
+  parIds(ids: string[]) {
+    return prisma.lot.findMany({ where: { id: { in: ids } }, select: { id: true, numero: true } });
+  },
+
   parImmeubleEtNumero(idImmeuble: string, numero: string) {
     return prisma.lot.findUnique({
       where: { idImmeuble_numero: { idImmeuble, numero } },

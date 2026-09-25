@@ -11,6 +11,9 @@ export const agsApi = {
     api.post<{ ag: Ag }>('/ags', { dateAg, resolutions }),
   ouvrir: (idAg: string) => api.post<{ ag: Ag }>(`/ags/${idAg}/ouverture`),
   cloturer: (idAg: string) => api.post<{ ag: Ag }>(`/ags/${idAg}/cloture`),
+  /** F-13 : procès-verbal des résolutions d'une AG clôturée (nom du fichier d'après la date de l'AG). */
+  procesVerbalPdf: (idAg: string, dateAg: string) =>
+    api.telecharger(`/ags/${idAg}/proces-verbal.pdf`, `proces-verbal-ag-${dateAg.slice(0, 10)}.pdf`),
   mesVotes: (idAg: string) =>
     api.get<{ votes: { idResolution: string; valeur: 'OUI' | 'NON' | 'ABSTENTION' }[] }>(
       `/ags/${idAg}/mes-votes`,

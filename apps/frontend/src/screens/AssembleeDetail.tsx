@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import Badge from '../components/Badge.js'
 import Button from '../components/Button.js'
+import BoutonTelechargement from '../components/BoutonTelechargement.js'
 import Notification from '../components/Notification.js'
 import { agsApi } from '../api/ags.js'
 import { ApiError } from '../api/client.js'
@@ -151,6 +152,12 @@ export default function AssembleeDetail() {
             AG du {formaterDate(ag.dateAg)}
           </h1>
           <Badge {...STATUT_BADGE[ag.statut]} />
+        </div>
+      )}
+
+      {!modeVoteCopro && ag.statut === 'CLOTUREE' && (
+        <div style={{ marginBottom: 16 }}>
+          <BoutonTelechargement libelle="Télécharger le PV (PDF)" onTelecharger={() => agsApi.procesVerbalPdf(ag.id, ag.dateAg)} />
         </div>
       )}
 

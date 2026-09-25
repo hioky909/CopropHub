@@ -10,6 +10,7 @@ import {
 } from '../services/charge.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { journalService } from '../services/journal.service.js';
+import { documentService } from '../services/document.service.js';
 
 /**
  * Controller — T-14 (F-09, US-01, US-05). Authentification exigée ; la
@@ -103,6 +104,27 @@ chargeRouter.post(
 );
 
 const paramsChargeSchema = z.object({ idCharge: z.string().uuid() });
+
+/**
+ * F-13 : relevé de charges en PDF. Même portée que la liste (`chargeService.lister`) : tout pour le
+ * syndic et le conseil syndical, seulement les charges de ses lots pour un copropriétaire (RM-10).
+ * Déclaré avant `/:idCharge`, qui l'intercepterait sinon.
+ */
+chargeRouter.get(
+  '/export.pdf',
+  asyncHandler(async (req, res) => {
+    const { pdf, nomFichier } = await documentService.releveCharges(req.utilisateur!);
+    journalService.journaliser('RELEVE_CHARGES_EXPORTE', req.utilisateur!.id);
+    res
+      .status(200)
+      .set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': `attachment; filename="${nomFichier}"`,
+        'Cache-Control': 'no-store',
+      })
+      .send(pdf);
+  }),
+);
 
 chargeRouter.get(
   '/:idCharge',

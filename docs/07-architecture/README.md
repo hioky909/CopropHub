@@ -34,6 +34,10 @@ Cookie de session signé HttpOnly/SameSite=Strict (Secure en production), sans t
 
 SPA React sans framework CSS : le design system (Doc 4) est appliqué via des styles inline et des variables CSS (`apps/frontend/src/index.css`), portés depuis une maquette Figma (`proto/`, conservée pour référence, non exécutée en CI). Routage basé sur le rôle du compte connecté (`RouteProtegee.tsx`, `Shell.tsx`). Voir [12-api/](../12-api/README.md) pour le contrat consommé.
 
+### Exports PDF (F-13)
+
+`services/document.service.ts` (bibliothèque `pdfkit`, sans navigateur embarqué) : `pdfProcesVerbal` et `pdfReleveCharges` sont des fonctions pures de mise en page (A4, pied de page « Page n / N », pagination avec titres de colonnes répétés, PDF non compressé donc inspectable par les tests) ; `documentService.procesVerbalAg` et `releveCharges` assemblent les données en réutilisant `agService.consulterResolutions` et `chargeService.lister`. Routes : `GET /ags/:idAg/proces-verbal.pdf`, `GET /charges/export.pdf`. Côté interface, `BoutonTelechargement` et `api.telecharger` (fetch + cookie, nom de fichier choisi par le client).
+
 ### Événements et notifications (F-12)
 
 `services/evenements.service.ts` est un petit bus interne : les services métier (`ag.service`, `incident.service`, `charge.service`) annoncent `AG_OUVERTE`, `AG_CLOTUREE`, `INCIDENT_STATUT_MODIFIE`, `CHARGE_CREEE` **après** le succès de l'écriture, sans savoir qui s'y intéresse. `services/notification.service.ts` s'y abonne au démarrage (`server.ts`, jamais dans `createApp()` : les tests restent silencieux tant qu'ils ne s'abonnent pas) et envoie les courriels via `mail.service.ts` (SMTP configurable, silencieux si `SMTP_HOST` est absent). Un abonné en erreur n'affecte ni l'émetteur ni les autres abonnés.

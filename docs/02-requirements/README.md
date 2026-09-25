@@ -18,6 +18,7 @@ Export condensé du Doc 2. Chaque exigence pointe vers son état réel dans [Doc
 | F-10 | Contrôle d'accès strict par rôle et par périmètre de données (immeuble/lot) | Bloc 1 — sécurité |
 | F-11 | Journalisation des actions sensibles (vote, création d'AG, changement de statut d'incident) | Bloc 3 — logs |
 | F-12 | Notifications par email (V1) : ouverture et clôture d'une AG, avancement d'un incident, nouvelle charge ; désactivables par chaque utilisateur | Bloc 2 — logique métier |
+| F-13 | Export PDF (V1) : procès-verbal des résolutions d'une AG clôturée (décomptes anonymes) et relevé de charges (selon le rôle) | Bloc 2 — logique métier |
 
 F-11 (journalisation) est implémentée (`journal.service.ts`) : lignes JSON d'audit sur la sortie standard, sans valeur de vote.
 

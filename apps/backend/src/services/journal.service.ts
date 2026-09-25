@@ -30,7 +30,9 @@ export type ActionJournal =
   | 'INCIDENT_DECLARE'
   | 'INCIDENT_STATUT_MODIFIE'
   | 'CHARGE_CREEE'
-  | 'CHARGE_PAYEE';
+  | 'CHARGE_PAYEE'
+  | 'PV_EXPORTE'
+  | 'RELEVE_CHARGES_EXPORTE';
 
 type Sortie = (ligne: string) => void;
 

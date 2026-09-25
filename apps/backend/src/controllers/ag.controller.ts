@@ -13,6 +13,7 @@ import { ImmeubleNonInitialiseError } from '../services/lot.service.js';
 import { voteService, VoteInterditError } from '../services/vote.service.js';
 import { journalService } from '../services/journal.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { documentService } from '../services/document.service.js';
 import { secondVoteArt251Possible } from '../services/resultat-calculateur.js';
 
 /**
@@ -188,6 +189,44 @@ agRouter.get(
     } catch (erreur) {
       if (erreur instanceof AgIntrouvableError) {
         res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+/**
+ * F-13 : procès-verbal des résolutions en PDF. Mêmes règles d'accès que la consultation des
+ * résultats (tout compte authentifié, AG clôturée seulement : 409 sinon, RM-04) ; décomptes
+ * anonymes uniquement. Téléchargement, jamais mis en cache.
+ */
+agRouter.get(
+  '/:idAg/proces-verbal.pdf',
+  asyncHandler(async (req, res) => {
+    const params = paramsAgSchema.safeParse(req.params);
+    if (!params.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+    try {
+      const { pdf, nomFichier } = await documentService.procesVerbalAg(params.data.idAg);
+      journalService.journaliser('PV_EXPORTE', req.utilisateur!.id, params.data.idAg);
+      res
+        .status(200)
+        .set({
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': `attachment; filename="${nomFichier}"`,
+          'Cache-Control': 'no-store',
+        })
+        .send(pdf);
+    } catch (erreur) {
+      if (erreur instanceof AgIntrouvableError) {
+        res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof ResolutionsNonDisponiblesError) {
+        res.status(409).json({ erreur: erreur.message });
         return;
       }
       throw erreur;

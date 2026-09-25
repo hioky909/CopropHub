@@ -43,6 +43,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | GET | `/ags` | authentifié | 200 `{ags: [{id, dateAg, statut, nombreResolutions}]}` — les plus récentes en premier. |
 | GET | `/ags/:idAg` | authentifié | 200 `{ag, resolutions: [{id, libelle, typeMajorite}]}`. Ordre du jour SANS décompte ni résultat, quel que soit le statut — nécessaire à l'écran de vote avant clôture. |
 | GET | `/ags/:idAg/resolutions` | authentifié | 200 `{ag, resolutions: [{..., statutResultat, decomptes}]}` sur une AG **clôturée** uniquement (409 sinon, RM-04). Décomptes anonymes, jamais l'identité des votants (US-04). Chaque résolution porte `secondVoteArt251Possible` (art. 25 rejeté avec ≥ 1/3 des inscrits « oui » : second vote à la majorité simple permis par l'art. 25-1) ; `ag.nombreInscrits` = électorat figé. |
+| GET | `/ags/:idAg/proces-verbal.pdf` | authentifié | F-13 : procès-verbal des résolutions en PDF (`Content-Disposition: attachment`, `Cache-Control: no-store`). Mêmes règles que les résultats : AG **clôturée** seulement (409 sinon, RM-04), 404 si inconnue, 422 si identifiant invalide ; décomptes anonymes, mention de l'art. 25-1 le cas échéant. |
 | GET | `/ags/:idAg/mes-votes` | copropriétaire (403 sinon) | 200 `{votes: [{idResolution, valeur}]}` — uniquement les votes de l'utilisateur courant sur cette AG (aucun identifiant d'utilisateur accepté, anti-IDOR) ; 404 si AG inconnue. |
 | PUT | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | `{valeur}` → 200. Modifie un vote déjà exprimé, tant que l'AG est ouverte (409 après clôture, RM-04) ; 404 si aucun vote n'existe encore (le PUT ne crée pas). |
 | POST | `/resolutions/:idResolution/votes` | copropriétaire rattaché à un lot | `{valeur: 'OUI'|'NON'|'ABSTENTION'}` → 201. Une voix par résolution (RM-02), identité issue de la session. |
@@ -62,6 +63,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | GET | `/charges` | authentifié | 200 `{charges}`. Toutes pour syndic/conseil syndical, seulement les siennes pour un copropriétaire. |
 | POST | `/charges` | syndic | `{idLot, montant, periode, dateEcheance?}` → 201 `{charge}`. Montant en euros, strictement positif, 2 décimales max ; date calendaire réelle ; 404 si le lot n'existe pas. Statut initial `A_PAYER`. |
 | PATCH | `/charges/:idCharge/paiement` | syndic | → 200 `{charge}` (statut `PAYEE`). 409 si déjà payée, 404 si inconnue. Déclaratif : aucune intégration bancaire. |
+| GET | `/charges/export.pdf` | authentifié | F-13 : relevé de charges en PDF, même portée que `GET /charges` (tout pour le syndic et le conseil syndical, les charges de ses lots pour un copropriétaire ; relevé vide sans lot). Statut « en retard » dérivé, totaux exacts. Déclaré avant `/:idCharge`. |
 | GET | `/charges/:idCharge` | authentifié | 200 `{charge}`. 403 explicite (pas 404) sur la charge d'un autre lot. |
 
 `statut` renvoyé par les lectures est **dérivé** : une charge `A_PAYER` dont `dateEcheance` (AAAA-MM-JJ, ou `null`) est passée est renvoyée `EN_RETARD` (RM-09), sans modification du stockage.

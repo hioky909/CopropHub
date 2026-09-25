@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs'
 import { expect, test } from '@playwright/test'
 import { COPRO, SYNDIC, auditer, libelleUnique, login, logout } from './fixtures.js'
 
@@ -61,4 +62,15 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await expect(page.getByText('Oui : 0')).toBeVisible()
   await expect(page.getByText('Non : 1')).toBeVisible()
   await auditer(page, 'résultats de l’AG')
+
+  // F-13 : le procès-verbal se télécharge en PDF, sous un nom daté.
+  const [telechargement] = await Promise.all([
+    page.waitForEvent('download'),
+    page.getByRole('button', { name: 'Télécharger le PV (PDF)' }).click(),
+  ])
+  expect(telechargement.suggestedFilename()).toBe('proces-verbal-ag-2026-12-01.pdf')
+  const pdf = readFileSync((await telechargement.path())!)
+  expect(pdf.subarray(0, 5).toString('latin1')).toBe('%PDF-')
+  expect(pdf.toString('latin1').trimEnd().endsWith('%%EOF')).toBe(true)
+  expect(pdf.length).toBeGreaterThan(1000)
 })

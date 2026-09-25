@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState, type FormEvent } from 'react'
 import Badge from '../components/Badge.js'
 import Button from '../components/Button.js'
 import { SelectField, TextField } from '../components/FormField.js'
+import BoutonTelechargement from '../components/BoutonTelechargement.js'
 import Notification from '../components/Notification.js'
 import { chargesApi } from '../api/charges.js'
 import { utilisateursApi } from '../api/utilisateurs.js'
@@ -79,10 +80,15 @@ export default function ListeCharges() {
 
   return (
     <main style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px' }}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
-        Charges
-      </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>{charges.length} ligne(s) de charge</p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 24 }}>
+        <div>
+          <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
+            Charges
+          </h1>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-500)' }}>{charges.length} ligne(s) de charge</p>
+        </div>
+        <BoutonTelechargement libelle="Exporter en PDF" onTelecharger={() => chargesApi.relevePdf()} />
+      </div>
 
         {erreur && (
           <div style={{ marginBottom: 16 }}>
