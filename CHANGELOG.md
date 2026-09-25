@@ -6,6 +6,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Added
 
+- Audit d'accessibilité complet (WCAG 2.1 AA) : test e2e axe-core sur tous les écrans, focus visible partout, champs reliés à leurs erreurs, notifications annoncées, lien « Aller au contenu », titre et focus à chaque changement de page, barre de progression du vote en boutons nommés, modale avec piège de focus, contraste des textes secondaires. Détail et limites dans `docs/04-ux-ui/README.md`.
 - Socle technique initial du monorepo (T-01) : dépôts `apps/frontend` et `apps/backend` en TypeScript, ESLint, Prettier.
 - Docker Compose pour l'environnement local (T-02) : PostgreSQL, backend, frontend.
 - Schéma Prisma et migration initiale reprenant le MPD (T-03), y compris l'index unique partiel et la contrainte CHECK écrits à la main.

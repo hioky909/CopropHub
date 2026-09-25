@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 /** Cadre commun des écrans publics d'authentification (logo, titre, carte centrée), même habillage que la connexion. */
 export default function PageAuth({ titre, children }: { titre: string; children: ReactNode }) {
   return (
-    <div
+    <main
       style={{
         minHeight: '100vh',
         backgroundColor: '#F5F6F8',
@@ -38,6 +38,6 @@ export default function PageAuth({ titre, children }: { titre: string; children:
           {children}
         </div>
       </div>
-    </div>
+    </main>
   )
 }

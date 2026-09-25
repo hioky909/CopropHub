@@ -242,8 +242,8 @@ const OPTIONS_VOTE = [
 ]
 
 function VoteLabel({ choix, enAttente }: { choix: VoteChoice | 'DEJA_VOTE' | undefined; enAttente?: boolean }) {
-  if (enAttente) return <span style={{ fontSize: 12, color: '#BDBDBD' }}>En attente</span>
-  if (!choix || choix === 'DEJA_VOTE') return <span style={{ fontSize: 12, color: '#BDBDBD' }}>—</span>
+  if (enAttente) return <span style={{ fontSize: 12, color: '#5C5C5C' }}>En attente</span>
+  if (!choix || choix === 'DEJA_VOTE') return <span style={{ fontSize: 12, color: '#5C5C5C' }}>—</span>
   const opt = OPTIONS_VOTE.find((o) => o.value === choix)!
   return (
     <span style={{ fontSize: 12, fontWeight: 500, color: opt.color, backgroundColor: opt.bg, padding: '2px 8px', borderRadius: 4 }}>
@@ -323,12 +323,17 @@ function EcranVote({
               <button
                 key={r.id}
                 onClick={() => setIndex(i)}
+                aria-label={`Résolution ${i + 1} sur ${resolutions.length}${votes[r.id] !== undefined ? ', votée' : ''}`}
+                aria-current={i === index ? 'step' : undefined}
                 style={{
                   flex: 1,
-                  height: 4,
+                  height: 12,
+                  padding: 0,
                   borderRadius: 2,
-                  border: 'none',
                   cursor: 'pointer',
+                  backgroundClip: 'content-box',
+                  borderTop: '4px solid transparent',
+                  borderBottom: '4px solid transparent',
                   backgroundColor: votes[r.id] !== undefined ? '#1E7A4C' : i === index ? '#1E4B8F' : '#E0E0E0',
                   transition: 'background 0.2s',
                 }}
@@ -372,7 +377,7 @@ function EcranVote({
           </div>
 
           <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #F2F2F2' }}>
-            <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>Mon vote</p>
+            <p id="titre-mon-vote" style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>Mon vote</p>
             {confirmee && !enModification ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {OPTIONS_VOTE.map((opt) => {
@@ -394,13 +399,14 @@ function EcranVote({
                       }}
                     >
                       {opt.label}
+                      {selected && <span className="sr-only"> (votre choix)</span>}
                     </div>
                   )
                 })}
               </div>
             ) : (
               <>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                <div role="group" aria-labelledby="titre-mon-vote" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                   {OPTIONS_VOTE.map((opt) => {
                     const selectionne = choix === opt.value
                     return (

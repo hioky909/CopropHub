@@ -216,14 +216,41 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
   const [envoi, setEnvoi] = useState(false)
   const dateInputRef = useRef<HTMLInputElement>(null)
 
+  const boiteRef = useRef<HTMLDivElement>(null)
+  const surFermeture = useRef(onClose)
+  surFermeture.current = onClose
+
+  // Accessibilité de la boîte de dialogue : focus à l'ouverture, Échap pour fermer, Tab qui reste
+  // dans la boîte, et focus rendu au bouton d'origine à la fermeture.
   useEffect(() => {
+    const declencheur = document.activeElement as HTMLElement | null
     dateInputRef.current?.focus()
-    function surEchap(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose()
+    function surTouche(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        surFermeture.current()
+        return
+      }
+      if (e.key !== 'Tab' || !boiteRef.current) return
+      const focalisables = boiteRef.current.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input, select, textarea, a[href]',
+      )
+      if (focalisables.length === 0) return
+      const premier = focalisables[0]
+      const dernier = focalisables[focalisables.length - 1]
+      if (e.shiftKey && document.activeElement === premier) {
+        e.preventDefault()
+        dernier.focus()
+      } else if (!e.shiftKey && document.activeElement === dernier) {
+        e.preventDefault()
+        premier.focus()
+      }
     }
-    window.addEventListener('keydown', surEchap)
-    return () => window.removeEventListener('keydown', surEchap)
-  }, [onClose])
+    window.addEventListener('keydown', surTouche)
+    return () => {
+      window.removeEventListener('keydown', surTouche)
+      declencheur?.focus?.()
+    }
+  }, [])
 
   function majResolution(index: number, patch: Partial<NouvelleResolution>) {
     setResolutions((prev) => prev.map((r, i) => (i === index ? { ...r, ...patch } : r)))
@@ -262,6 +289,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       onClick={onClose}
     >
       <div
+        ref={boiteRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="titre-modal-creation-ag"
@@ -284,27 +312,29 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
               type="date"
               value={dateAg}
               onChange={(e) => setDateAg(e.target.value)}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', color: '#1A1A1A', outline: 'none' }}
+              style={{ width: '100%', padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', color: '#1A1A1A' }}
             />
           </div>
 
           <div>
             <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
-              Résolutions <span style={{ color: '#B3261E' }}>*</span>
+              Résolutions <span aria-hidden="true" style={{ color: '#B3261E' }}>*</span>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resolutions.map((r, i) => (
                 <div key={i} style={{ display: 'flex', gap: 6 }}>
                   <input
+                    aria-label={`Libellé de la résolution ${i + 1}`}
                     placeholder={`Résolution ${i + 1}`}
                     value={r.libelle}
                     onChange={(e) => majResolution(i, { libelle: e.target.value })}
-                    style={{ flex: 1, padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', outline: 'none' }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit' }}
                   />
                   <select
+                    aria-label={`Type de majorité de la résolution ${i + 1}`}
                     value={r.typeMajorite}
                     onChange={(e) => majResolution(i, { typeMajorite: e.target.value as TypeMajorite })}
-                    style={{ padding: '8px 8px', fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', outline: 'none', color: '#3D3D3D' }}
+                    style={{ padding: '8px 8px', fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', color: '#3D3D3D' }}
                   >
                     {OPTIONS_MAJORITE.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -316,7 +346,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                     <button
                       type="button"
                       onClick={() => setResolutions((prev) => prev.filter((_, idx) => idx !== i))}
-                      aria-label="Retirer la résolution"
+                      aria-label={`Retirer la résolution ${i + 1}`}
                       style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 6, color: '#B3261E', cursor: 'pointer', padding: '0 10px' }}
                     >
                       ×

@@ -206,7 +206,7 @@ export default function ListeCharges() {
               <thead>
                 <tr style={{ backgroundColor: '#F5F6F8', borderBottom: '1px solid #E0E0E0' }}>
                   {[...(estSyndic ? ['Lot'] : []), 'Période', 'Montant', 'Échéance', 'Statut', ...(estSyndic ? [''] : [])].map((col, index) => (
-                    <th
+                    <th scope="col"
                       key={`${col}-${index}`}
                       style={{ padding: '9px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}
                     >

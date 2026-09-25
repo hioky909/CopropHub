@@ -48,6 +48,17 @@ Badge de statut (succès/avertissement/danger/neutre), Bouton (primaire/secondai
 
 Cible WCAG 2.1 niveau AA, vérifiée sur les écrans clés (pas promise app-wide). Vérification réelle effectuée en T-24 : navigation clavier complète sur le formulaire de connexion et le seul modal de l'application, labels associés à leur champ (`htmlFor`/`id`, corrigé après un défaut trouvé dans la maquette source) — voir le CHANGELOG (entrées T-17, T-23, T-24) pour le détail des gaps trouvés et corrigés.
 
+**Audit complet (2026-09-25)** — vérifié en navigateur réel par `e2e/accessibilite.spec.ts` (axe-core, WCAG 2.1 A et AA, zéro violation tolérée) sur tous les écrans publics et connectés (syndic et copropriétaire), la modale de création d'AG, l'écran de vote et les résultats. Ce que l'audit a fait corriger :
+- **Focus visible partout** : les champs et listes déroulantes supprimaient leur contour (`outline: none` en ligne) ; le style `:focus-visible` global s'applique désormais à tous les contrôles.
+- **Champs de formulaire** : erreur ou aide reliée au champ (`aria-describedby`), `aria-invalid`, `aria-required` (l'astérisque visuel est masqué aux lecteurs d'écran), message d'erreur annoncé (`role="alert"`).
+- **Notifications** : `role="alert"` pour erreurs et avertissements, `role="status"` (annonce polie) pour succès et informations ; icônes décoratives masquées.
+- **Navigation** : lien « Aller au contenu » (visible au focus), repère `<nav>` nommé, chaque écran a un `<main>` et un `<h1>`, le titre de l'onglet suit la page (« Charges — CopropHub »), et le focus est ramené sur le contenu à chaque changement de page (sinon un lecteur d'écran n'annonce rien).
+- **Vote** : la barre de progression est devenue des boutons nommés (« Résolution 2 sur 3, votée », zone de clic de 12 px au lieu de 4), les choix sont un groupe nommé, le choix enregistré est annoncé (« votre choix »).
+- **Modale** : Tab reste dans la boîte, Échap la ferme, le focus revient au bouton d'origine ; champs des résolutions nommés individuellement.
+- **Tableaux** : `scope="col"` sur les en-têtes. **Contraste** : les textes « En attente » / « — » en gris clair (1,9:1) passent à 5,9:1. `prefers-reduced-motion` respecté.
+
+**Limites assumées** : axe-core ne détecte qu'une partie des défauts — pas de test avec un vrai lecteur d'écran (NVDA/VoiceOver) ; les bordures des champs (`#E0E0E0`, 1,3:1) restent celles du design system d'origine, sous les 3:1 du critère 1.4.11 : à trancher avec le design system plutôt que de s'en écarter ici.
+
 ## Responsive
 
 Mobile-first pour les écrans à usage nomade (vote, signalement d'incident) ; desktop-first toléré pour les écrans d'administration syndic (gestion des copropriétaires, création d'AG) — mais **aucun écran ne doit obliger à défiler horizontalement sur un téléphone** (375 px), critère vérifié par un test e2e (`e2e/responsive.spec.ts`).

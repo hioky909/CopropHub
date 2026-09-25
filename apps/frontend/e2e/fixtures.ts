@@ -1,4 +1,5 @@
-import type { Page } from '@playwright/test'
+import AxeBuilder from '@axe-core/playwright'
+import { expect, type Page } from '@playwright/test'
 
 /**
  * Identifiants amorcés par `apps/backend/scripts/e2e-seed.ts` : mêmes
@@ -40,4 +41,11 @@ export async function logout(page: Page): Promise<void> {
     page.waitForResponse((r) => r.request().method() === 'POST' && r.url().endsWith('/auth/deconnexion')),
     page.getByRole('button', { name: 'Déconnexion' }).click(),
   ])
+}
+
+/** Audit axe-core (WCAG 2.1 A et AA) de la page affichée : aucune violation tolérée. */
+export async function auditer(page: Page, ecran: string): Promise<void> {
+  const { violations } = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa']).analyze()
+  const resume = violations.map((v) => `${v.id} (${v.impact}) : ${v.nodes.map((n) => n.target.join(' ')).join(' | ')}`)
+  expect(resume, `violations d'accessibilité sur ${ecran}`).toEqual([])
 }

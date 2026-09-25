@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.js'
 import type { TypeCompte } from '../api/types.js'
@@ -22,12 +22,46 @@ export default function Shell({ children }: { children: ReactNode }) {
     document.querySelector('.entete-nav a.active')?.scrollIntoView?.({ inline: 'center', block: 'nearest' })
   }, [location.pathname])
 
+  // Changement de page : un lecteur d'écran ne l'annonce pas de lui-même. On donne à l'onglet un
+  // titre propre à la page et on place le focus sur le contenu (sauf au tout premier affichage).
+  const premierAffichage = useRef(true)
+  useEffect(() => {
+    // Les écrans chargent leurs données après le premier rendu : le titre suit donc le contenu.
+    const majTitre = () => {
+      const titre = document.querySelector('h1')?.textContent
+      document.title = titre ? `${titre} — CopropHub` : 'CopropHub'
+    }
+    majTitre()
+    const observateur = new MutationObserver(majTitre)
+    observateur.observe(document.body, { childList: true, subtree: true, characterData: true })
+    const main = document.querySelector('main')
+    if (premierAffichage.current) {
+      premierAffichage.current = false
+      return () => observateur.disconnect()
+    }
+    main?.setAttribute('tabindex', '-1')
+    main?.focus({ preventScroll: true })
+    return () => observateur.disconnect()
+  }, [location.pathname])
+
   if (!utilisateur) return <>{children}</>
 
   const items = NAV_ITEMS.filter((item) => item.roles.includes(utilisateur.typeCompte))
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#F5F6F8' }}>
+      <a
+        href="#contenu"
+        className="lien-evitement"
+        onClick={(e) => {
+          e.preventDefault()
+          const main = document.querySelector('main')
+          main?.setAttribute('tabindex', '-1')
+          main?.focus()
+        }}
+      >
+        Aller au contenu
+      </a>
       <header
         style={{
           backgroundColor: '#FFFFFF',
@@ -52,7 +86,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                     justifyContent: 'center',
                   }}
                 >
-                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
                     <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
                     <rect x="3" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
@@ -65,7 +99,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                 </span>
               </div>
 
-              <nav className="entete-nav" style={{ display: 'flex', gap: 4 }}>
+              <nav aria-label="Navigation principale" className="entete-nav" style={{ display: 'flex', gap: 4 }}>
                 {items.map((item) => (
                   <NavLink
                     key={item.to}

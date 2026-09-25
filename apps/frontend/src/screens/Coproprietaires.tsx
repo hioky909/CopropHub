@@ -193,10 +193,10 @@ export default function Coproprietaires() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={enTete}>Lot</th>
-                <th style={enTete}>Type</th>
-                <th style={enTete}>Propriétaire</th>
-                <th style={enTete}>Rattacher à</th>
+                <th scope="col" style={enTete}>Lot</th>
+                <th scope="col" style={enTete}>Type</th>
+                <th scope="col" style={enTete}>Propriétaire</th>
+                <th scope="col" style={enTete}>Rattacher à</th>
               </tr>
             </thead>
             <tbody>
@@ -249,10 +249,10 @@ export default function Coproprietaires() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={enTete}>Nom</th>
-                <th style={enTete}>Email</th>
-                <th style={enTete}>Lots</th>
-                <th style={enTete}>Conseil syndical</th>
+                <th scope="col" style={enTete}>Nom</th>
+                <th scope="col" style={enTete}>Email</th>
+                <th scope="col" style={enTete}>Lots</th>
+                <th scope="col" style={enTete}>Conseil syndical</th>
               </tr>
             </thead>
             <tbody>
@@ -298,8 +298,8 @@ export default function Coproprietaires() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
-                <th style={enTete}>Nom</th>
-                <th style={enTete}>Email</th>
+                <th scope="col" style={enTete}>Nom</th>
+                <th scope="col" style={enTete}>Email</th>
               </tr>
             </thead>
             <tbody>

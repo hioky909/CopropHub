@@ -16,7 +16,6 @@ const inputBase = {
   backgroundColor: '#FFFFFF',
   border: '1px solid #E0E0E0',
   borderRadius: 6,
-  outline: 'none',
   transition: 'border-color 0.15s',
   lineHeight: 1.5,
 }
@@ -28,14 +27,14 @@ function FieldWrapper({
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
       <label htmlFor={fieldId} style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
         {label}
-        {required && <span style={{ color: '#B3261E', marginLeft: 2 }}>*</span>}
+        {required && <span aria-hidden="true" style={{ color: '#B3261E', marginLeft: 2 }}>*</span>}
       </label>
       {children}
       {error && (
-        <p style={{ fontSize: 12, color: '#B3261E', margin: 0 }}>{error}</p>
+        <p id={`${fieldId}-message`} role="alert" style={{ fontSize: 12, color: '#B3261E', margin: 0 }}>{error}</p>
       )}
       {!error && help && (
-        <p style={{ fontSize: 12, color: '#5C5C5C', margin: 0 }}>{help}</p>
+        <p id={`${fieldId}-message`} style={{ fontSize: 12, color: '#5C5C5C', margin: 0 }}>{help}</p>
       )}
     </div>
   )
@@ -50,6 +49,9 @@ export function TextField({
     <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <input
         id={fieldId}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || help ? `${fieldId}-message` : undefined}
         {...props}
         style={{
           ...inputBase,
@@ -77,6 +79,9 @@ export function SelectField({
     <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <select
         id={fieldId}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || help ? `${fieldId}-message` : undefined}
         {...props}
         style={{
           ...inputBase,
@@ -103,6 +108,9 @@ export function TextareaField({
     <FieldWrapper label={label} help={help} error={error} required={required} fieldId={fieldId}>
       <textarea
         id={fieldId}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error || help ? `${fieldId}-message` : undefined}
         {...props}
         rows={props.rows ?? 4}
         style={{

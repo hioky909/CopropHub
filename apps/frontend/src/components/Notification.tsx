@@ -20,7 +20,7 @@ export default function Notification({ variant, title, children, onDismiss }: No
   const s = STYLES[variant]
   return (
     <div
-      role="alert"
+      role={variant === 'error' || variant === 'warning' ? 'alert' : 'status'}
       style={{
         display: 'flex',
         gap: 12,
@@ -31,6 +31,7 @@ export default function Notification({ variant, title, children, onDismiss }: No
       }}
     >
       <span
+        aria-hidden="true"
         style={{
           width: 20,
           height: 20,

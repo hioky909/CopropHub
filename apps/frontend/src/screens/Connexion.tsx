@@ -39,7 +39,7 @@ export default function Connexion() {
   }
 
   return (
-    <div
+    <main
       style={{
         minHeight: '100vh',
         backgroundColor: '#F5F6F8',
@@ -50,6 +50,7 @@ export default function Connexion() {
       }}
     >
       <div style={{ width: '100%', maxWidth: 400 }}>
+        <h1 className="sr-only">{mode === 'connexion' ? 'Connexion' : 'Créer un compte'}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
           <div
             style={{
@@ -62,7 +63,7 @@ export default function Connexion() {
               justifyContent: 'center',
             }}
           >
-            <svg width="16" height="16" viewBox="0 0 14 14" fill="none">
+            <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
               <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
               <rect x="3" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
@@ -88,6 +89,7 @@ export default function Connexion() {
               <button
                 key={m}
                 type="button"
+                aria-pressed={mode === m}
                 onClick={() => {
                   setMode(m)
                   setErreur(null)
@@ -153,6 +155,6 @@ export default function Connexion() {
           </p>
         )}
       </div>
-    </div>
+    </main>
   )
 }

@@ -34,6 +34,7 @@ export default function Badge({ variant, label, dot = true }: BadgeProps) {
     >
       {dot && (
         <span
+          aria-hidden="true"
           style={{
             width: 6,
             height: 6,

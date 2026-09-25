@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { COPRO, SYNDIC, libelleUnique, login, logout } from './fixtures.js'
+import { COPRO, SYNDIC, auditer, libelleUnique, login, logout } from './fixtures.js'
 
 test('parcours complet : création AG → ouverture → vote → clôture → résultats (F-04 à F-07)', async ({
   page,
@@ -32,6 +32,7 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await login(page, COPRO.email, COPRO.motDePasse)
   await page.goto(`/assemblees/${ag.id}`)
   await expect(page.getByText(libelle)).toBeVisible()
+  await auditer(page, 'écran de vote')
   await page.getByRole('button', { name: 'Pour' }).click()
   await page.getByRole('button', { name: /Valider mon vote/ }).click()
 
@@ -58,4 +59,5 @@ test('parcours complet : création AG → ouverture → vote → clôture → r�
   await expect(page.getByText('Rejetée')).toBeVisible()
   await expect(page.getByText('Oui : 0')).toBeVisible()
   await expect(page.getByText('Non : 1')).toBeVisible()
+  await auditer(page, 'résultats de l’AG')
 })
