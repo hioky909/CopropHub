@@ -42,12 +42,21 @@ export default function Coproprietaires() {
   const [numeroLot, setNumeroLot] = useState('')
   const [typeLot, setTypeLot] = useState(TYPES_LOT[0]!)
   const [choixProprietaire, setChoixProprietaire] = useState<Record<string, string>>({})
+  const [syndics, setSyndics] = useState<{ id: string; nom: string; email: string }[]>([])
+  const [nomSyndic, setNomSyndic] = useState('')
+  const [emailSyndic, setEmailSyndic] = useState('')
+  const [motDePasseSyndic, setMotDePasseSyndic] = useState('')
 
   const charger = useCallback(async () => {
     try {
-      const [c, l] = await Promise.all([utilisateursApi.lister(), utilisateursApi.listerLots()])
+      const [c, l, s] = await Promise.all([
+        utilisateursApi.lister(),
+        utilisateursApi.listerLots(),
+        utilisateursApi.listerSyndics(),
+      ])
       setCoproprietaires(c.coproprietaires)
       setLots(l.lots)
+      setSyndics(s.syndics)
     } catch (err) {
       setErreur(err instanceof ApiError ? err.message : 'Impossible de charger les copropriétaires.')
     } finally {
@@ -86,6 +95,19 @@ export default function Coproprietaires() {
       setNom('')
       setEmail('')
       setMotDePasse('')
+    }
+  }
+
+  async function creerSyndic(e: FormEvent) {
+    e.preventDefault()
+    const ok = await executer(
+      () => utilisateursApi.creerSyndic(nomSyndic, emailSyndic, motDePasseSyndic),
+      `Syndic ${nomSyndic} créé.`,
+    )
+    if (ok) {
+      setNomSyndic('')
+      setEmailSyndic('')
+      setMotDePasseSyndic('')
     }
   }
 
@@ -230,6 +252,7 @@ export default function Coproprietaires() {
                 <th style={enTete}>Nom</th>
                 <th style={enTete}>Email</th>
                 <th style={enTete}>Lots</th>
+                <th style={enTete}>Conseil syndical</th>
               </tr>
             </thead>
             <tbody>
@@ -242,12 +265,70 @@ export default function Coproprietaires() {
                     <td style={cellule}>
                       {numeros.length > 0 ? numeros.join(', ') : <span style={{ color: '#5C5C5C' }}>Aucun lot</span>}
                     </td>
+                    <td style={cellule}>
+                      <input
+                        type="checkbox"
+                        aria-label={`Membre du conseil syndical : ${c.nom}`}
+                        checked={c.estMembreConseilSyndical}
+                        disabled={action}
+                        onChange={(e) =>
+                          void executer(
+                            () => utilisateursApi.definirConseilSyndical(c.id, e.target.checked),
+                            e.target.checked
+                              ? `${c.nom} est désigné(e) membre du conseil syndical.`
+                              : `${c.nom} n’est plus membre du conseil syndical.`,
+                          )
+                        }
+                        style={{ width: 18, height: 18, cursor: 'pointer' }}
+                      />
+                    </td>
                   </tr>
                 )
               })}
             </tbody>
           </table>
         )}
+      </div>
+
+      <div className="grille-deux-colonnes" style={{ marginTop: 24 }}>
+        <div style={carteTableau}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Équipe du syndic</h2>
+          </div>
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead>
+              <tr>
+                <th style={enTete}>Nom</th>
+                <th style={enTete}>Email</th>
+              </tr>
+            </thead>
+            <tbody>
+              {syndics.map((s) => (
+                <tr key={s.id} style={{ borderTop: '1px solid #F2F2F2' }}>
+                  <td style={{ ...cellule, fontWeight: 500 }}>{s.nom}</td>
+                  <td style={cellule}>{s.email}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <form onSubmit={creerSyndic} style={{ ...carte, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Ajouter un syndic</h2>
+          <TextField label="Nom du nouveau syndic" required value={nomSyndic} onChange={(e) => setNomSyndic(e.target.value)} />
+          <TextField label="Courriel du nouveau syndic" type="email" required value={emailSyndic} onChange={(e) => setEmailSyndic(e.target.value)} />
+          <TextField
+            label="Mot de passe du nouveau syndic"
+            type="password"
+            required
+            value={motDePasseSyndic}
+            onChange={(e) => setMotDePasseSyndic(e.target.value)}
+            help="12 caractères minimum. Un syndic peut tout gérer : n’en créez que de confiance."
+          />
+          <Button type="submit" variant="primary" disabled={action}>
+            Créer le syndic
+          </Button>
+        </form>
       </div>
     </main>
   )

@@ -11,7 +11,7 @@ Export condensé du Doc 2. Chaque exigence pointe vers son état réel dans [Doc
 | F-03 | Rattachement d'un copropriétaire à un ou plusieurs lots | Bloc 2 |
 | F-04 | Création d'une AG avec ordre du jour et résolutions | Bloc 1 |
 | F-05 | Vote en ligne sur chaque résolution (oui/non/abstention) par copropriétaire | Bloc 1 |
-| F-06 | Calcul automatique du quorum et du résultat d'une résolution | Bloc 2 — logique métier |
+| F-06 | Calcul automatique du résultat d'une résolution (aucun quorum de présence n'existe en copropriété : décision documentée sous RM-03) | Bloc 2 — logique métier |
 | F-07 | Consultation des résolutions et résultats passés | Bloc 1 |
 | F-08 | Déclaration et suivi d'un incident avec statut (déclaré → en cours → résolu) | Bloc 1 |
 | F-09 | Consultation des charges par lot et par période | Bloc 2 |
@@ -68,6 +68,7 @@ Le périmètre MVP retient les **4 mêmes types de résolution**, pour rester fi
   - *double majorité* : voix « oui » ≥ deux tiers du nombre total de copropriétaires inscrits ;
   - *unanimité* : tous les copropriétaires inscrits ont voté « oui ».
   - Le nombre de copropriétaires **inscrits** est figé à l'ouverture du vote (`ag.nombre_inscrits_geles`) : un transfert de lot pendant que l'AG est ouverte ne modifie pas le dénominateur d'une AG déjà en cours.
+- **Quorum (décision)** : la loi du 10 juillet 1965 ne prévoit **aucun quorum de présence** pour tenir une assemblée générale de copropriété ; seules comptent les majorités par résolution (art. 24, 25, 26, unanimité), déjà appliquées ci-dessus. Aucun contrôle de quorum n'est donc implémenté — en ajouter un aurait créé une règle qui n'existe pas et pu invalider des résultats valides. L'écran des résultats affiche la participation (votants sur inscrits) à titre d'information. Non implémenté et laissé pour une éventuelle évolution : la « passerelle » de l'art. 25-1 (si l'art. 25 échoue mais que le « oui » atteint un tiers des voix, second vote immédiat à la majorité de l'art. 24).
 - **RM-04** : une fois l'AG clôturée par le syndic, aucun vote ne peut plus être modifié ni ajouté (immutabilité du résultat) — la modification d'un vote est refusée après la clôture, atomiquement vis-à-vis de celle-ci.
 
 ### RM-05 à RM-07 — AG et participation

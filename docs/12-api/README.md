@@ -19,6 +19,9 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | Méthode | Route | Rôle | Description |
 |---|---|---|---|
 | GET | `/utilisateurs` | syndic | Liste des copropriétaires. |
+| GET | `/utilisateurs/syndics` | syndic | 200 `{syndics: [{id, nom, email}]}` — équipe du syndic. |
+| POST | `/utilisateurs/syndics` | syndic | `{nom, email, motDePasse}` → 201. Crée un compte SYNDIC (jamais possible par l'inscription publique) ; 409 email pris, 422 mot de passe trop court. |
+| PATCH | `/utilisateurs/:idUtilisateur/conseil-syndical` | syndic | `{estMembre: boolean}` → 200. Désigne ou retire un membre du conseil syndical ; 422 si le compte n'est pas un copropriétaire, 404 si inconnu. |
 | POST | `/utilisateurs` | syndic | `{nom, email, motDePasse}` → 201. Crée un compte COPROPRIETAIRE (type jamais accepté du client). |
 | POST | `/utilisateurs/lots` | syndic | `{numero, typeLot}` → 201 `{lot}`. |
 | POST | `/utilisateurs/lots/rattachement` | syndic | `{idLot, idUtilisateur}` → 201. Idempotent ; clôture (pas suppression) l'ancien rattachement sauf s'il a débuté le jour même. |

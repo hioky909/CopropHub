@@ -52,6 +52,8 @@ L'API répond sur `http://localhost:3000` (`/health` pour le contrôle de démar
 | POST | `/auth/mot-de-passe` | authentifié | Changer son mot de passe (exige l'actuel, politique 12 caractères) |
 | GET | `/auth/moi` | authentifié | Utilisateur courant |
 | GET | `/utilisateurs` | syndic | Liste des copropriétaires |
+| GET / POST | `/utilisateurs/syndics` | syndic | Lister l'équipe du syndic / créer un autre compte syndic |
+| PATCH | `/utilisateurs/:idUtilisateur/conseil-syndical` | syndic | Désigner ou retirer un membre du conseil syndical (copropriétaire uniquement) |
 | POST | `/utilisateurs` | syndic | Créer un copropriétaire (F-03, US-10) |
 | POST | `/utilisateurs/lots` | syndic | Créer un lot (F-02) |
 | POST | `/utilisateurs/lots/rattachement` | syndic | Rattacher un lot à un copropriétaire (US-10) |

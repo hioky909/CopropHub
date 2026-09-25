@@ -24,7 +24,7 @@ Décision (`ADR-002-authentification`) : cookie de session signé **HttpOnly/Sec
 | Charges d'un lot | Lecture/écriture, tous les lots | Lecture, tous les lots | Lecture, ses lots uniquement |
 | Incidents | Lecture/écriture (statut), tous | Lecture, tous | Lecture/création : les siens et ceux des parties communes (jamais ceux du lot d'un autre, jamais l'identité du déclarant d'autrui — point ouvert tranché) |
 | Résolutions / votes | Création, clôture ; lecture des résultats agrégés | Lecture des résultats agrégés | Vote (le sien uniquement), lecture des résultats agrégés |
-| Copropriétaires / lots | Lecture/écriture, tous | Lecture, tous | Lecture, son propre profil uniquement |
+| Copropriétaires / lots | Lecture/écriture, tous ; création d'autres comptes syndic ; désignation des membres du conseil syndical | Lecture, tous | Lecture, son propre profil uniquement |
 
 Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, fonction `autoriser(utilisateur, action, ressource, permissions)`, appelée **avant** tout accès aux données (jamais « charger puis filtrer »). Un membre du conseil syndical **cumule** ses droits de base (copropriétaire, conditionnés à l'appartenance) avec ses droits étendus (conseil syndical, inconditionnels) — jamais un remplacement de l'un par l'autre (bug réel trouvé et corrigé en implémentation, cf. CHANGELOG).
 
