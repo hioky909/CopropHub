@@ -16,10 +16,7 @@ describe('api.telecharger', () => {
   it('récupère le fichier avec le cookie de session puis le propose au téléchargement sous le nom donné', async () => {
     const fetchMock = vi.fn().mockResolvedValue({ ok: true, blob: () => Promise.resolve(blobDuPdf) })
     vi.stubGlobal('fetch', fetchMock)
-    let lien: HTMLAnchorElement | undefined
-    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function (this: HTMLAnchorElement) {
-      lien = this
-    })
+    const clic = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => undefined)
 
     await api.telecharger('/ags/ag-1/proces-verbal.pdf', 'proces-verbal-ag-2026-11-14.pdf')
 
@@ -28,8 +25,9 @@ describe('api.telecharger', () => {
     expect(String(url)).toMatch(/\/ags\/ag-1\/proces-verbal\.pdf$/)
     expect(options).toMatchObject({ credentials: 'include' })
     expect(URL.createObjectURL).toHaveBeenCalledWith(blobDuPdf)
-    expect(lien?.download).toBe('proces-verbal-ag-2026-11-14.pdf')
-    expect(lien?.href).toBe('blob:test')
+    const lien = clic.mock.contexts[0] as HTMLAnchorElement // le lien sur lequel `click()` a été appelé
+    expect(lien.download).toBe('proces-verbal-ag-2026-11-14.pdf')
+    expect(lien.href).toBe('blob:test')
     expect(document.querySelector('a[download]')).toBeNull() // le lien temporaire est retiré du document
   })
 
