@@ -131,7 +131,7 @@ jobs:
           docker compose -f docker-compose.prod.yml --env-file .env.ci up -d
           docker compose -f docker-compose.prod.yml --env-file .env.ci --profile outils run --rm seed
           for i in $(seq 1 30); do curl -sk -o /dev/null https://localhost:18443/api/health && break; sleep 2; done
-          ./deploy/verifier-production.sh https://localhost:18443 --insecure
+          bash ./deploy/verifier-production.sh https://localhost:18443 --insecure
 
       - name: Journaux en cas d'échec
         if: failure()
@@ -171,4 +171,4 @@ jobs:
         if: env.DEPLOY_DOMAINE != '' && env.DEPLOY_HOST != ''
         run: |
           for i in $(seq 1 30); do curl -fsS "https://$DEPLOY_DOMAINE/api/health" >/dev/null && break; sleep 5; done
-          ./deploy/verifier-production.sh "https://$DEPLOY_DOMAINE"
+          bash ./deploy/verifier-production.sh "https://$DEPLOY_DOMAINE"
