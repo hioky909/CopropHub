@@ -16,6 +16,8 @@ export type ActionJournal =
   | 'DECONNEXION'
   | 'MOT_DE_PASSE_MODIFIE'
   | 'COPROPRIETAIRE_CREE'
+  | 'SYNDIC_CREE'
+  | 'CONSEIL_SYNDICAL_MODIFIE'
   | 'LOT_CREE'
   | 'LOT_RATTACHE'
   | 'AG_CREEE'

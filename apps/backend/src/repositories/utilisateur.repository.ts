@@ -51,6 +51,30 @@ export const utilisateurRepository = {
    * copropriétaire peut être rattaché à un lot (RM-07, contrainte
    * chk_conseil_syndical_coproprietaire côté base).
    */
+  /** Comptes syndic (gestion de l'équipe du syndic). */
+  listerSyndics() {
+    return prisma.utilisateur.findMany({
+      where: { typeCompte: 'SYNDIC' },
+      orderBy: { nom: 'asc' },
+    });
+  },
+
+  /**
+   * Désigne (ou retire) un membre du conseil syndical. Ne touche qu'un compte
+   * COPROPRIETAIRE — la contrainte CHECK du MPD l'impose aussi en base.
+   * Retourne `null` si aucun copropriétaire ne correspond.
+   */
+  async definirMembreConseilSyndical(id: string, estMembreConseilSyndical: boolean) {
+    const resultat = await prisma.utilisateur.updateMany({
+      where: { id, typeCompte: 'COPROPRIETAIRE' },
+      data: { estMembreConseilSyndical },
+    });
+    if (resultat.count === 0) {
+      return null;
+    }
+    return prisma.utilisateur.findUnique({ where: { id } });
+  },
+
   listerCoproprietaires() {
     return prisma.utilisateur.findMany({
       where: { typeCompte: 'COPROPRIETAIRE' },

@@ -44,7 +44,55 @@ function debuteAvantAujourdhui(dateDebut: Date): boolean {
   return jour(dateDebut) < jour(new Date());
 }
 
+export class CompteNonCoproprietaireError extends Error {
+  constructor() {
+    super('Seul un copropriétaire peut être membre du conseil syndical.');
+    this.name = 'CompteNonCoproprietaireError';
+  }
+}
+
 export const utilisateurService = {
+  async listerSyndics() {
+    return utilisateurRepository.listerSyndics();
+  },
+
+  /**
+   * Création d'un compte SYNDIC supplémentaire, par un syndic déjà connecté
+   * (jamais par l'inscription publique, anti-élévation de privilèges).
+   */
+  async creerSyndic(donnees: { nom: string; email: string; motDePasseClair: string }) {
+    if (await utilisateurRepository.parEmail(donnees.email)) {
+      throw new EmailDejaUtiliseError();
+    }
+    const motDePasseHash = await motDePasseService.hacher(donnees.motDePasseClair);
+    const utilisateur = await utilisateurRepository.creer({
+      nom: donnees.nom,
+      email: donnees.email,
+      motDePasseHash,
+      typeCompte: 'SYNDIC',
+    });
+    if (!utilisateur) {
+      throw new EmailDejaUtiliseError();
+    }
+    return utilisateur;
+  },
+
+  /** Le conseil syndical est un droit de regard supplémentaire d'un copropriétaire (RM-07, RM-12) : le syndic le désigne ou le retire. */
+  async definirConseilSyndical(idUtilisateur: string, estMembre: boolean) {
+    const utilisateur = await utilisateurRepository.parId(idUtilisateur);
+    if (!utilisateur) {
+      throw new UtilisateurIntrouvableError();
+    }
+    if (utilisateur.typeCompte !== 'COPROPRIETAIRE') {
+      throw new CompteNonCoproprietaireError();
+    }
+    const modifie = await utilisateurRepository.definirMembreConseilSyndical(idUtilisateur, estMembre);
+    if (!modifie) {
+      throw new UtilisateurIntrouvableError();
+    }
+    return modifie;
+  },
+
   async listerCoproprietaires() {
     return utilisateurRepository.listerCoproprietaires();
   },

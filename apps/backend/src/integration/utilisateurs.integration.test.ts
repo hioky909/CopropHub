@@ -31,6 +31,8 @@ describe('autorisation (RM-14) sur /utilisateurs', () => {
   const routes = [
     ['get', '/utilisateurs'],
     ['get', '/utilisateurs/lots'],
+    ['get', '/utilisateurs/syndics'],
+    ['post', '/utilisateurs/syndics'],
     ['post', '/utilisateurs'],
     ['post', '/utilisateurs/lots'],
     ['post', '/utilisateurs/lots/rattachement'],
@@ -302,5 +304,102 @@ describe('GET /utilisateurs/lots — lots et propriétaire actuel (réservé au 
     expect(
       (await request(app).get('/utilisateurs/lots').set('Cookie', cookieSession(copro.id))).status,
     ).toBe(403);
+  });
+});
+
+describe('comptes syndic supplémentaires (réservé au syndic)', () => {
+  it('un syndic crée un autre syndic, qui peut ensuite agir comme syndic ; il apparaît dans la liste', async () => {
+    const creation = await request(app)
+      .post('/utilisateurs/syndics')
+      .set('Cookie', cookieSyndic)
+      .send({ nom: 'Second Syndic', email: 'second@test.local', motDePasse: MOT_DE_PASSE });
+
+    expect(creation.status).toBe(201);
+    const enBase = await prisma.utilisateur.findUniqueOrThrow({ where: { email: 'second@test.local' } });
+    expect(enBase.typeCompte).toBe('SYNDIC');
+    expect(enBase.motDePasseHash).not.toBe(MOT_DE_PASSE);
+
+    const cookieSecond = cookieSession(enBase.id);
+    expect((await request(app).get('/utilisateurs/lots').set('Cookie', cookieSecond)).status).toBe(200);
+    const liste = await request(app).get('/utilisateurs/syndics').set('Cookie', cookieSyndic);
+    expect(liste.body.syndics.map((u: { email: string }) => u.email).sort()).toEqual([
+      'second@test.local',
+      'syndic@test.local',
+    ]);
+    expect(JSON.stringify(liste.body)).not.toMatch(/hash|motDePasse/i);
+  });
+
+  it('email déjà pris : 409 ; mot de passe trop court : 422 ; un copropriétaire ne peut pas créer de syndic (403, rien écrit)', async () => {
+    await creerUtilisateur({ email: 'pris@test.local' });
+    const copro = await creerUtilisateur({ email: 'copro@test.local' });
+    const avant = await prisma.utilisateur.count();
+
+    expect(
+      (
+        await request(app)
+          .post('/utilisateurs/syndics')
+          .set('Cookie', cookieSyndic)
+          .send({ nom: 'X', email: 'pris@test.local', motDePasse: MOT_DE_PASSE })
+      ).status,
+    ).toBe(409);
+    expect(
+      (
+        await request(app)
+          .post('/utilisateurs/syndics')
+          .set('Cookie', cookieSyndic)
+          .send({ nom: 'X', email: 'nouveau@test.local', motDePasse: 'court' })
+      ).status,
+    ).toBe(422);
+    expect(
+      (
+        await request(app)
+          .post('/utilisateurs/syndics')
+          .set('Cookie', cookieSession(copro.id))
+          .send({ nom: 'X', email: 'nouveau@test.local', motDePasse: MOT_DE_PASSE })
+      ).status,
+    ).toBe(403);
+    expect(await prisma.utilisateur.count()).toBe(avant);
+  });
+});
+
+describe('conseil syndical : désigner et retirer un membre', () => {
+  const patch = (cookie: string, id: string, corps: object) =>
+    request(app).patch(`/utilisateurs/${id}/conseil-syndical`).set('Cookie', cookie).send(corps);
+
+  it('le syndic désigne puis retire un membre ; le droit de regard étendu suit (RM-12)', async () => {
+    const membre = await creerUtilisateur({ email: 'membre@test.local' });
+    const autre = await creerUtilisateur({ email: 'autre@test.local' });
+    const lot = await creerLot(immeuble.id, '1', autre.id);
+    await request(app)
+      .post('/incidents')
+      .set('Cookie', cookieSession(autre.id))
+      .send({ titre: 'Fuite chez autre', idLot: lot.id });
+    const voit = async () =>
+      (await request(app).get('/incidents').set('Cookie', cookieSession(membre.id))).body.incidents.length;
+
+    expect(await voit()).toBe(0); // simple copropriétaire : ne voit pas l'incident du lot d'un autre
+
+    const designation = await patch(cookieSyndic, membre.id, { estMembre: true });
+    expect(designation.status).toBe(200);
+    expect(designation.body.utilisateur.estMembreConseilSyndical).toBe(true);
+    expect(await voit()).toBe(1); // membre du conseil : droit de regard étendu
+
+    expect((await patch(cookieSyndic, membre.id, { estMembre: false })).status).toBe(200);
+    expect(await voit()).toBe(0);
+  });
+
+  it('refuse un compte syndic (422), un inconnu (404), un corps invalide (422) et un copropriétaire (403)', async () => {
+    const syndic = await creerUtilisateur({ typeCompte: 'SYNDIC', email: 'autre-syndic@test.local' });
+    const copro = await creerUtilisateur({ email: 'copro@test.local' });
+
+    expect((await patch(cookieSyndic, syndic.id, { estMembre: true })).status).toBe(422);
+    expect(
+      (await patch(cookieSyndic, '99999999-9999-4999-8999-999999999999', { estMembre: true })).status,
+    ).toBe(404);
+    expect((await patch(cookieSyndic, copro.id, { estMembre: 'oui' })).status).toBe(422);
+    expect((await patch(cookieSession(copro.id), copro.id, { estMembre: true })).status).toBe(403);
+    expect(
+      (await prisma.utilisateur.findUniqueOrThrow({ where: { id: copro.id } })).estMembreConseilSyndical,
+    ).toBe(false);
   });
 });

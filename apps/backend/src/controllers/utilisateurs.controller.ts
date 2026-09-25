@@ -7,6 +7,7 @@ import {
   LotIntrouvableError,
   UtilisateurIntrouvableError,
   RattachementConcurrentError,
+  CompteNonCoproprietaireError,
 } from '../services/utilisateur.service.js';
 import {
   lotService,
@@ -172,6 +173,87 @@ utilisateursRouter.post(
       }
       if (erreur instanceof RattachementConcurrentError) {
         res.status(409).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+/** Équipe du syndic : liste et création de comptes SYNDIC supplémentaires (réservé au syndic, comme tout ce routeur). */
+utilisateursRouter.get(
+  '/syndics',
+  asyncHandler(async (_req, res) => {
+    const syndics = await utilisateurService.listerSyndics();
+    res.status(200).json({
+      syndics: syndics.map((u) => ({ id: u.id, nom: u.nom, email: u.email })),
+    });
+  }),
+);
+
+utilisateursRouter.post(
+  '/syndics',
+  asyncHandler(async (req, res) => {
+    const analyse = creerCoproprietaireSchema.safeParse(req.body);
+    if (!analyse.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      const syndic = await utilisateurService.creerSyndic({
+        nom: analyse.data.nom,
+        email: analyse.data.email,
+        motDePasseClair: analyse.data.motDePasse,
+      });
+      journalService.journaliser('SYNDIC_CREE', req.utilisateur!.id, syndic.id);
+      res.status(201).json({ utilisateur: { id: syndic.id, nom: syndic.nom, email: syndic.email } });
+    } catch (erreur) {
+      if (erreur instanceof EmailDejaUtiliseError) {
+        res.status(409).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof MotDePasseInvalideError) {
+        res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+const conseilSyndicalSchema = z.object({ estMembre: z.boolean() });
+const paramsUtilisateurSchema = z.object({ idUtilisateur: z.string().uuid() });
+
+/** Désigner ou retirer un membre du conseil syndical. Seul un copropriétaire peut l'être (422 sinon). */
+utilisateursRouter.patch(
+  '/:idUtilisateur/conseil-syndical',
+  asyncHandler(async (req, res) => {
+    const params = paramsUtilisateurSchema.safeParse(req.params);
+    const corps = conseilSyndicalSchema.safeParse(req.body);
+    if (!params.success || !corps.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      const utilisateur = await utilisateurService.definirConseilSyndical(
+        params.data.idUtilisateur,
+        corps.data.estMembre,
+      );
+      journalService.journaliser('CONSEIL_SYNDICAL_MODIFIE', req.utilisateur!.id, utilisateur.id, {
+        estMembre: utilisateur.estMembreConseilSyndical,
+      });
+      res.status(200).json({
+        utilisateur: { id: utilisateur.id, estMembreConseilSyndical: utilisateur.estMembreConseilSyndical },
+      });
+    } catch (erreur) {
+      if (erreur instanceof UtilisateurIntrouvableError) {
+        res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof CompteNonCoproprietaireError) {
+        res.status(422).json({ erreur: erreur.message });
         return;
       }
       throw erreur;
