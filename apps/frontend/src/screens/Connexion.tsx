@@ -1,4 +1,4 @@
-import LogoMarque from '../components/LogoMarque.js'
+import { LogoHorizontal } from '../components/Logo.js'
 import { useState, type FormEvent } from 'react'
 import { Link, Navigate, useLocation } from 'react-router-dom'
 import Button from '../components/Button.js'
@@ -53,10 +53,7 @@ export default function Connexion() {
       <div style={{ width: '100%', maxWidth: 400 }}>
         <h1 className="sr-only">{mode === 'connexion' ? 'Connexion' : 'Créer un compte'}</h1>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', marginBottom: 32 }}>
-          <LogoMarque taille={32} />
-          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
-            CopropHub
-          </span>
+          <LogoHorizontal taille={40} />
         </div>
 
         <div

@@ -6,7 +6,7 @@ import type { TypeCompte } from '../api/types.js'
 import { libelleRole } from '../utils/format.js'
 import AvatarProfil from './AvatarProfil.js'
 import Icone, { type NomIcone } from './Icones.js'
-import LogoMarque from './LogoMarque.js'
+import { LogoHorizontal } from './Logo.js'
 
 const NAV_ITEMS: { to: string; label: string; icone: NomIcone; roles: TypeCompte[] }[] = [
   { to: '/', label: 'Tableau de bord', icone: 'tableau-de-bord', roles: ['SYNDIC'] },
@@ -71,8 +71,7 @@ export default function Shell({ children }: { children: ReactNode }) {
           <div className="entete-rangee">
             <div className="entete-gauche">
               <div className="entete-marque">
-                <LogoMarque taille={30} />
-                <span>CopropHub</span>
+                <LogoHorizontal taille={28} />
               </div>
               <span className="entete-separateur" aria-hidden="true" />
 

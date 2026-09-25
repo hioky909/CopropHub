@@ -24,6 +24,7 @@ test('l’en-tête affiche l’identité et un bouton « Mon compte » dédié q
   await login(page, COPRO.email, COPRO.motDePasse)
   await page.goto('/charges')
   const entete = page.getByRole('banner')
+  await expect(entete.getByText('CopropHub', { exact: true })).toBeVisible() // logo horizontal : nom en vrai texte
   await expect(entete.locator('[data-avatar]')).toBeVisible()
   await expect(entete.getByText(COPRO.email)).toBeVisible()
   await expect(entete.getByText('Copropriétaire')).toBeVisible()
@@ -91,4 +92,15 @@ test('sur un écran de téléphone, l’en-tête garde avatar, compte et déconn
   }
   const debordement = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(debordement).toBeLessThanOrEqual(0)
+})
+
+test('le favicon est le logo (icône d’application) et il est bien servi', async ({ page, request }) => {
+  await page.goto('/connexion')
+  await expect(page.locator('link[rel="icon"]')).toHaveAttribute('href', '/favicon.svg')
+  const reponse = await request.get('/favicon.svg')
+  expect(reponse.ok()).toBe(true)
+  expect(reponse.headers()['content-type']).toContain('image/svg+xml')
+  const svg = await reponse.text()
+  expect(svg.match(/<circle/g)).toHaveLength(7) // le hub : centre + 6 points
+  expect(svg).toContain('#1E4B8F') // bleu d'origine : un favicon ne peut pas suivre le thème
 })
