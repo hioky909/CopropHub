@@ -34,6 +34,10 @@ Cookie de session signé HttpOnly/SameSite=Strict (Secure en production), sans t
 
 SPA React sans framework CSS : le design system (Doc 4) est appliqué via des styles inline et des variables CSS (`apps/frontend/src/index.css`), portés depuis une maquette Figma (`proto/`, conservée pour référence, non exécutée en CI). Routage basé sur le rôle du compte connecté (`RouteProtegee.tsx`, `Shell.tsx`). Voir [12-api/](../12-api/README.md) pour le contrat consommé.
 
+### Thème de couleur
+
+`apps/frontend/src/theme/` : `oklch.ts` (conversions et gamut), `contraste.ts` (ratios WCAG), `genererTheme.ts` (palette à partir de `{teinte, intensite}`, pure et déterministe), `appliquerTheme.ts` (variables CSS via le CSSOM), `themeStorage.ts` (cache `localStorage` anti-flash), `noms-teintes.ts`. `context/ThemeContext.tsx` (sous `AuthProvider`) applique le thème du compte sur `<html>` ; les composants lisent `var(--…)`, donc un changement de thème ne re-rend rien. Flux : `main.tsx` applique le cache avant le premier rendu → `/auth/moi` renvoie `utilisateur.theme` (le serveur a le dernier mot) → `PUT/DELETE /utilisateurs/moi/theme` à l'enregistrement → déconnexion : retour à Classique et cache effacé. Côté backend : `theme.service.ts`, deux méthodes dans `utilisateur.repository.ts`, colonnes `theme_teinte`/`theme_intensite` (migration `0005`). Décisions : ADR-003 et ADR-004.
+
 ## Déploiement
 
 Docker Compose local (`docker-compose.yml`) : service `migrate` (applique les migrations) → `backend` → `frontend`, plus PostgreSQL. Détails dans [11-devops/](../11-devops/README.md).

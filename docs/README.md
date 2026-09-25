@@ -16,6 +16,6 @@ Cette arborescence exporte, en version contrôlée, la documentation de concepti
 | [10-testing/](10-testing/) | Pyramide de tests, [evidence/](10-testing/evidence/) (preuves réelles) | Doc 6 |
 | [11-devops/](11-devops/) | CI/CD, Docker Compose, variables d'environnement | Doc 8 |
 | [12-api/](12-api/) | Documentation des endpoints REST réellement implémentés | générée pendant l'implémentation |
-| [13-decisions/](13-decisions/) | ADR-001 ; futurs ADR au fil des décisions structurantes | — |
+| [13-decisions/](13-decisions/) | ADR-001 (3 couches), ADR-003 (thème : stocker teinte et intensité), ADR-004 (tokens CSS, OKLCH natif) ; futurs ADR au fil des décisions structurantes | — |
 
 Les documents sources restent la version la plus riche (tableaux interactifs, diagrammes mermaid rendus) ; ces fichiers Markdown sont la référence versionnée et défendable hors connexion.

@@ -61,6 +61,18 @@ Cible WCAG 2.1 niveau AA, vérifiée sur les écrans clés (pas promise app-wide
 
 **Limites assumées** : axe-core ne détecte qu'une partie des défauts — pas de test avec un vrai lecteur d'écran (NVDA/VoiceOver) ; les bordures des champs (`#E0E0E0`, 1,3:1) restent celles du design system d'origine, sous les 3:1 du critère 1.4.11 : à trancher avec le design system plutôt que de s'en écarter ici.
 
+## Personnalisation des couleurs
+
+Chaque utilisateur peut choisir la couleur principale de l'interface (carte **Apparence** de la page Mon compte, `EditeurApparence.tsx`). Décisions : [ADR-003](../13-decisions/ADR-003-theme-entrees-pas-couleurs.md) (ce qui est stocké) et [ADR-004](../13-decisions/ADR-004-tokens-css-oklch-sans-dependance.md) (tokens, OKLCH, contraste).
+
+**Expérience.** Deux styles : **Classique** (couleurs d'origine du design system, rien n'est stocké) et **Personnalisé**. En Personnalisé : sept couleurs suggérées (la plupart des utilisateurs cliquent une pastille), un anneau de teinte (`role="slider"` ; souris, tactile, ←/→/↑/↓ ±1°, PageUp/PageDown ±10°, Home/End, nom de couleur lu par les lecteurs d'écran) et un curseur d'intensité. L'utilisateur ne choisit jamais la luminosité : elle est calculée pour garantir la lisibilité. Un **aperçu** (vrais composants : navigation, carte, lien, badges, boutons, champ, notifications) reçoit les variables dans son propre conteneur inerte : l'application ne change qu'à **Enregistrer**. **Annuler** revient à la valeur enregistrée ; **Réinitialiser le thème CopropHub** rétablit Classique. Si la couleur demandée doit être nettement modifiée pour rester lisible (jaune, cyan vifs), l'interface l'indique.
+
+**Ce que le thème change** : `--color-primary`, `-hover`, `-light`, `-border`, `-foreground` et le fond de page (légèrement teinté). **Ce qu'il ne change jamais** : les couleurs sémantiques (succès, avertissement, erreur, information — l'information a ses propres tokens fixes `--color-info*`) et les neutres de texte. Pas de mode sombre, pas de choix d'harmonie, pas de saisie hexadécimale (décisions assumées : l'interface reste simple, le moteur fait le travail).
+
+**Lisibilité garantie** (WCAG 2.1 AA) : le primaire, utilisé comme texte, atteint au moins 6:1 sur blanc, fond de page et teinte claire ; le texte sur bouton primaire au moins 4,5:1 (repos et survol). Prouvé par un test qui balaie 360 teintes × 5 intensités, et par l'audit axe-core en e2e avec un thème vert et un jaune très vif.
+
+**Limites** : pas de test avec un vrai lecteur d'écran ; les bordures de champ `#E0E0E0` restent sous les 3:1 du critère 1.4.11 (héritage du design system d'origine) ; passer de Personnalisé à Classique ne conserve pas le dernier réglage. Le prototype `proto/` ne prévoit aucun écran de paramètres : la carte reprend le langage des cartes existantes (fond blanc, bordure `neutral-200`, rayon 8, titre 15/600).
+
 ## Responsive
 
 Mobile-first pour les écrans à usage nomade (vote, signalement d'incident) ; desktop-first toléré pour les écrans d'administration syndic (gestion des copropriétaires, création d'AG) — mais **aucun écran ne doit obliger à défiler horizontalement sur un téléphone** (375 px), critère vérifié par un test e2e (`e2e/responsive.spec.ts`).

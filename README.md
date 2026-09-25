@@ -4,7 +4,7 @@ Application de gestion de copropriété (syndic, conseil syndical, copropriétai
 
 ## État du projet
 
-**Le backlog MVP (27 tâches, T-01 à T-26 + T-38) est terminé et vérifié réellement** : backend complet (toutes les routes métier), frontend fonctionnel câblé sur l'API réelle (connexion, tableau de bord syndic, assemblées générales avec vote et résultats, incidents, charges), suite E2E Playwright, audits réels des états d'interface et de l'accessibilité clavier, en-têtes de sécurité testés, documentation de conception exportée dans [`docs/`](docs/). Détail de chaque vérification : Doc 10 (document « Traçabilité & structure documentaire »).
+**Le backlog MVP (27 tâches, T-01 à T-26 + T-38) est terminé et vérifié réellement** : backend complet (toutes les routes métier), frontend fonctionnel câblé sur l'API réelle (connexion, tableau de bord syndic, assemblées générales avec vote et résultats, incidents, charges), suite E2E Playwright, audits réels des états d'interface et de l'accessibilité clavier, en-têtes de sécurité testés, documentation de conception exportée dans [`docs/`](docs/). Chaque utilisateur peut aussi personnaliser la couleur principale de l'interface (Mon compte → Apparence), avec des contrastes toujours conformes WCAG AA ([`docs/04-ux-ui`](docs/04-ux-ui/README.md)). Détail de chaque vérification : Doc 10 (document « Traçabilité & structure documentaire »).
 
 Le style visuel du frontend part d'une maquette générée par Figma à partir du design system du Doc 4 (conservée telle quelle sous `proto/`, non exécutée en CI, pour référence) ; les composants et écrans de `apps/frontend/src/` en sont un portage câblé sur l'API réelle (données réelles uniquement, aucune valeur fictive).
 
