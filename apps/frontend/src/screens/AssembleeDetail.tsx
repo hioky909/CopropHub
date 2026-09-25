@@ -133,7 +133,7 @@ export default function AssembleeDetail() {
       {!modeVoteCopro && (
         <button
           onClick={() => navigate('/assemblees')}
-          style={{ marginBottom: 16, fontSize: 13, color: '#5C5C5C', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
+          style={{ marginBottom: 16, fontSize: 13, color: 'var(--color-neutral-500)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', padding: 0 }}
         >
           ← Toutes les assemblées
         </button>
@@ -141,7 +141,7 @@ export default function AssembleeDetail() {
 
       {!modeVoteCopro && (
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: '#1A1A1A' }}>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 700, color: 'var(--color-neutral-900)' }}>
             AG du {formaterDate(ag.dateAg)}
           </h1>
           <Badge {...STATUT_BADGE[ag.statut]} />
@@ -172,22 +172,22 @@ export default function AssembleeDetail() {
       {ag.statut === 'CLOTUREE' && resultats ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {resultats.map((r) => (
-            <div key={r.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20 }}>
+            <div key={r.id} style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 8 }}>
-                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>{r.libelle}</h3>
+                <h3 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>{r.libelle}</h3>
                 <Badge
                   variant={r.statutResultat === 'ADOPTEE' ? 'success' : 'danger'}
                   label={r.statutResultat === 'ADOPTEE' ? 'Adoptée' : 'Rejetée'}
                 />
               </div>
-              <p style={{ margin: '0 0 12px', fontSize: 12, color: '#5C5C5C' }}>{MAJORITE_LABEL[r.typeMajorite]}</p>
+              <p style={{ margin: '0 0 12px', fontSize: 12, color: 'var(--color-neutral-500)' }}>{MAJORITE_LABEL[r.typeMajorite]}</p>
               <div style={{ display: 'flex', gap: 16, fontSize: 13 }}>
-                <span style={{ color: '#1E7A4C', fontWeight: 600 }}>Oui : {r.decomptes.oui}</span>
-                <span style={{ color: '#B3261E', fontWeight: 600 }}>Non : {r.decomptes.non}</span>
-                <span style={{ color: '#5C5C5C', fontWeight: 600 }}>Abstention : {r.decomptes.abstention}</span>
+                <span style={{ color: 'var(--color-success)', fontWeight: 600 }}>Oui : {r.decomptes.oui}</span>
+                <span style={{ color: 'var(--color-danger)', fontWeight: 600 }}>Non : {r.decomptes.non}</span>
+                <span style={{ color: 'var(--color-neutral-500)', fontWeight: 600 }}>Abstention : {r.decomptes.abstention}</span>
               </div>
               {nombreInscrits !== null && (
-                <p style={{ margin: '8px 0 0', fontSize: 12, color: '#5C5C5C' }}>
+                <p style={{ margin: '8px 0 0', fontSize: 12, color: 'var(--color-neutral-500)' }}>
                   Participation : {r.decomptes.oui + r.decomptes.non + r.decomptes.abstention} votant(s) sur{' '}
                   {nombreInscrits} copropriétaire(s) inscrit(s)
                 </p>
@@ -202,7 +202,7 @@ export default function AssembleeDetail() {
                 </div>
               )}
               {estCopro && (
-                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C', display: 'flex', alignItems: 'center', gap: 8 }}>
+                <p style={{ margin: '12px 0 0', fontSize: 13, color: 'var(--color-neutral-500)', display: 'flex', alignItems: 'center', gap: 8 }}>
                   Mon vote :
                   {votesEnregistres[r.id] ? (
                     <VoteLabel choix={votesEnregistres[r.id]} />
@@ -225,16 +225,16 @@ export default function AssembleeDetail() {
         />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {resolutions.length === 0 && <p style={{ fontSize: 13, color: '#5C5C5C' }}>Aucune résolution.</p>}
+          {resolutions.length === 0 && <p style={{ fontSize: 13, color: 'var(--color-neutral-500)' }}>Aucune résolution.</p>}
           {resolutions.map((r) => (
-            <div key={r.id} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20 }}>
-              <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>{r.libelle}</h3>
-              <p style={{ margin: '0 0 4px', fontSize: 12, color: '#5C5C5C' }}>{MAJORITE_LABEL[r.typeMajorite]}</p>
+            <div key={r.id} style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 20 }}>
+              <h3 style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>{r.libelle}</h3>
+              <p style={{ margin: '0 0 4px', fontSize: 12, color: 'var(--color-neutral-500)' }}>{MAJORITE_LABEL[r.typeMajorite]}</p>
               {ag.statut === 'PLANIFIEE' && (
-                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C' }}>Le vote n’est pas encore ouvert.</p>
+                <p style={{ margin: '12px 0 0', fontSize: 13, color: 'var(--color-neutral-500)' }}>Le vote n’est pas encore ouvert.</p>
               )}
               {ag.statut === 'OUVERTE' && (
-                <p style={{ margin: '12px 0 0', fontSize: 13, color: '#5C5C5C' }}>Vote en cours parmi les copropriétaires.</p>
+                <p style={{ margin: '12px 0 0', fontSize: 13, color: 'var(--color-neutral-500)' }}>Vote en cours parmi les copropriétaires.</p>
               )}
             </div>
           ))}
@@ -245,14 +245,14 @@ export default function AssembleeDetail() {
 }
 
 const OPTIONS_VOTE = [
-  { value: 'OUI' as const, label: 'Pour', color: '#1E7A4C', bg: '#E8F5EE', border: '#A8D8BC' },
-  { value: 'NON' as const, label: 'Contre', color: '#B3261E', bg: '#FDECEA', border: '#F5C6C4' },
-  { value: 'ABSTENTION' as const, label: 'Abstention', color: '#5C5C5C', bg: '#F2F2F2', border: '#BDBDBD' },
+  { value: 'OUI' as const, label: 'Pour', color: 'var(--color-success)', bg: 'var(--color-success-light)', border: 'var(--color-success-border)' },
+  { value: 'NON' as const, label: 'Contre', color: 'var(--color-danger)', bg: 'var(--color-danger-light)', border: 'var(--color-danger-border)' },
+  { value: 'ABSTENTION' as const, label: 'Abstention', color: 'var(--color-neutral-500)', bg: 'var(--color-neutral-100)', border: 'var(--color-neutral-300)' },
 ]
 
 function VoteLabel({ choix, enAttente }: { choix: VoteChoice | 'DEJA_VOTE' | undefined; enAttente?: boolean }) {
-  if (enAttente) return <span style={{ fontSize: 12, color: '#5C5C5C' }}>En attente</span>
-  if (!choix || choix === 'DEJA_VOTE') return <span style={{ fontSize: 12, color: '#5C5C5C' }}>—</span>
+  if (enAttente) return <span style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>En attente</span>
+  if (!choix || choix === 'DEJA_VOTE') return <span style={{ fontSize: 12, color: 'var(--color-neutral-500)' }}>—</span>
   const opt = OPTIONS_VOTE.find((o) => o.value === choix)!
   return (
     <span style={{ fontSize: 12, fontWeight: 500, color: opt.color, backgroundColor: opt.bg, padding: '2px 8px', borderRadius: 4 }}>
@@ -322,9 +322,9 @@ function EcranVote({
 
   return (
     <div>
-      <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E0E0E0', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 10 }}>
+      <header style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-neutral-200)', padding: '12px 16px', position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{ maxWidth: 600, margin: '0 auto' }}>
-          <p style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>
+          <p style={{ margin: '0 0 8px', fontSize: 14, fontWeight: 600, color: 'var(--color-neutral-900)' }}>
             Vote en ligne — AG du {formaterDate(ag.dateAg)}
           </p>
           <div style={{ display: 'flex', gap: 4 }}>
@@ -343,13 +343,13 @@ function EcranVote({
                   backgroundClip: 'content-box',
                   borderTop: '4px solid transparent',
                   borderBottom: '4px solid transparent',
-                  backgroundColor: votes[r.id] !== undefined ? '#1E7A4C' : i === index ? '#1E4B8F' : '#E0E0E0',
+                  backgroundColor: votes[r.id] !== undefined ? 'var(--color-success)' : i === index ? 'var(--color-primary)' : 'var(--color-neutral-200)',
                   transition: 'background 0.2s',
                 }}
               />
             ))}
           </div>
-          <p style={{ margin: '4px 0 0', fontSize: 11, color: '#5C5C5C' }}>
+          <p style={{ margin: '4px 0 0', fontSize: 11, color: 'var(--color-neutral-500)' }}>
             Résolution {index + 1} sur {resolutions.length}
           </p>
         </div>
@@ -366,27 +366,27 @@ function EcranVote({
           </div>
         )}
 
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 10, overflow: 'hidden', marginBottom: 16 }}>
           <div style={{ padding: '20px 20px 0' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'flex-start', marginBottom: 12 }}>
-              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 4, backgroundColor: '#EBF0F9', color: '#1E4B8F', fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', flexShrink: 0, marginTop: 2 }}>
+              <span style={{ display: 'inline-block', padding: '2px 8px', borderRadius: 4, backgroundColor: 'var(--color-primary-light)', color: 'var(--color-primary)', fontSize: 11, fontWeight: 700, letterSpacing: '0.04em', flexShrink: 0, marginTop: 2 }}>
                 RÉS. {index + 1}
               </span>
-              <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1A1A1A', lineHeight: 1.3, letterSpacing: '-0.01em' }}>
+              <h1 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--color-neutral-900)', lineHeight: 1.3, letterSpacing: '-0.01em' }}>
                 {resolution.libelle}
               </h1>
             </div>
 
-            <div style={{ padding: 12, backgroundColor: '#F5F6F8', borderRadius: 6, marginBottom: 16 }}>
-              <p style={{ margin: '0 0 2px', fontSize: 11, fontWeight: 600, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <div style={{ padding: 12, backgroundColor: 'var(--color-background)', borderRadius: 6, marginBottom: 16 }}>
+              <p style={{ margin: '0 0 2px', fontSize: 11, fontWeight: 600, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                 Règle de majorité
               </p>
-              <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>{MAJORITE_LABEL[resolution.typeMajorite]}</p>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>{MAJORITE_LABEL[resolution.typeMajorite]}</p>
             </div>
           </div>
 
-          <div style={{ padding: '16px 20px 20px', borderTop: '1px solid #F2F2F2' }}>
-            <p id="titre-mon-vote" style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1A1A1A' }}>Mon vote</p>
+          <div style={{ padding: '16px 20px 20px', borderTop: '1px solid var(--color-neutral-100)' }}>
+            <p id="titre-mon-vote" style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Mon vote</p>
             {confirmee && !enModification ? (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                 {OPTIONS_VOTE.map((opt) => {
@@ -398,9 +398,9 @@ function EcranVote({
                       style={{
                         padding: '14px 8px',
                         borderRadius: 8,
-                        border: `2px solid ${selected ? opt.border : '#E0E0E0'}`,
-                        backgroundColor: selected ? opt.bg : '#FFFFFF',
-                        color: selected ? opt.color : '#5C5C5C',
+                        border: `2px solid ${selected ? opt.border : 'var(--color-neutral-200)'}`,
+                        backgroundColor: selected ? opt.bg : 'var(--color-surface)',
+                        color: selected ? opt.color : 'var(--color-neutral-500)',
                         fontSize: 14,
                         fontWeight: 600,
                         textAlign: 'center',
@@ -427,9 +427,9 @@ function EcranVote({
                         style={{
                           padding: '14px 8px',
                           borderRadius: 8,
-                          border: `2px solid ${selectionne ? opt.border : '#E0E0E0'}`,
-                          backgroundColor: selectionne ? opt.bg : '#FFFFFF',
-                          color: selectionne ? opt.color : '#5C5C5C',
+                          border: `2px solid ${selectionne ? opt.border : 'var(--color-neutral-200)'}`,
+                          backgroundColor: selectionne ? opt.bg : 'var(--color-surface)',
+                          color: selectionne ? opt.color : 'var(--color-neutral-500)',
                           fontSize: 14,
                           fontWeight: 600,
                           cursor: action ? 'not-allowed' : 'pointer',
@@ -486,13 +486,13 @@ function EcranVote({
         </div>
 
         {Object.keys(votes).length > 0 && (
-          <div style={{ marginTop: 24, padding: 16, backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8 }}>
-            <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+          <div style={{ marginTop: 24, padding: 16, backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8 }}>
+            <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 600, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               Récapitulatif
             </p>
             {resolutions.map((r, i) => (
-              <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < resolutions.length - 1 ? '1px solid #F2F2F2' : 'none' }}>
-                <span style={{ fontSize: 13, color: '#3D3D3D' }}>Résolution {i + 1}</span>
+              <div key={r.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: i < resolutions.length - 1 ? '1px solid var(--color-neutral-100)' : 'none' }}>
+                <span style={{ fontSize: 13, color: 'var(--color-neutral-700)' }}>Résolution {i + 1}</span>
                 <VoteLabel choix={votes[r.id]} enAttente={votes[r.id] === undefined} />
               </div>
             ))}

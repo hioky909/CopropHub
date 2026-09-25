@@ -57,10 +57,10 @@ export default function DashboardSyndic() {
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
         <div>
-          <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.02em' }}>
+          <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
             Tableau de bord
           </h1>
-          <p style={{ margin: 0, fontSize: 14, color: '#5C5C5C' }}>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-500)' }}>
             {chargement ? 'Chargement…' : `${ags.length} AG · ${incidents.length} incidents · ${charges.length} charges`}
           </p>
         </div>
@@ -95,45 +95,45 @@ export default function DashboardSyndic() {
           <div
             key={stat.label}
             style={{
-              backgroundColor: '#FFFFFF',
-              border: `1px solid ${stat.alert ? '#F5C6C4' : '#E0E0E0'}`,
+              backgroundColor: 'var(--color-surface)',
+              border: `1px solid ${stat.alert ? 'var(--color-danger-border)' : 'var(--color-neutral-200)'}`,
               borderRadius: 8,
               padding: 24,
             }}
           >
-            <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 500, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            <p style={{ margin: '0 0 8px', fontSize: 12, fontWeight: 500, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
               {stat.label}
             </p>
-            <p style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: stat.alert ? '#B3261E' : '#1A1A1A', letterSpacing: '-0.02em', lineHeight: 1 }}>
+            <p style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: stat.alert ? 'var(--color-danger)' : 'var(--color-neutral-900)', letterSpacing: '-0.02em', lineHeight: 1 }}>
               {stat.value}
             </p>
-            <p style={{ margin: 0, fontSize: 12, color: '#5C5C5C' }}>{stat.sub}</p>
+            <p style={{ margin: 0, fontSize: 12, color: 'var(--color-neutral-500)' }}>{stat.sub}</p>
           </div>
         ))}
       </div>
 
       <div className="grille-tableau-de-bord">
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflowX: 'auto' }}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Incidents récents</h2>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, overflowX: 'auto' }}>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-neutral-100)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Incidents récents</h2>
             <button
               onClick={() => navigate('/incidents')}
-              style={{ fontSize: 13, color: '#1E4B8F', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
+              style={{ fontSize: 13, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 500 }}
             >
               Voir tous
             </button>
           </div>
           {incidentsRecents.length === 0 ? (
-            <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>
+            <p style={{ padding: 24, fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>
               {chargement ? 'Chargement…' : 'Aucun incident déclaré.'}
             </p>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <tbody>
                 {incidentsRecents.map((inc, i) => (
-                  <tr key={inc.id} style={{ borderTop: i > 0 ? '1px solid #F2F2F2' : 'none' }}>
-                    <td style={{ padding: '12px 24px', fontSize: 14, color: '#1A1A1A', fontWeight: 500 }}>{inc.titre}</td>
-                    <td style={{ padding: '12px 24px', fontSize: 13, color: '#5C5C5C' }}>
+                  <tr key={inc.id} style={{ borderTop: i > 0 ? '1px solid var(--color-neutral-100)' : 'none' }}>
+                    <td style={{ padding: '12px 24px', fontSize: 14, color: 'var(--color-neutral-900)', fontWeight: 500 }}>{inc.titre}</td>
+                    <td style={{ padding: '12px 24px', fontSize: 13, color: 'var(--color-neutral-500)' }}>
                       {formaterDate(inc.dateCreation)}
                     </td>
                     <td style={{ padding: '12px 24px' }}>
@@ -147,21 +147,21 @@ export default function DashboardSyndic() {
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24 }}>
-            <h2 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>
+          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 24 }}>
+            <h2 style={{ margin: '0 0 16px', fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>
               Assemblée générale
             </h2>
             {prochaineAg ? (
-              <div style={{ padding: 16, backgroundColor: '#EBF0F9', borderRadius: 6, marginBottom: 16 }}>
+              <div style={{ padding: 16, backgroundColor: 'var(--color-primary-light)', borderRadius: 6, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#1E4B8F' }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: 'var(--color-primary)' }}>
                     {formaterDate(prochaineAg.dateAg)}
                   </p>
                   <Badge {...STATUT_AG_BADGE[prochaineAg.statut]} />
                 </div>
               </div>
             ) : (
-              <p style={{ margin: '0 0 16px', fontSize: 13, color: '#5C5C5C' }}>Aucune AG planifiée.</p>
+              <p style={{ margin: '0 0 16px', fontSize: 13, color: 'var(--color-neutral-500)' }}>Aucune AG planifiée.</p>
             )}
             <Button variant="primary" fullWidth onClick={() => navigate('/assemblees')}>
               Gérer les AG
@@ -169,16 +169,16 @@ export default function DashboardSyndic() {
           </div>
 
           {chargesEnRetard.length > 0 && (
-            <div style={{ backgroundColor: '#FDECEA', border: '1px solid #F5C6C4', borderRadius: 8, padding: 16 }}>
-              <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: '#B3261E' }}>
+            <div style={{ backgroundColor: 'var(--color-danger-light)', border: '1px solid var(--color-danger-border)', borderRadius: 8, padding: 16 }}>
+              <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 600, color: 'var(--color-danger)' }}>
                 {chargesEnRetard.length} charge{chargesEnRetard.length > 1 ? 's' : ''} en retard
               </p>
-              <p style={{ margin: '0 0 10px', fontSize: 13, color: '#3D3D3D' }}>
+              <p style={{ margin: '0 0 10px', fontSize: 13, color: 'var(--color-neutral-700)' }}>
                 {formaterMontant(totalRetard)} non recouvrés.
               </p>
               <button
                 onClick={() => navigate('/charges')}
-                style={{ fontSize: 12, fontWeight: 600, color: '#B3261E', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+                style={{ fontSize: 12, fontWeight: 600, color: 'var(--color-danger)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
               >
                 Voir les charges
               </button>
@@ -279,7 +279,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
       style={{
         position: 'fixed',
         inset: 0,
-        backgroundColor: 'rgba(0,0,0,0.4)',
+        backgroundColor: 'var(--color-overlay)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -293,18 +293,18 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
         role="dialog"
         aria-modal="true"
         aria-labelledby="titre-modal-creation-ag"
-        style={{ backgroundColor: '#FFFFFF', borderRadius: 10, padding: 32, width: '100%', maxWidth: 520, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
+        style={{ backgroundColor: 'var(--color-surface)', borderRadius: 10, padding: 32, width: '100%', maxWidth: 520, boxShadow: '0 20px 60px rgba(0,0,0,0.15)' }}
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 id="titre-modal-creation-ag" style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: '#1A1A1A' }}>Créer une assemblée générale</h2>
-        <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>
+        <h2 id="titre-modal-creation-ag" style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Créer une assemblée générale</h2>
+        <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>
           L&apos;AG est créée à l&apos;état planifiée. Vous l&apos;ouvrirez au vote depuis la liste des assemblées.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
           <div>
-            <label htmlFor="date-ag-creation" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: '#1A1A1A', marginBottom: 4 }}>
-              Date prévue <span style={{ color: '#B3261E' }}>*</span>
+            <label htmlFor="date-ag-creation" style={{ display: 'block', fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)', marginBottom: 4 }}>
+              Date prévue <span style={{ color: 'var(--color-danger)' }}>*</span>
             </label>
             <input
               id="date-ag-creation"
@@ -312,13 +312,13 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
               type="date"
               value={dateAg}
               onChange={(e) => setDateAg(e.target.value)}
-              style={{ width: '100%', padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', color: '#1A1A1A' }}
+              style={{ width: '100%', padding: '8px 12px', fontSize: 14, border: '1px solid var(--color-neutral-200)', borderRadius: 6, fontFamily: 'inherit', color: 'var(--color-neutral-900)' }}
             />
           </div>
 
           <div>
-            <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
-              Résolutions <span aria-hidden="true" style={{ color: '#B3261E' }}>*</span>
+            <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)' }}>
+              Résolutions <span aria-hidden="true" style={{ color: 'var(--color-danger)' }}>*</span>
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {resolutions.map((r, i) => (
@@ -328,13 +328,13 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                     placeholder={`Résolution ${i + 1}`}
                     value={r.libelle}
                     onChange={(e) => majResolution(i, { libelle: e.target.value })}
-                    style={{ flex: 1, padding: '8px 12px', fontSize: 14, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit' }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: 14, border: '1px solid var(--color-neutral-200)', borderRadius: 6, fontFamily: 'inherit' }}
                   />
                   <select
                     aria-label={`Type de majorité de la résolution ${i + 1}`}
                     value={r.typeMajorite}
                     onChange={(e) => majResolution(i, { typeMajorite: e.target.value as TypeMajorite })}
-                    style={{ padding: '8px 8px', fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit', color: '#3D3D3D' }}
+                    style={{ padding: '8px 8px', fontSize: 13, border: '1px solid var(--color-neutral-200)', borderRadius: 6, fontFamily: 'inherit', color: 'var(--color-neutral-700)' }}
                   >
                     {OPTIONS_MAJORITE.map((o) => (
                       <option key={o.value} value={o.value}>
@@ -347,7 +347,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
                       type="button"
                       onClick={() => setResolutions((prev) => prev.filter((_, idx) => idx !== i))}
                       aria-label={`Retirer la résolution ${i + 1}`}
-                      style={{ background: 'none', border: '1px solid #E0E0E0', borderRadius: 6, color: '#B3261E', cursor: 'pointer', padding: '0 10px' }}
+                      style={{ background: 'none', border: '1px solid var(--color-neutral-200)', borderRadius: 6, color: 'var(--color-danger)', cursor: 'pointer', padding: '0 10px' }}
                     >
                       ×
                     </button>
@@ -358,7 +358,7 @@ function CreerAgModal({ onClose, onCreated }: { onClose: () => void; onCreated: 
             <button
               type="button"
               onClick={() => setResolutions((prev) => [...prev, { libelle: '', typeMajorite: 'SIMPLE' }])}
-              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: '#1E4B8F', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
+              style={{ marginTop: 8, fontSize: 12, fontWeight: 600, color: 'var(--color-primary)', background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontFamily: 'inherit' }}
             >
               + Ajouter une résolution
             </button>

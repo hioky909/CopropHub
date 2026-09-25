@@ -12,9 +12,9 @@ const inputBase = {
   padding: '8px 12px',
   fontSize: 14,
   fontFamily: 'inherit',
-  color: '#1A1A1A',
-  backgroundColor: '#FFFFFF',
-  border: '1px solid #E0E0E0',
+  color: 'var(--color-neutral-900)',
+  backgroundColor: 'var(--color-surface)',
+  border: '1px solid var(--color-neutral-200)',
   borderRadius: 6,
   transition: 'border-color 0.15s',
   lineHeight: 1.5,
@@ -25,16 +25,16 @@ function FieldWrapper({
 }: BaseFieldProps & { fieldId: string; children: ReactNode }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      <label htmlFor={fieldId} style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A' }}>
+      <label htmlFor={fieldId} style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)' }}>
         {label}
-        {required && <span aria-hidden="true" style={{ color: '#B3261E', marginLeft: 2 }}>*</span>}
+        {required && <span aria-hidden="true" style={{ color: 'var(--color-danger)', marginLeft: 2 }}>*</span>}
       </label>
       {children}
       {error && (
-        <p id={`${fieldId}-message`} role="alert" style={{ fontSize: 12, color: '#B3261E', margin: 0 }}>{error}</p>
+        <p id={`${fieldId}-message`} role="alert" style={{ fontSize: 12, color: 'var(--color-danger)', margin: 0 }}>{error}</p>
       )}
       {!error && help && (
-        <p id={`${fieldId}-message`} style={{ fontSize: 12, color: '#5C5C5C', margin: 0 }}>{help}</p>
+        <p id={`${fieldId}-message`} style={{ fontSize: 12, color: 'var(--color-neutral-500)', margin: 0 }}>{help}</p>
       )}
     </div>
   )
@@ -55,14 +55,14 @@ export function TextField({
         {...props}
         style={{
           ...inputBase,
-          borderColor: error ? '#B3261E' : '#E0E0E0',
+          borderColor: error ? 'var(--color-danger)' : 'var(--color-neutral-200)',
         }}
         onFocus={e => {
-          e.target.style.borderColor = error ? '#B3261E' : '#1E4B8F'
-          e.target.style.boxShadow = `0 0 0 3px ${error ? '#FDECEA' : '#EBF0F9'}`
+          e.target.style.borderColor = error ? 'var(--color-danger)' : 'var(--color-primary)'
+          e.target.style.boxShadow = `0 0 0 3px ${error ? 'var(--color-danger-light)' : 'var(--color-primary-light)'}`
         }}
         onBlur={e => {
-          e.target.style.borderColor = error ? '#B3261E' : '#E0E0E0'
+          e.target.style.borderColor = error ? 'var(--color-danger)' : 'var(--color-neutral-200)'
           e.target.style.boxShadow = 'none'
         }}
       />
@@ -85,7 +85,7 @@ export function SelectField({
         {...props}
         style={{
           ...inputBase,
-          borderColor: error ? '#B3261E' : '#E0E0E0',
+          borderColor: error ? 'var(--color-danger)' : 'var(--color-neutral-200)',
           appearance: 'none',
           backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235C5C5C' d='M6 8L1 3h10z'/%3E%3C/svg%3E")`,
           backgroundRepeat: 'no-repeat',
@@ -115,16 +115,16 @@ export function TextareaField({
         rows={props.rows ?? 4}
         style={{
           ...inputBase,
-          borderColor: error ? '#B3261E' : '#E0E0E0',
+          borderColor: error ? 'var(--color-danger)' : 'var(--color-neutral-200)',
           resize: 'vertical',
           minHeight: 88,
         }}
         onFocus={e => {
-          e.target.style.borderColor = error ? '#B3261E' : '#1E4B8F'
-          e.target.style.boxShadow = `0 0 0 3px ${error ? '#FDECEA' : '#EBF0F9'}`
+          e.target.style.borderColor = error ? 'var(--color-danger)' : 'var(--color-primary)'
+          e.target.style.boxShadow = `0 0 0 3px ${error ? 'var(--color-danger-light)' : 'var(--color-primary-light)'}`
         }}
         onBlur={e => {
-          e.target.style.borderColor = error ? '#B3261E' : '#E0E0E0'
+          e.target.style.borderColor = error ? 'var(--color-danger)' : 'var(--color-neutral-200)'
           e.target.style.boxShadow = 'none'
         }}
       />

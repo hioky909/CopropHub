@@ -101,15 +101,15 @@ export default function ListeIncidents() {
   }
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F6F8' }}>
-      <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E0E0E0', padding: '16px 16px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
+      <header style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-neutral-200)', padding: '16px 16px' }}>
         <div style={{ maxWidth: 960, margin: '0 auto' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
             <div>
-              <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.01em' }}>
+              <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
                 Incidents
               </h1>
-              <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>{incidents.length} incident(s) enregistré(s)</p>
+              <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>{incidents.length} incident(s) enregistré(s)</p>
             </div>
             {estCopro && (
               <Button variant="primary" onClick={() => setShowForm(true)}>
@@ -135,9 +135,9 @@ export default function ListeIncidents() {
         )}
 
         {showForm && (
-          <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24, marginBottom: 24 }}>
-            <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, color: '#1A1A1A' }}>Déclarer un incident</h2>
-            <p style={{ margin: '0 0 20px', fontSize: 13, color: '#5C5C5C' }}>
+          <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 24, marginBottom: 24 }}>
+            <h2 style={{ margin: '0 0 4px', fontSize: 18, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Déclarer un incident</h2>
+            <p style={{ margin: '0 0 20px', fontSize: 13, color: 'var(--color-neutral-500)' }}>
               Votre signalement sera transmis au syndic.
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 20 }}>
@@ -195,9 +195,9 @@ export default function ListeIncidents() {
                 borderRadius: 20,
                 fontSize: 13,
                 fontWeight: filterStatut === f.key ? 600 : 400,
-                color: filterStatut === f.key ? '#1E4B8F' : '#5C5C5C',
-                backgroundColor: filterStatut === f.key ? '#EBF0F9' : '#FFFFFF',
-                border: `1px solid ${filterStatut === f.key ? '#B3C8E8' : '#E0E0E0'}`,
+                color: filterStatut === f.key ? 'var(--color-primary)' : 'var(--color-neutral-500)',
+                backgroundColor: filterStatut === f.key ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                border: `1px solid ${filterStatut === f.key ? 'var(--color-primary-border)' : 'var(--color-neutral-200)'}`,
                 cursor: 'pointer',
                 fontFamily: 'inherit',
               }}
@@ -207,11 +207,11 @@ export default function ListeIncidents() {
           ))}
         </div>
 
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, overflow: 'hidden' }}>
           {chargement ? (
-            <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>Chargement…</p>
+            <p style={{ padding: 24, fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>Chargement…</p>
           ) : filtered.length === 0 ? (
-            <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>Aucun incident.</p>
+            <p style={{ padding: 24, fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>Aucun incident.</p>
           ) : (
             filtered.map((inc, i) => {
               const s = STATUT_MAP[inc.statut]
@@ -226,12 +226,12 @@ export default function ListeIncidents() {
                     justifyContent: 'space-between',
                     gap: 16,
                     padding: '12px 16px',
-                    borderTop: i > 0 ? '1px solid #F2F2F2' : 'none',
+                    borderTop: i > 0 ? '1px solid var(--color-neutral-100)' : 'none',
                   }}
                 >
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 500, color: '#1A1A1A' }}>{inc.titre}</p>
-                    <p style={{ margin: 0, fontSize: 12, color: '#5C5C5C' }}>
+                    <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 500, color: 'var(--color-neutral-900)' }}>{inc.titre}</p>
+                    <p style={{ margin: 0, fontSize: 12, color: 'var(--color-neutral-500)' }}>
                       {formaterDate(inc.dateCreation)} · {inc.idLot ? 'Lot' : 'Partie commune'}
                     </p>
                   </div>
@@ -242,9 +242,9 @@ export default function ListeIncidents() {
                       style={{
                         fontSize: 12,
                         fontWeight: 500,
-                        color: '#1E4B8F',
+                        color: 'var(--color-primary)',
                         background: 'none',
-                        border: '1px solid #B3C8E8',
+                        border: '1px solid var(--color-primary-border)',
                         borderRadius: 4,
                         padding: '3px 8px',
                         cursor: 'pointer',

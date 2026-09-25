@@ -77,10 +77,10 @@ export default function Assemblees() {
 
   return (
     <main style={{ maxWidth: 960, margin: '0 auto', padding: '32px 24px' }}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.02em' }}>
+      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
         Assemblées générales
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>
+      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>
         {estSyndic
           ? 'Ouvrez le vote, suivez-le et clôturez chaque assemblée pour figer ses résultats.'
           : 'Consultez ou modifiez votre vote tant qu’une assemblée est ouverte, et retrouvez les résultats des assemblées clôturées.'}
@@ -109,9 +109,9 @@ export default function Assemblees() {
                   borderRadius: 20,
                   fontSize: 13,
                   fontWeight: actif ? 600 : 400,
-                  color: actif ? '#1E4B8F' : '#5C5C5C',
-                  backgroundColor: actif ? '#EBF0F9' : '#FFFFFF',
-                  border: `1px solid ${actif ? '#B3C8E8' : '#E0E0E0'}`,
+                  color: actif ? 'var(--color-primary)' : 'var(--color-neutral-500)',
+                  backgroundColor: actif ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                  border: `1px solid ${actif ? 'var(--color-primary-border)' : 'var(--color-neutral-200)'}`,
                   cursor: 'pointer',
                   fontFamily: 'inherit',
                   transition: 'all 0.1s',
@@ -121,8 +121,8 @@ export default function Assemblees() {
                 <span
                   style={{
                     fontSize: 11,
-                    backgroundColor: actif ? '#1E4B8F' : '#F2F2F2',
-                    color: actif ? '#FFFFFF' : '#5C5C5C',
+                    backgroundColor: actif ? 'var(--color-primary)' : 'var(--color-neutral-100)',
+                    color: actif ? 'var(--color-surface)' : 'var(--color-neutral-500)',
                     borderRadius: 10,
                     padding: '1px 6px',
                     fontWeight: 600,
@@ -137,14 +137,14 @@ export default function Assemblees() {
       )}
 
       {chargement ? (
-        <p style={{ fontSize: 13, color: '#5C5C5C', margin: 0 }}>Chargement…</p>
+        <p style={{ fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>Chargement…</p>
       ) : ags.length === 0 ? (
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24 }}>
-          <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>Aucune assemblée générale.</p>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 24 }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>Aucune assemblée générale.</p>
         </div>
       ) : visibles.length === 0 ? (
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24 }}>
-          <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>Aucune assemblée dans cette catégorie.</p>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 24 }}>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>Aucune assemblée dans cette catégorie.</p>
         </div>
       ) : (
         <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -168,10 +168,10 @@ export default function Assemblees() {
                     textAlign: 'left',
                     fontFamily: 'inherit',
                     cursor: 'pointer',
-                    backgroundColor: '#FFFFFF',
-                    border: `1px solid ${actif ? '#B3C8E8' : '#E0E0E0'}`,
+                    backgroundColor: 'var(--color-surface)',
+                    border: `1px solid ${actif ? 'var(--color-primary-border)' : 'var(--color-neutral-200)'}`,
                     borderRadius: 8,
-                    boxShadow: actif ? '0 2px 8px rgba(30,75,143,0.08)' : 'none',
+                    boxShadow: actif ? '0 2px 8px color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'none',
                     transition: 'border-color 0.15s, box-shadow 0.15s',
                   }}
                 >
@@ -182,8 +182,8 @@ export default function Assemblees() {
                       width: 56,
                       height: 56,
                       borderRadius: 8,
-                      backgroundColor: cloturee ? '#F2F2F2' : '#EBF0F9',
-                      color: cloturee ? '#5C5C5C' : '#1E4B8F',
+                      backgroundColor: cloturee ? 'var(--color-neutral-100)' : 'var(--color-primary-light)',
+                      color: cloturee ? 'var(--color-neutral-500)' : 'var(--color-primary)',
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
@@ -196,10 +196,10 @@ export default function Assemblees() {
                   </div>
 
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>
+                    <p style={{ margin: '0 0 4px', fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>
                       Assemblée générale du {formaterDateLongue(ag.dateAg)}
                     </p>
-                    <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>
+                    <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>
                       {ag.nombreResolutions !== undefined &&
                         `${ag.nombreResolutions} résolution${ag.nombreResolutions > 1 ? 's' : ''} · `}
                       {description(ag)}
@@ -209,7 +209,7 @@ export default function Assemblees() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
                     {dejaVotees.has(ag.id) && <Badge variant="success" label="Voté" />}
                     <Badge {...STATUT_BADGE[ag.statut]} />
-                    <span aria-hidden="true" style={{ fontSize: 20, color: actif ? '#1E4B8F' : '#BDBDBD', marginLeft: 4 }}>
+                    <span aria-hidden="true" style={{ fontSize: 20, color: actif ? 'var(--color-primary)' : 'var(--color-neutral-300)', marginLeft: 4 }}>
                       ›
                     </span>
                   </div>

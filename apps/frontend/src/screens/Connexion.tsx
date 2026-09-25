@@ -42,7 +42,7 @@ export default function Connexion() {
     <main
       style={{
         minHeight: '100vh',
-        backgroundColor: '#F5F6F8',
+        backgroundColor: 'var(--color-background)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -56,7 +56,7 @@ export default function Connexion() {
             style={{
               width: 32,
               height: 32,
-              backgroundColor: '#1E4B8F',
+              backgroundColor: 'var(--color-primary)',
               borderRadius: 7,
               display: 'flex',
               alignItems: 'center',
@@ -66,25 +66,25 @@ export default function Connexion() {
             <svg width="16" height="16" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
               <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
-              <rect x="3" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
-              <rect x="6" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
-              <rect x="9" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
+              <rect x="3" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
+              <rect x="6" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
+              <rect x="9" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
             </svg>
           </div>
-          <span style={{ fontSize: 18, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.01em' }}>
+          <span style={{ fontSize: 18, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
             CopropHub
           </span>
         </div>
 
         <div
           style={{
-            backgroundColor: '#FFFFFF',
-            border: '1px solid #E0E0E0',
+            backgroundColor: 'var(--color-surface)',
+            border: '1px solid var(--color-neutral-200)',
             borderRadius: 10,
             padding: 32,
           }}
         >
-          <div style={{ display: 'flex', gap: 4, marginBottom: 24, backgroundColor: '#F2F2F2', borderRadius: 8, padding: 3 }}>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 24, backgroundColor: 'var(--color-neutral-100)', borderRadius: 8, padding: 3 }}>
             {(['connexion', 'inscription'] as const).map((m) => (
               <button
                 key={m}
@@ -103,8 +103,8 @@ export default function Connexion() {
                   fontSize: 13,
                   fontWeight: 600,
                   fontFamily: 'inherit',
-                  backgroundColor: mode === m ? '#FFFFFF' : 'transparent',
-                  color: mode === m ? '#1A1A1A' : '#5C5C5C',
+                  backgroundColor: mode === m ? 'var(--color-surface)' : 'transparent',
+                  color: mode === m ? 'var(--color-neutral-900)' : 'var(--color-neutral-500)',
                   boxShadow: mode === m ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
                 }}
               >
@@ -142,7 +142,7 @@ export default function Connexion() {
           </form>
           {mode === 'connexion' && (
             <p style={{ margin: '16px 0 0', fontSize: 13, textAlign: 'center' }}>
-              <Link to="/mot-de-passe-oublie" style={{ color: '#1E4B8F' }}>
+              <Link to="/mot-de-passe-oublie" style={{ color: 'var(--color-primary)' }}>
                 Mot de passe oublié ?
               </Link>
             </p>
@@ -150,7 +150,7 @@ export default function Connexion() {
         </div>
 
         {mode === 'inscription' && (
-          <p style={{ marginTop: 16, fontSize: 12, color: '#5C5C5C', textAlign: 'center' }}>
+          <p style={{ marginTop: 16, fontSize: 12, color: 'var(--color-neutral-500)', textAlign: 'center' }}>
             La création de compte crée un compte copropriétaire ; le syndic rattache ensuite votre lot.
           </p>
         )}

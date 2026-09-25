@@ -9,7 +9,7 @@ export function RouteProtegee({ children, roles }: { children: ReactNode; roles?
 
   if (chargement) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#5C5C5C' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-neutral-500)' }}>
         Chargement…
       </div>
     )
@@ -19,8 +19,8 @@ export function RouteProtegee({ children, roles }: { children: ReactNode; roles?
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
         <div style={{ maxWidth: 360, textAlign: 'center' }}>
-          <p style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600, color: '#B3261E' }}>Serveur injoignable</p>
-          <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>
+          <p style={{ margin: '0 0 8px', fontSize: 15, fontWeight: 600, color: 'var(--color-danger)' }}>Serveur injoignable</p>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>
             Impossible de contacter le serveur CopropHub. Vérifiez votre connexion, puis rechargez la page.
           </p>
         </div>

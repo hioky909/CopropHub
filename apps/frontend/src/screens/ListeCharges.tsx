@@ -78,13 +78,13 @@ export default function ListeCharges() {
   const tauxRecouvrement = total > 0 ? Math.round((totalPaye / total) * 100) : 0
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F6F8' }}>
-      <header style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid #E0E0E0', padding: '16px 24px' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
+      <header style={{ backgroundColor: 'var(--color-surface)', borderBottom: '1px solid var(--color-neutral-200)', padding: '16px 24px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
-          <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.01em' }}>
+          <h1 style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
             Charges
           </h1>
-          <p style={{ margin: 0, fontSize: 13, color: '#5C5C5C' }}>{charges.length} ligne(s) de charge</p>
+          <p style={{ margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>{charges.length} ligne(s) de charge</p>
         </div>
       </header>
 
@@ -105,7 +105,7 @@ export default function ListeCharges() {
           <form
             onSubmit={creerCharge}
             className="formulaire-charge"
-            style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20, marginBottom: 24 }}
+            style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 20, marginBottom: 24 }}
           >
             <SelectField label="Lot" required value={idLot} onChange={(e) => setIdLot(e.target.value)}>
               <option value="">Choisir…</option>
@@ -128,12 +128,12 @@ export default function ListeCharges() {
           <>
             <div className="grille-trois-kpi" style={{ marginBottom: 24 }}>
               {[
-                { label: 'Total', value: fmt(total), color: '#1A1A1A' },
-                { label: 'Recouvré', value: fmt(totalPaye), color: '#1E7A4C' },
-                { label: 'En retard', value: fmt(totalRetard), color: '#B3261E' },
+                { label: 'Total', value: fmt(total), color: 'var(--color-neutral-900)' },
+                { label: 'Recouvré', value: fmt(totalPaye), color: 'var(--color-success)' },
+                { label: 'En retard', value: fmt(totalRetard), color: 'var(--color-danger)' },
               ].map((kpi) => (
-                <div key={kpi.label} style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20 }}>
-                  <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                <div key={kpi.label} style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 20 }}>
+                  <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 600, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
                     {kpi.label}
                   </p>
                   <p style={{ margin: 0, fontSize: 24, fontWeight: 700, color: kpi.color, letterSpacing: '-0.02em' }}>{kpi.value}</p>
@@ -143,8 +143,8 @@ export default function ListeCharges() {
 
             <div
               style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid #E0E0E0',
+                backgroundColor: 'var(--color-surface)',
+                border: '1px solid var(--color-neutral-200)',
                 borderRadius: 8,
                 padding: '16px 20px',
                 marginBottom: 20,
@@ -153,18 +153,18 @@ export default function ListeCharges() {
                 gap: 16,
               }}
             >
-              <span style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', whiteSpace: 'nowrap' }}>Taux de recouvrement</span>
-              <div style={{ flex: 1, height: 8, backgroundColor: '#F2F2F2', borderRadius: 4, overflow: 'hidden' }}>
+              <span style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)', whiteSpace: 'nowrap' }}>Taux de recouvrement</span>
+              <div style={{ flex: 1, height: 8, backgroundColor: 'var(--color-neutral-100)', borderRadius: 4, overflow: 'hidden' }}>
                 <div
                   style={{
                     width: `${tauxRecouvrement}%`,
                     height: '100%',
-                    backgroundColor: tauxRecouvrement >= 80 ? '#1E7A4C' : tauxRecouvrement >= 60 ? '#A15C00' : '#B3261E',
+                    backgroundColor: tauxRecouvrement >= 80 ? 'var(--color-success)' : tauxRecouvrement >= 60 ? 'var(--color-warning)' : 'var(--color-danger)',
                     borderRadius: 4,
                   }}
                 />
               </div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{tauxRecouvrement} %</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--color-neutral-900)' }}>{tauxRecouvrement} %</span>
             </div>
 
             <div style={{ display: 'flex', gap: 6, marginBottom: 16 }}>
@@ -182,9 +182,9 @@ export default function ListeCharges() {
                     borderRadius: 20,
                     fontSize: 13,
                     fontWeight: filterStatut === f.key ? 600 : 400,
-                    color: filterStatut === f.key ? '#1E4B8F' : '#5C5C5C',
-                    backgroundColor: filterStatut === f.key ? '#EBF0F9' : '#FFFFFF',
-                    border: `1px solid ${filterStatut === f.key ? '#B3C8E8' : '#E0E0E0'}`,
+                    color: filterStatut === f.key ? 'var(--color-primary)' : 'var(--color-neutral-500)',
+                    backgroundColor: filterStatut === f.key ? 'var(--color-primary-light)' : 'var(--color-surface)',
+                    border: `1px solid ${filterStatut === f.key ? 'var(--color-primary-border)' : 'var(--color-neutral-200)'}`,
                     cursor: 'pointer',
                     fontFamily: 'inherit',
                   }}
@@ -196,19 +196,19 @@ export default function ListeCharges() {
           </>
         )}
 
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflowX: 'auto' }}>
+        <div style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, overflowX: 'auto' }}>
           {chargement ? (
-            <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>Chargement…</p>
+            <p style={{ padding: 24, fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>Chargement…</p>
           ) : filtered.length === 0 ? (
-            <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>Aucune charge.</p>
+            <p style={{ padding: 24, fontSize: 13, color: 'var(--color-neutral-500)', margin: 0 }}>Aucune charge.</p>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr style={{ backgroundColor: '#F5F6F8', borderBottom: '1px solid #E0E0E0' }}>
+                <tr style={{ backgroundColor: 'var(--color-background)', borderBottom: '1px solid var(--color-neutral-200)' }}>
                   {[...(estSyndic ? ['Lot'] : []), 'Période', 'Montant', 'Échéance', 'Statut', ...(estSyndic ? [''] : [])].map((col, index) => (
                     <th scope="col"
                       key={`${col}-${index}`}
-                      style={{ padding: '9px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: '#5C5C5C', textTransform: 'uppercase', letterSpacing: '0.06em' }}
+                      style={{ padding: '9px 16px', textAlign: 'left', fontSize: 11, fontWeight: 600, color: 'var(--color-neutral-500)', textTransform: 'uppercase', letterSpacing: '0.06em' }}
                     >
                       {col}
                     </th>
@@ -217,15 +217,15 @@ export default function ListeCharges() {
               </thead>
               <tbody>
                 {filtered.map((charge, i) => (
-                  <tr key={charge.id} style={{ borderTop: i > 0 ? '1px solid #F2F2F2' : 'none' }}>
+                  <tr key={charge.id} style={{ borderTop: i > 0 ? '1px solid var(--color-neutral-100)' : 'none' }}>
                     {estSyndic && (
-                      <td style={{ padding: '12px 16px', fontSize: 13, color: '#1A1A1A', fontWeight: 500 }}>{numeroLot(charge.idLot)}</td>
+                      <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--color-neutral-900)', fontWeight: 500 }}>{numeroLot(charge.idLot)}</td>
                     )}
-                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#5C5C5C' }}>{charge.periode}</td>
-                    <td style={{ padding: '12px 16px', fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--color-neutral-500)' }}>{charge.periode}</td>
+                    <td style={{ padding: '12px 16px', fontSize: 14, fontWeight: 600, color: 'var(--color-neutral-900)' }}>
                       {fmt(Number(charge.montant))}
                     </td>
-                    <td style={{ padding: '12px 16px', fontSize: 13, color: '#5C5C5C' }}>
+                    <td style={{ padding: '12px 16px', fontSize: 13, color: 'var(--color-neutral-500)' }}>
                       {charge.dateEcheance ? formaterDate(charge.dateEcheance) : '—'}
                     </td>
                     <td style={{ padding: '12px 16px' }}>

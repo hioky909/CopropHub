@@ -25,23 +25,23 @@ const BASE = {
 
 const VARIANTS: Record<ButtonVariant, object> = {
   primary: {
-    backgroundColor: '#1E4B8F',
-    color: '#FFFFFF',
-    borderColor: '#1E4B8F',
+    backgroundColor: 'var(--color-primary)',
+    color: 'var(--color-primary-foreground)',
+    borderColor: 'var(--color-primary)',
   },
   secondary: {
-    backgroundColor: '#FFFFFF',
-    color: '#1A1A1A',
-    borderColor: '#E0E0E0',
+    backgroundColor: 'var(--color-surface)',
+    color: 'var(--color-neutral-900)',
+    borderColor: 'var(--color-neutral-200)',
   },
   destructive: {
-    backgroundColor: '#FDECEA',
-    color: '#B3261E',
-    borderColor: '#F5C6C4',
+    backgroundColor: 'var(--color-danger-light)',
+    color: 'var(--color-danger)',
+    borderColor: 'var(--color-danger-border)',
   },
   ghost: {
     backgroundColor: 'transparent',
-    color: '#5C5C5C',
+    color: 'var(--color-neutral-500)',
     borderColor: 'transparent',
   },
 }
@@ -63,6 +63,7 @@ export default function Button({
   return (
     <button
       {...props}
+      className={`bouton bouton-${variant}`}
       disabled={disabled}
       style={{
         ...BASE,

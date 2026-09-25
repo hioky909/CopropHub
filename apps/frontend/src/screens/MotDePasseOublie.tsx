@@ -38,7 +38,7 @@ export default function MotDePasseOublie() {
         <Notification variant="success">{message}</Notification>
       ) : (
         <form onSubmit={soumettre} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <p style={{ margin: 0, fontSize: 14, color: '#5C5C5C' }}>
+          <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-500)' }}>
             Saisissez l’adresse de votre compte : nous vous enverrons un lien pour choisir un nouveau mot de passe.
           </p>
           {erreur && <Notification variant="error">{erreur}</Notification>}
@@ -49,7 +49,7 @@ export default function MotDePasseOublie() {
         </form>
       )}
       <p style={{ margin: '16px 0 0', fontSize: 13, textAlign: 'center' }}>
-        <Link to="/connexion" style={{ color: '#1E4B8F' }}>
+        <Link to="/connexion" style={{ color: 'var(--color-primary)' }}>
           Retour à la connexion
         </Link>
       </p>

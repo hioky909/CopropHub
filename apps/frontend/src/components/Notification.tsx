@@ -3,10 +3,10 @@ import { ReactNode } from 'react'
 type NotifVariant = 'success' | 'error' | 'info' | 'warning'
 
 const STYLES: Record<NotifVariant, { bg: string; border: string; icon: string; color: string; label: string }> = {
-  success: { bg: '#E8F5EE', border: '#A8D8BC', icon: '✓', color: '#1E7A4C', label: 'Succès' },
-  error:   { bg: '#FDECEA', border: '#F5C6C4', icon: '✕', color: '#B3261E', label: 'Erreur' },
-  info:    { bg: '#EBF0F9', border: '#B3C8E8', icon: 'ℹ', color: '#1E4B8F', label: 'Information' },
-  warning: { bg: '#FEF3E2', border: '#F5CFA0', icon: '!', color: '#A15C00', label: 'Attention' },
+  success: { bg: 'var(--color-success-light)', border: 'var(--color-success-border)', icon: '✓', color: 'var(--color-success)', label: 'Succès' },
+  error:   { bg: 'var(--color-danger-light)', border: 'var(--color-danger-border)', icon: '✕', color: 'var(--color-danger)', label: 'Erreur' },
+  info:    { bg: 'var(--color-info-light)', border: 'var(--color-info-border)', icon: 'ℹ', color: 'var(--color-info)', label: 'Information' },
+  warning: { bg: 'var(--color-warning-light)', border: 'var(--color-warning-border)', icon: '!', color: 'var(--color-warning)', label: 'Attention' },
 }
 
 interface NotificationProps {
@@ -37,7 +37,7 @@ export default function Notification({ variant, title, children, onDismiss }: No
           height: 20,
           borderRadius: '50%',
           backgroundColor: s.color,
-          color: '#FFFFFF',
+          color: 'var(--color-surface)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -53,7 +53,7 @@ export default function Notification({ variant, title, children, onDismiss }: No
         {title && (
           <p style={{ margin: '0 0 2px', fontSize: 14, fontWeight: 600, color: s.color }}>{title}</p>
         )}
-        <p style={{ margin: 0, fontSize: 14, color: '#3D3D3D', lineHeight: 1.5 }}>{children}</p>
+        <p style={{ margin: 0, fontSize: 14, color: 'var(--color-neutral-700)', lineHeight: 1.5 }}>{children}</p>
       </div>
       {onDismiss && (
         <button

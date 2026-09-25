@@ -17,6 +17,8 @@ Export condensé du Doc 4. Le design system décrit ici est celui réellement ap
 | `color-surface` | `#FFFFFF` | — | Fond des cartes |
 | `color-background` | `#F5F6F8` | — | Fond de page |
 
+Tous les composants lisent ces couleurs par variables CSS (`var(--color-…)`, définies dans `index.css`), jamais par un littéral hexadécimal : un test (`src/tokens.test.ts`) le garantit. Tokens complémentaires : `--color-primary-hover/-light/-border/-foreground`, `--color-info(-light/-border)` (statut « information », fixe), `--color-success/warning/danger-light/-border`, `--color-neutral-100/200/300/400/700`, `--color-overlay` (voile de la modale).
+
 ### Typographie
 
 | Style | Taille / graisse | Usage |

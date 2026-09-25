@@ -1,11 +1,11 @@
 type BadgeVariant = 'success' | 'warning' | 'danger' | 'neutral' | 'info';
 
 const STYLES: Record<BadgeVariant, { bg: string; color: string; dot: string }> = {
-  success: { bg: '#E8F5EE', color: '#1E7A4C', dot: '#1E7A4C' },
-  warning: { bg: '#FEF3E2', color: '#A15C00', dot: '#A15C00' },
-  danger: { bg: '#FDECEA', color: '#B3261E', dot: '#B3261E' },
-  neutral: { bg: '#F2F2F2', color: '#5C5C5C', dot: '#9E9E9E' },
-  info: { bg: '#EBF0F9', color: '#1E4B8F', dot: '#1E4B8F' },
+  success: { bg: 'var(--color-success-light)', color: 'var(--color-success)', dot: 'var(--color-success)' },
+  warning: { bg: 'var(--color-warning-light)', color: 'var(--color-warning)', dot: 'var(--color-warning)' },
+  danger: { bg: 'var(--color-danger-light)', color: 'var(--color-danger)', dot: 'var(--color-danger)' },
+  neutral: { bg: 'var(--color-neutral-100)', color: 'var(--color-neutral-500)', dot: 'var(--color-neutral-400)' },
+  info: { bg: 'var(--color-info-light)', color: 'var(--color-info)', dot: 'var(--color-info)' },
 };
 
 interface BadgeProps {

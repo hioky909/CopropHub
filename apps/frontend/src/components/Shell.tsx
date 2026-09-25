@@ -49,7 +49,7 @@ export default function Shell({ children }: { children: ReactNode }) {
   const items = NAV_ITEMS.filter((item) => item.roles.includes(utilisateur.typeCompte))
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#F5F6F8' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: 'var(--color-background)' }}>
       <a
         href="#contenu"
         className="lien-evitement"
@@ -64,8 +64,8 @@ export default function Shell({ children }: { children: ReactNode }) {
       </a>
       <header
         style={{
-          backgroundColor: '#FFFFFF',
-          borderBottom: '1px solid #E0E0E0',
+          backgroundColor: 'var(--color-surface)',
+          borderBottom: '1px solid var(--color-neutral-200)',
           position: 'sticky',
           top: 0,
           zIndex: 20,
@@ -79,7 +79,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                   style={{
                     width: 28,
                     height: 28,
-                    backgroundColor: '#1E4B8F',
+                    backgroundColor: 'var(--color-primary)',
                     borderRadius: 6,
                     display: 'flex',
                     alignItems: 'center',
@@ -89,12 +89,12 @@ export default function Shell({ children }: { children: ReactNode }) {
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <rect x="1" y="4" width="12" height="9" rx="1" fill="white" opacity="0.9" />
                     <rect x="4" y="1" width="6" height="4" rx="1" fill="white" opacity="0.7" />
-                    <rect x="3" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
-                    <rect x="6" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
-                    <rect x="9" y="7" width="2" height="2" rx="0.5" fill="#1E4B8F" />
+                    <rect x="3" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
+                    <rect x="6" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
+                    <rect x="9" y="7" width="2" height="2" rx="0.5" style={{ fill: 'var(--color-primary)' }} />
                   </svg>
                 </div>
-                <span style={{ fontSize: 15, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.01em' }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.01em' }}>
                   CopropHub
                 </span>
               </div>
@@ -109,8 +109,8 @@ export default function Shell({ children }: { children: ReactNode }) {
                       padding: '6px 12px',
                       fontSize: 13,
                       fontWeight: isActive ? 600 : 400,
-                      color: isActive ? '#1E4B8F' : '#5C5C5C',
-                      backgroundColor: isActive ? '#EBF0F9' : 'transparent',
+                      color: isActive ? 'var(--color-primary)' : 'var(--color-neutral-500)',
+                      backgroundColor: isActive ? 'var(--color-primary-light)' : 'transparent',
                       borderRadius: 6,
                       textDecoration: 'none',
                       flexShrink: 0,
@@ -127,12 +127,12 @@ export default function Shell({ children }: { children: ReactNode }) {
                 <NavLink
                   to="/compte"
                   title="Mon compte"
-                  style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', textDecoration: 'none' }}
+                  style={{ fontSize: 13, fontWeight: 500, color: 'var(--color-neutral-900)', textDecoration: 'none' }}
                 >
                   <span className="libelle-long">{utilisateur.email}</span>
                   <span className="libelle-court">Mon compte</span>
                 </NavLink>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: '#1E4B8F' }}>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: 'var(--color-primary)' }}>
                   {utilisateur.typeCompte === 'SYNDIC'
                     ? 'Syndic'
                     : utilisateur.estMembreConseilSyndical
@@ -147,9 +147,9 @@ export default function Shell({ children }: { children: ReactNode }) {
                 style={{
                   fontSize: 12,
                   fontWeight: 500,
-                  color: '#5C5C5C',
+                  color: 'var(--color-neutral-500)',
                   background: 'none',
-                  border: '1px solid #E0E0E0',
+                  border: '1px solid var(--color-neutral-200)',
                   borderRadius: 6,
                   padding: '6px 10px',
                   cursor: 'pointer',

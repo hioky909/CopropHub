@@ -68,11 +68,11 @@ export default function Reinitialisation() {
       )}
       <p style={{ margin: '16px 0 0', fontSize: 13, textAlign: 'center' }}>
         {termine ? (
-          <Link to="/connexion" style={{ color: '#1E4B8F' }}>
+          <Link to="/connexion" style={{ color: 'var(--color-primary)' }}>
             Aller à la connexion
           </Link>
         ) : (
-          <Link to="/mot-de-passe-oublie" style={{ color: '#1E4B8F' }}>
+          <Link to="/mot-de-passe-oublie" style={{ color: 'var(--color-primary)' }}>
             Demander un nouveau lien
           </Link>
         )}

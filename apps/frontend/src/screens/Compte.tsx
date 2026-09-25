@@ -40,16 +40,16 @@ export default function Compte() {
 
   return (
     <main style={{ maxWidth: 520, margin: '0 auto', padding: '32px 24px' }}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.02em' }}>
+      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
         Mon compte
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>{utilisateur?.email}</p>
+      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>{utilisateur?.email}</p>
 
       <form
         onSubmit={soumettre}
-        style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}
+        style={{ backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}
       >
-        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Changer mon mot de passe</h2>
+        <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Changer mon mot de passe</h2>
         {erreur && <Notification variant="error">{erreur}</Notification>}
         {succes && <Notification variant="success">Mot de passe modifié.</Notification>}
         <TextField

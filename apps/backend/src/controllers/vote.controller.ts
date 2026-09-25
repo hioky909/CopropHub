@@ -93,7 +93,10 @@ voteRouter.put(
         res.status(403).json({ erreur: erreur.message });
         return;
       }
-      if (erreur instanceof ResolutionIntrouvableError || erreur instanceof AucunVoteAModifierError) {
+      if (
+        erreur instanceof ResolutionIntrouvableError ||
+        erreur instanceof AucunVoteAModifierError
+      ) {
         res.status(404).json({ erreur: erreur.message });
         return;
       }

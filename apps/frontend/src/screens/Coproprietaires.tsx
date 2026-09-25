@@ -8,14 +8,14 @@ import type { Coproprietaire, LotAvecProprietaire } from '../api/types.js'
 
 const TYPES_LOT = ['appartement', 'cave', 'parking', 'local commercial']
 
-const carte = { backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8 } as const
+const carte = { backgroundColor: 'var(--color-surface)', border: '1px solid var(--color-neutral-200)', borderRadius: 8 } as const
 const carteTableau = { ...carte, overflowX: 'auto' } as const
-const cellule = { padding: '12px 24px', fontSize: 14, color: '#1A1A1A' } as const
+const cellule = { padding: '12px 24px', fontSize: 14, color: 'var(--color-neutral-900)' } as const
 const enTete = {
   padding: '10px 24px',
   fontSize: 12,
   fontWeight: 500,
-  color: '#5C5C5C',
+  color: 'var(--color-neutral-500)',
   textTransform: 'uppercase',
   letterSpacing: '0.06em',
   textAlign: 'left',
@@ -129,10 +129,10 @@ export default function Coproprietaires() {
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}>
-      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.02em' }}>
+      <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: 'var(--color-neutral-900)', letterSpacing: '-0.02em' }}>
         Copropriétaires
       </h1>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: '#5C5C5C' }}>
+      <p style={{ margin: '0 0 24px', fontSize: 14, color: 'var(--color-neutral-500)' }}>
         {chargement ? 'Chargement…' : `${coproprietaires.length} copropriétaires · ${lots.length} lots`}
       </p>
 
@@ -149,7 +149,7 @@ export default function Coproprietaires() {
 
       <div className="grille-deux-colonnes" style={{ marginBottom: 24 }}>
         <form onSubmit={creerCoproprietaire} style={{ ...carte, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Ajouter un copropriétaire</h2>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Ajouter un copropriétaire</h2>
           <TextField label="Nom complet" required value={nom} onChange={(e) => setNom(e.target.value)} />
           <TextField label="Email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           <TextField
@@ -166,7 +166,7 @@ export default function Coproprietaires() {
         </form>
 
         <form onSubmit={creerLot} style={{ ...carte, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Ajouter un lot</h2>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Ajouter un lot</h2>
           <TextField label="Numéro du lot" required value={numeroLot} onChange={(e) => setNumeroLot(e.target.value)} />
           <SelectField label="Type de lot" value={typeLot} onChange={(e) => setTypeLot(e.target.value)}>
             {TYPES_LOT.map((t) => (
@@ -182,11 +182,11 @@ export default function Coproprietaires() {
       </div>
 
       <div style={{ ...carteTableau, marginBottom: 24 }}>
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Lots et propriétaires</h2>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-neutral-100)' }}>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Lots et propriétaires</h2>
         </div>
         {lots.length === 0 ? (
-          <p style={{ padding: 24, margin: 0, fontSize: 13, color: '#5C5C5C' }}>
+          <p style={{ padding: 24, margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>
             {chargement ? 'Chargement…' : 'Aucun lot. Créez-en un ci-dessus.'}
           </p>
         ) : (
@@ -201,17 +201,17 @@ export default function Coproprietaires() {
             </thead>
             <tbody>
               {lots.map((lot) => (
-                <tr key={lot.id} style={{ borderTop: '1px solid #F2F2F2' }}>
+                <tr key={lot.id} style={{ borderTop: '1px solid var(--color-neutral-100)' }}>
                   <td style={{ ...cellule, fontWeight: 600 }}>{lot.numero}</td>
                   <td style={cellule}>{lot.typeLot}</td>
-                  <td style={cellule}>{lot.proprietaire?.nom ?? <span style={{ color: '#5C5C5C' }}>Non rattaché</span>}</td>
+                  <td style={cellule}>{lot.proprietaire?.nom ?? <span style={{ color: 'var(--color-neutral-500)' }}>Non rattaché</span>}</td>
                   <td style={cellule}>
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                       <select
                         aria-label={`Copropriétaire à rattacher au lot ${lot.numero}`}
                         value={choixProprietaire[lot.id] ?? ''}
                         onChange={(e) => setChoixProprietaire((prev) => ({ ...prev, [lot.id]: e.target.value }))}
-                        style={{ padding: '6px 8px', fontSize: 13, border: '1px solid #E0E0E0', borderRadius: 6, fontFamily: 'inherit' }}
+                        style={{ padding: '6px 8px', fontSize: 13, border: '1px solid var(--color-neutral-200)', borderRadius: 6, fontFamily: 'inherit' }}
                       >
                         <option value="">Choisir…</option>
                         {coproprietaires.map((c) => (
@@ -238,11 +238,11 @@ export default function Coproprietaires() {
       </div>
 
       <div style={carteTableau}>
-        <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Copropriétaires</h2>
+        <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-neutral-100)' }}>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Copropriétaires</h2>
         </div>
         {coproprietaires.length === 0 ? (
-          <p style={{ padding: 24, margin: 0, fontSize: 13, color: '#5C5C5C' }}>
+          <p style={{ padding: 24, margin: 0, fontSize: 13, color: 'var(--color-neutral-500)' }}>
             {chargement ? 'Chargement…' : 'Aucun copropriétaire. Créez-en un ci-dessus.'}
           </p>
         ) : (
@@ -259,11 +259,11 @@ export default function Coproprietaires() {
               {coproprietaires.map((c) => {
                 const numeros = lotsDe(c.id)
                 return (
-                  <tr key={c.id} style={{ borderTop: '1px solid #F2F2F2' }}>
+                  <tr key={c.id} style={{ borderTop: '1px solid var(--color-neutral-100)' }}>
                     <td style={{ ...cellule, fontWeight: 500 }}>{c.nom}</td>
                     <td style={cellule}>{c.email}</td>
                     <td style={cellule}>
-                      {numeros.length > 0 ? numeros.join(', ') : <span style={{ color: '#5C5C5C' }}>Aucun lot</span>}
+                      {numeros.length > 0 ? numeros.join(', ') : <span style={{ color: 'var(--color-neutral-500)' }}>Aucun lot</span>}
                     </td>
                     <td style={cellule}>
                       <input
@@ -292,8 +292,8 @@ export default function Coproprietaires() {
 
       <div className="grille-deux-colonnes" style={{ marginTop: 24 }}>
         <div style={carteTableau}>
-          <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Équipe du syndic</h2>
+          <div style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-neutral-100)' }}>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Équipe du syndic</h2>
           </div>
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
@@ -304,7 +304,7 @@ export default function Coproprietaires() {
             </thead>
             <tbody>
               {syndics.map((s) => (
-                <tr key={s.id} style={{ borderTop: '1px solid #F2F2F2' }}>
+                <tr key={s.id} style={{ borderTop: '1px solid var(--color-neutral-100)' }}>
                   <td style={{ ...cellule, fontWeight: 500 }}>{s.nom}</td>
                   <td style={cellule}>{s.email}</td>
                 </tr>
@@ -314,7 +314,7 @@ export default function Coproprietaires() {
         </div>
 
         <form onSubmit={creerSyndic} style={{ ...carte, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Ajouter un syndic</h2>
+          <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: 'var(--color-neutral-900)' }}>Ajouter un syndic</h2>
           <TextField label="Nom du nouveau syndic" required value={nomSyndic} onChange={(e) => setNomSyndic(e.target.value)} />
           <TextField label="Courriel du nouveau syndic" type="email" required value={emailSyndic} onChange={(e) => setEmailSyndic(e.target.value)} />
           <TextField
