@@ -55,6 +55,6 @@ Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, f
 - [x] Journalisation des actions sensibles (F-11) — `journal.service.ts`, testée ; stockage/collecte à la charge de la plateforme de déploiement
 - [x] Headers de sécurité (Helmet : HSTS, X-Content-Type-Options, X-Frame-Options…) — testés (T-25, `security-headers.test.ts`)
 - [x] CORS restreint à l'origine du front, pas de wildcard — testé (T-25)
-- [ ] HTTPS obligatoire en production — dépend de l'infrastructure de déploiement, non encore définie (T-11-devops)
+- [x] HTTPS obligatoire en production — installation fournie (`docker-compose.prod.yml`, Caddy : certificat Let's Encrypt automatique, HSTS, CSP stricte, origine unique), vérifiée en conditions réelles par `deploy/verifier-production.sh` et un parcours navigateur ; reste à l'exploitant de fournir le domaine et la machine
 - [x] Audit des dépendances intégré à la CI (`npm audit --audit-level=high`)
 - [x] Contraintes CHECK/UNIQUE/clés composites en base comme dernière ligne de défense

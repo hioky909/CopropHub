@@ -2,9 +2,9 @@ name: CI
 
 on:
   pull_request:
-    branches: [main]
+    branches: [main, master]
   push:
-    branches: [main]
+    branches: [main, master]
 
 jobs:
   quality:
@@ -65,6 +65,14 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Valider la configuration Compose de production
+        # Les variables obligatoires sont fournies avec des valeurs factices : seul le fichier est contrôlé.
+        run: docker compose -f docker-compose.prod.yml --env-file .env.production.example config --quiet
+        env:
+          DOMAINE: copro.example.org
+          DB_PASSWORD: ci
+          SESSION_SECRET: ci
+
       - name: Installer les navigateurs Playwright
         run: npx playwright install --with-deps chromium
         working-directory: apps/frontend
@@ -77,11 +85,90 @@ jobs:
       - name: Audit de sécurité des dépendances
         run: npm audit --audit-level=high
 
-  deploy:
+  # Livraison : construit les images de production, les vérifie en conditions réelles (HTTPS, proxy,
+  # migrations, amorçage, en-têtes de sécurité), les publie sur GitHub Container Registry, puis —
+  # seulement si les secrets de déploiement sont configurés — met à jour le serveur par SSH.
+  livraison:
     needs: quality
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    env:
+      # Secrets facultatifs du déploiement (exposés ici pour pouvoir les tester dans `if:`).
+      DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+      DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+      DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+      DEPLOY_DOMAINE: ${{ secrets.DEPLOY_DOMAINE }}
     steps:
       - uses: actions/checkout@v4
-      - name: Déployer
-        run: echo "Étape de déploiement (Docker Compose / plateforme cloud, cf. Doc 8 CI/CD)"
+
+      - name: Nommer les images (le nom d'organisation doit être en minuscules)
+        run: |
+          echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/coprophub" >> "$GITHUB_ENV"
+          echo "IMAGE_TAG=${GITHUB_SHA}" >> "$GITHUB_ENV"
+
+      - name: Construire les images de production
+        run: |
+          cat > .env.ci <<EOF
+          DOMAINE=localhost
+          DB_PASSWORD=$(openssl rand -hex 16)
+          SESSION_SECRET=$(openssl rand -base64 36)
+          HTTP_PORT=18080
+          HTTPS_PORT=18443
+          SEED_IMMEUBLE_NOM=Résidence de contrôle
+          SEED_IMMEUBLE_ADRESSE=1 rue du Contrôle, 75000 Paris
+          SEED_SYNDIC_NOM=Syndic de contrôle
+          SEED_SYNDIC_EMAIL=controle@example.org
+          SEED_SYNDIC_MOT_DE_PASSE=$(openssl rand -hex 16)
+          EOF
+          docker compose -f docker-compose.prod.yml --env-file .env.ci build
+
+      - name: Contrôle de fumée des images (HTTPS local, proxy, migrations, amorçage)
+        run: |
+          docker compose -f docker-compose.prod.yml --env-file .env.ci up -d
+          docker compose -f docker-compose.prod.yml --env-file .env.ci --profile outils run --rm seed
+          for i in $(seq 1 30); do curl -sk -o /dev/null https://localhost:18443/api/health && break; sleep 2; done
+          ./deploy/verifier-production.sh https://localhost:18443 --insecure
+
+      - name: Journaux en cas d'échec
+        if: failure()
+        run: docker compose -f docker-compose.prod.yml --env-file .env.ci logs --tail 100
+
+      - name: Arrêter les conteneurs de contrôle
+        if: always()
+        run: docker compose -f docker-compose.prod.yml --env-file .env.ci down -v
+
+      - name: Se connecter à GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publier les images (étiquette = commit, et « latest »)
+        run: |
+          docker compose -f docker-compose.prod.yml --env-file .env.ci push
+          for image in backend web outils; do
+            docker tag "$IMAGE_PREFIX/$image:$IMAGE_TAG" "$IMAGE_PREFIX/$image:latest"
+            docker push "$IMAGE_PREFIX/$image:latest"
+          done
+
+      - name: Déployer sur le serveur
+        if: env.DEPLOY_HOST != '' && env.DEPLOY_SSH_KEY != ''
+        run: |
+          install -m 700 -d ~/.ssh
+          echo "$DEPLOY_SSH_KEY" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
+          # Le serveur contient déjà docker-compose.prod.yml et .env.production (cf. docs/11-devops).
+          COMPOSE="docker compose -f docker-compose.prod.yml --env-file .env.production"
+          ssh -i ~/.ssh/id_deploy "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && export IMAGE_PREFIX='$IMAGE_PREFIX' IMAGE_TAG='$IMAGE_TAG' && $COMPOSE pull && $COMPOSE up -d --remove-orphans"
+
+      - name: Vérifier le déploiement
+        if: env.DEPLOY_DOMAINE != '' && env.DEPLOY_HOST != ''
+        run: |
+          for i in $(seq 1 30); do curl -fsS "https://$DEPLOY_DOMAINE/api/health" >/dev/null && break; sleep 5; done
+          ./deploy/verifier-production.sh "https://$DEPLOY_DOMAINE"

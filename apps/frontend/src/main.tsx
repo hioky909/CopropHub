@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App.js";
+import "@fontsource-variable/inter/wght.css"; // police Inter auto-hébergée (aucune requête vers un tiers)
 import "./index.css";
 import { appliquerTheme } from "./theme/appliquerTheme.js";
 import { genererTheme } from "./theme/genererTheme.js";

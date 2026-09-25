@@ -131,3 +131,23 @@ for (const largeur of [1280, 1920]) {
     expect(boiteCompte.width).toBeLessThanOrEqual(40)
   })
 }
+
+test('aucune requête vers un site tiers, et la police Inter est bien chargée depuis l’application (RGPD)', async ({ page }) => {
+  const origines = new Set<string>()
+  page.on('request', (r) => {
+    if (r.url().startsWith('http')) origines.add(new URL(r.url()).origin)
+  })
+  await login(page, COPRO.email, COPRO.motDePasse)
+  for (const chemin of ['/charges', '/assemblees', '/incidents', '/compte']) {
+    await page.goto(chemin)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
+  }
+  // Seulement le frontend et l'API : ni Google Fonts, ni CDN.
+  for (const origine of origines) expect(origine).toMatch(/^http:\/\/localhost:(3100|5183|3000|5173)$/)
+
+  const policeChargee = await page.evaluate(async () => {
+    await document.fonts.ready
+    return document.fonts.check('600 16px "Inter Variable"')
+  })
+  expect(policeChargee).toBe(true)
+})

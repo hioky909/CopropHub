@@ -23,6 +23,14 @@ import { sessionService } from './services/session.service.js';
 export function createApp(): Express {
   const app = express();
 
+  // Derrière un proxy inverse (Caddy en production), l'adresse du visiteur est dans X-Forwarded-For :
+  // sans cela, tous les visiteurs partageraient l'adresse du proxy et les limites de débit (globale,
+  // connexion, mot de passe oublié) se bloqueraient mutuellement. `TRUST_PROXY` = nombre de proxys de
+  // confiance devant l'application (1 avec l'installation fournie, 0 par défaut : l'en-tête est alors
+  // ignoré, un client ne peut pas usurper son adresse).
+  const sauts = Number(process.env.TRUST_PROXY ?? 0);
+  app.set('trust proxy', Number.isInteger(sauts) && sauts > 0 ? sauts : false);
+
   // En-têtes de sécurité, CORS restrictif et rate limiting :
   // cf. Doc 5 "Modèle de menace & sécurité" § Sécurité transverse.
   app.use(helmet());

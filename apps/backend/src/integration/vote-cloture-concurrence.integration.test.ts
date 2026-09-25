@@ -33,8 +33,11 @@ const ITERATIONS = 80;
 let votants: UtilisateurAuthentifie[];
 let idImmeuble: string;
 
-// Fenêtre (ms) dans laquelle les 12 votes et la clôture démarrent au hasard.
-const FENETRE_MS = 20;
+// Fenêtres (ms) dans lesquelles les 12 votes et la clôture démarrent au hasard. Avec une base
+// proche, 20 ms suffit à faire tomber la clôture au milieu des votes ; sur un réseau plus lent
+// (PostgreSQL en conteneur sous Windows/macOS), les opérations se sérialisent et il faut étaler
+// davantage les départs. On élargit donc la fenêtre tant que la course n'est pas réellement exercée.
+const FENETRES_MS = [20, 60, 150];
 const attendre = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 beforeAll(async () => {
@@ -55,7 +58,8 @@ beforeAll(async () => {
 });
 
 describe('vote et clôture simultanés (RM-04)', () => {
-  it(`${ITERATIONS} clôtures lancées au milieu de ${INSCRITS} votes : aucun vote perdu ni ajouté après coup`, async () => {
+  /** Une passe de ITERATIONS clôtures ; les invariants métier sont vérifiés à CHAQUE itération, sans exception. */
+  async function passe(fenetreMs: number) {
     let acceptes = 0;
     let refuses = 0;
     let iterationsMixtes = 0;
@@ -68,7 +72,7 @@ describe('vote et clôture simultanés (RM-04)', () => {
 
       // Chaque vote et la clôture partent à un instant aléatoire de la fenêtre :
       // la clôture tombe ainsi tantôt avant, tantôt au milieu, tantôt après les votes.
-      const aleatoire = () => attendre(Math.random() * FENETRE_MS);
+      const aleatoire = () => attendre(Math.random() * fenetreMs);
       const votes = votants.map((votant) =>
         aleatoire()
           .then(() => voteService.voter(votant, idResolution, 'OUI'))
@@ -102,16 +106,24 @@ describe('vote et clôture simultanés (RM-04)', () => {
       expect((await prisma.aG.findUniqueOrThrow({ where: { id: ag.id } })).statut).toBe('CLOTUREE');
     }
 
-    // Preuve que le test exerce bien la course : des votes acceptés ET refusés
-    // dans une même itération.
-    // eslint-disable-next-line no-console -- affichage volontaire : preuve que la course est exercée
-    console.info(
-      `[concurrence] votes acceptés=${acceptes}, refusés=${refuses}, itérations où la clôture est tombée au milieu des votes=${iterationsMixtes}/${ITERATIONS}`,
-    );
-    expect(acceptes + refuses).toBe(INSCRITS * ITERATIONS);
+    return { acceptes, refuses, iterationsMixtes };
+  }
+
+  it(`${ITERATIONS} clôtures lancées au milieu de ${INSCRITS} votes : aucun vote perdu ni ajouté après coup`, async () => {
+    let derniere = { acceptes: 0, refuses: 0, iterationsMixtes: 0 };
+    for (const fenetreMs of FENETRES_MS) {
+      derniere = await passe(fenetreMs);
+      // Preuve que le test exerce bien la course : des votes acceptés ET refusés dans une même itération.
+      // eslint-disable-next-line no-console -- affichage volontaire : preuve que la course est exercée
+      console.info(
+        `[concurrence] fenêtre=${fenetreMs} ms, votes acceptés=${derniere.acceptes}, refusés=${derniere.refuses}, itérations où la clôture est tombée au milieu des votes=${derniere.iterationsMixtes}/${ITERATIONS}`,
+      );
+      expect(derniere.acceptes + derniere.refuses).toBe(INSCRITS * ITERATIONS);
+      if (derniere.iterationsMixtes >= ITERATIONS / 8) break;
+    }
     expect(
-      iterationsMixtes,
-      "le test n'exerce pas la course (clôture trop rarement au milieu des votes)",
+      derniere.iterationsMixtes,
+      "le test n'exerce pas la course (clôture trop rarement au milieu des votes), même avec la plus large fenêtre",
     ).toBeGreaterThanOrEqual(ITERATIONS / 8);
   });
 });

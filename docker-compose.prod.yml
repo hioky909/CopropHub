@@ -1,0 +1,120 @@
+# CopropHub — production. Indépendant de l'hébergeur : n'importe quelle machine avec Docker, un nom
+# de domaine qui pointe dessus et les ports 80/443 ouverts.
+#
+#   cp .env.production.example .env.production      # puis renseigner les valeurs
+#   docker compose -f docker-compose.prod.yml --env-file .env.production up -d
+#   docker compose -f docker-compose.prod.yml --env-file .env.production --profile outils run --rm seed
+#
+# Seul le service `web` (Caddy) est exposé : la base et le backend ne publient aucun port. Les
+# images sont construites localement (`--build`) ou tirées d'un registre (IMAGE_PREFIX/IMAGE_TAG,
+# cf. le job de livraison de la CI).
+name: coprophub-prod
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: coprophub
+      POSTGRES_USER: coprophub
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?DB_PASSWORD est requis (voir .env.production.example)}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U coprophub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Applique les migrations Prisma puis s'arrête (le backend n'attend que sa réussite).
+  migrate:
+    image: ${IMAGE_PREFIX:-coprophub}/outils:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: build
+    command: ["npm", "run", "prisma:migrate:deploy", "--workspace=apps/backend"]
+    environment:
+      DATABASE_URL: postgresql://coprophub:${DB_PASSWORD}@db:5432/coprophub
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  # Amorçage du premier compte syndic et de l'immeuble (une seule fois). Aucune valeur par défaut
+  # en production : les variables SEED_* sont obligatoires (cf. .env.production.example).
+  seed:
+    image: ${IMAGE_PREFIX:-coprophub}/outils:${IMAGE_TAG:-latest}
+    profiles: ["outils"]
+    command: ["npm", "run", "prisma:seed", "--workspace=apps/backend"]
+    environment:
+      DATABASE_URL: postgresql://coprophub:${DB_PASSWORD}@db:5432/coprophub
+      NODE_ENV: production
+      SEED_IMMEUBLE_NOM: ${SEED_IMMEUBLE_NOM:-}
+      SEED_IMMEUBLE_ADRESSE: ${SEED_IMMEUBLE_ADRESSE:-}
+      SEED_SYNDIC_NOM: ${SEED_SYNDIC_NOM:-}
+      SEED_SYNDIC_EMAIL: ${SEED_SYNDIC_EMAIL:-}
+      SEED_SYNDIC_MOT_DE_PASSE: ${SEED_SYNDIC_MOT_DE_PASSE:-}
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: "no"
+
+  backend:
+    image: ${IMAGE_PREFIX:-coprophub}/backend:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      target: runtime
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://coprophub:${DB_PASSWORD}@db:5432/coprophub
+      SESSION_SECRET: ${SESSION_SECRET:?SESSION_SECRET est requis (voir .env.production.example)}
+      PORT: 3000
+      NODE_ENV: production
+      # Un proxy (Caddy) précède le backend : les limites de débit comptent chaque visiteur séparément.
+      TRUST_PROXY: 1
+      FRONTEND_ORIGIN: https://${DOMAINE:?DOMAINE est requis}
+      APP_URL: https://${DOMAINE}
+      RATE_LIMIT_MAX: ${RATE_LIMIT_MAX:-1000}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-false}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
+      MAIL_FROM: ${MAIL_FROM:-CopropHub <no-reply@example.org>}
+    depends_on:
+      db:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://localhost:3000/health').then((r) => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  web:
+    image: ${IMAGE_PREFIX:-coprophub}/web:${IMAGE_TAG:-latest}
+    build:
+      context: .
+      dockerfile: deploy/Dockerfile.web
+    restart: unless-stopped
+    environment:
+      DOMAINE: ${DOMAINE}
+    ports:
+      - "${HTTP_PORT:-80}:80"
+      - "${HTTPS_PORT:-443}:443"
+      - "${HTTPS_PORT:-443}:443/udp"
+    volumes:
+      - caddy_data:/data # certificats : à conserver, sinon Let's Encrypt limite les nouvelles demandes
+      - caddy_config:/config
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  db_data:
+  caddy_data:
+  caddy_config:
