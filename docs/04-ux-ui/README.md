@@ -50,7 +50,9 @@ Cible WCAG 2.1 niveau AA, vérifiée sur les écrans clés (pas promise app-wide
 
 ## Responsive
 
-Mobile-first pour les écrans à usage nomade (vote, signalement d'incident) ; desktop-first toléré pour les écrans d'administration syndic (gestion des copropriétaires, création d'AG).
+Mobile-first pour les écrans à usage nomade (vote, signalement d'incident) ; desktop-first toléré pour les écrans d'administration syndic (gestion des copropriétaires, création d'AG) — mais **aucun écran ne doit obliger à défiler horizontalement sur un téléphone** (375 px), critère vérifié par un test e2e (`e2e/responsive.spec.ts`).
+
+Implémentation : classes CSS dans `apps/frontend/src/index.css` (`grille-stats`, `grille-tableau-de-bord`, `formulaire-charge`…) dont les grilles se replient sous 900 px puis 700 px ; les tableaux défilent dans leur carte plutôt que d'élargir la page ; l'en-tête passe sur deux lignes (logo + compte, puis navigation défilante dont l'onglet actif est ramené dans la vue) et le lien du compte s'abrège en « Mon compte ». Les styles posés en ligne l'emportant sur les classes, les règles mobiles qui les contredisent utilisent `!important`.
 
 ## Origine du style visuel réellement livré
 

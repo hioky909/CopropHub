@@ -160,6 +160,7 @@ export default function Assemblees() {
                   onMouseLeave={() => setSurvol(null)}
                   style={{
                     display: 'flex',
+                    flexWrap: 'wrap',
                     width: '100%',
                     alignItems: 'center',
                     gap: 16,

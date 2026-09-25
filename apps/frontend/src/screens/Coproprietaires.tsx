@@ -9,6 +9,7 @@ import type { Coproprietaire, LotAvecProprietaire } from '../api/types.js'
 const TYPES_LOT = ['appartement', 'cave', 'parking', 'local commercial']
 
 const carte = { backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8 } as const
+const carteTableau = { ...carte, overflowX: 'auto' } as const
 const cellule = { padding: '12px 24px', fontSize: 14, color: '#1A1A1A' } as const
 const enTete = {
   padding: '10px 24px',
@@ -124,7 +125,7 @@ export default function Coproprietaires() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
+      <div className="grille-deux-colonnes" style={{ marginBottom: 24 }}>
         <form onSubmit={creerCoproprietaire} style={{ ...carte, padding: 24, display: 'flex', flexDirection: 'column', gap: 12 }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Ajouter un copropriétaire</h2>
           <TextField label="Nom complet" required value={nom} onChange={(e) => setNom(e.target.value)} />
@@ -135,7 +136,7 @@ export default function Coproprietaires() {
             required
             value={motDePasse}
             onChange={(e) => setMotDePasse(e.target.value)}
-            help="12 caractères minimum. Le changement de mot de passe n’est pas encore disponible dans l’application."
+            help="12 caractères minimum. Le copropriétaire pourra le changer depuis « Mon compte »."
           />
           <Button type="submit" variant="primary" disabled={action}>
             Créer le copropriétaire
@@ -158,7 +159,7 @@ export default function Coproprietaires() {
         </form>
       </div>
 
-      <div style={{ ...carte, overflow: 'hidden', marginBottom: 24 }}>
+      <div style={{ ...carteTableau, marginBottom: 24 }}>
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Lots et propriétaires</h2>
         </div>
@@ -214,7 +215,7 @@ export default function Coproprietaires() {
         )}
       </div>
 
-      <div style={{ ...carte, overflow: 'hidden' }}>
+      <div style={carteTableau}>
         <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2' }}>
           <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Copropriétaires</h2>
         </div>

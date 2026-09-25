@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
-import { NavLink, useNavigate } from 'react-router-dom'
+import { useEffect } from 'react'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.js'
 import type { TypeCompte } from '../api/types.js'
 
@@ -14,6 +15,12 @@ const NAV_ITEMS: { to: string; label: string; roles: TypeCompte[] }[] = [
 export default function Shell({ children }: { children: ReactNode }) {
   const { utilisateur, deconnecter } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
+
+  // Sur mobile la navigation défile : on amène l'onglet actif dans la vue.
+  useEffect(() => {
+    document.querySelector('.entete-nav a.active')?.scrollIntoView?.({ inline: 'center', block: 'nearest' })
+  }, [location.pathname])
 
   if (!utilisateur) return <>{children}</>
 
@@ -31,9 +38,9 @@ export default function Shell({ children }: { children: ReactNode }) {
         }}
       >
         <div style={{ maxWidth: 1280, margin: '0 auto', padding: '0 24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, minHeight: 56, padding: '6px 0' }}>
+            <div className="entete-gauche" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <div className="entete-marque" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div
                   style={{
                     width: 28,
@@ -58,7 +65,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                 </span>
               </div>
 
-              <nav style={{ display: 'flex', gap: 4 }}>
+              <nav className="entete-nav" style={{ display: 'flex', gap: 4 }}>
                 {items.map((item) => (
                   <NavLink
                     key={item.to}
@@ -72,6 +79,7 @@ export default function Shell({ children }: { children: ReactNode }) {
                       backgroundColor: isActive ? '#EBF0F9' : 'transparent',
                       borderRadius: 6,
                       textDecoration: 'none',
+                      flexShrink: 0,
                     })}
                   >
                     {item.label}
@@ -80,14 +88,15 @@ export default function Shell({ children }: { children: ReactNode }) {
               </nav>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div className="entete-utilisateur" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <div style={{ textAlign: 'right' }}>
                 <NavLink
                   to="/compte"
                   title="Mon compte"
                   style={{ fontSize: 13, fontWeight: 500, color: '#1A1A1A', textDecoration: 'none' }}
                 >
-                  {utilisateur.email}
+                  <span className="libelle-long">{utilisateur.email}</span>
+                  <span className="libelle-court">Mon compte</span>
                 </NavLink>
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 500, color: '#1E4B8F' }}>
                   {utilisateur.typeCompte === 'SYNDIC'

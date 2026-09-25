@@ -104,7 +104,8 @@ export default function ListeCharges() {
         {estSyndic && (
           <form
             onSubmit={creerCharge}
-            style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20, marginBottom: 24, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr) auto', gap: 12, alignItems: 'end' }}
+            className="formulaire-charge"
+            style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, padding: 20, marginBottom: 24 }}
           >
             <SelectField label="Lot" required value={idLot} onChange={(e) => setIdLot(e.target.value)}>
               <option value="">Choisir…</option>
@@ -125,7 +126,7 @@ export default function ListeCharges() {
 
         {charges.length > 0 && (
           <>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 24 }}>
+            <div className="grille-trois-kpi" style={{ marginBottom: 24 }}>
               {[
                 { label: 'Total', value: fmt(total), color: '#1A1A1A' },
                 { label: 'Recouvré', value: fmt(totalPaye), color: '#1E7A4C' },
@@ -195,7 +196,7 @@ export default function ListeCharges() {
           </>
         )}
 
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflow: 'hidden' }}>
+        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflowX: 'auto' }}>
           {chargement ? (
             <p style={{ padding: 24, fontSize: 13, color: '#5C5C5C', margin: 0 }}>Chargement…</p>
           ) : filtered.length === 0 ? (

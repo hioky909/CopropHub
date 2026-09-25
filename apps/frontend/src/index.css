@@ -62,3 +62,84 @@ body {
     transform: rotate(360deg);
   }
 }
+
+/* Mises en page responsives : les grilles se replient sur petit écran (mobile-first pour
+   le vote et le signalement, cf. docs/04-ux-ui), les tableaux défilent dans leur carte
+   plutôt que d'élargir la page. */
+.grille-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.grille-trois-kpi {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+.grille-deux-colonnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.grille-tableau-de-bord {
+  display: grid;
+  grid-template-columns: 1fr 360px;
+  gap: 24px;
+  align-items: start;
+}
+.formulaire-charge {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr) auto;
+  gap: 12px;
+  align-items: end;
+}
+.libelle-court {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .grille-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .grille-tableau-de-bord {
+    grid-template-columns: 1fr;
+  }
+  .formulaire-charge {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .grille-deux-colonnes,
+  .grille-trois-kpi,
+  .formulaire-charge {
+    grid-template-columns: 1fr;
+  }
+  /* En-tête : logo et compte sur la 1re ligne, navigation défilante sur la 2e. */
+  .entete-gauche {
+    display: contents !important; /* le display:flex posé en ligne sinon l'emporte */
+  }
+  .entete-marque {
+    order: 1;
+  }
+  .entete-utilisateur {
+    order: 2;
+  }
+  .entete-nav {
+    order: 3;
+    flex-basis: 100%;
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 4px;
+  }
+  .libelle-long {
+    display: none;
+  }
+  .libelle-court {
+    display: inline;
+  }
+  main {
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}

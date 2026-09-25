@@ -55,7 +55,7 @@ export default function DashboardSyndic() {
 
   return (
     <main style={{ maxWidth: 1280, margin: '0 auto', padding: '32px 24px' }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 32 }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, marginBottom: 32 }}>
         <div>
           <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.02em' }}>
             Tableau de bord
@@ -80,7 +80,7 @@ export default function DashboardSyndic() {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16, marginBottom: 32 }}>
+      <div className="grille-stats" style={{ marginBottom: 32 }}>
         {[
           { label: 'Assemblées générales', value: String(ags.length), sub: `${ags.filter((a) => a.statut === 'OUVERTE').length} en vote` },
           { label: 'Incidents', value: String(incidents.length), sub: `${incidents.filter((i) => i.statut !== 'RESOLU').length} non résolus` },
@@ -112,8 +112,8 @@ export default function DashboardSyndic() {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 360px', gap: 24, alignItems: 'start' }}>
-        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflow: 'hidden' }}>
+      <div className="grille-tableau-de-bord">
+        <div style={{ backgroundColor: '#FFFFFF', border: '1px solid #E0E0E0', borderRadius: 8, overflowX: 'auto' }}>
           <div style={{ padding: '16px 24px', borderBottom: '1px solid #F2F2F2', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <h2 style={{ margin: 0, fontSize: 15, fontWeight: 600, color: '#1A1A1A' }}>Incidents récents</h2>
             <button
