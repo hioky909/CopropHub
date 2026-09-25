@@ -17,6 +17,7 @@ import {
 import { MotDePasseInvalideError } from '../services/mot-de-passe.service.js';
 import { asyncHandler } from '../middleware/async-handler.js';
 import { themeService, ThemeInvalideError } from '../services/theme.service.js';
+import { notificationService } from '../services/notification.service.js';
 import { journalService } from '../services/journal.service.js';
 
 /**
@@ -86,6 +87,23 @@ utilisateursRouter.delete(
   asyncHandler(async (req, res) => {
     await themeService.reinitialiser(req.utilisateur!.id);
     res.status(204).send();
+  }),
+);
+
+/** F-12 : préférence de notifications par email de l'utilisateur lui-même (aucun identifiant accepté). */
+const notificationsSchema = z.object({ actives: z.boolean() }).strict();
+
+utilisateursRouter.put(
+  '/moi/notifications',
+  exigerAuthentification,
+  asyncHandler(async (req, res) => {
+    const corps = notificationsSchema.safeParse(req.body);
+    if (!corps.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+    const actives = await notificationService.definirPreference(req.utilisateur!.id, corps.data.actives);
+    res.status(200).json({ notificationsEmail: actives });
   }),
 );
 

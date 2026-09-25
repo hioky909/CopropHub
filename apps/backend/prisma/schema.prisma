@@ -88,6 +88,8 @@ model Utilisateur {
   themeIntensite           Int?       @map("theme_intensite") @db.SmallInt
   // Jetons de session émis avant cet instant refusés (changement ou réinitialisation du mot de passe, migration 0006).
   sessionsValidesDepuis    DateTime?  @map("sessions_valides_depuis") @db.Timestamptz
+  // F-12 : courriels de service (AG, incident, charge), activés par défaut, désactivables (migration 0007).
+  notificationsEmail       Boolean    @default(true) @map("notifications_email")
 
   rattachements     Rattachement[]
   votes             Vote[]

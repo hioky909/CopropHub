@@ -7,6 +7,7 @@ import { ApiError } from "../api/client.js";
 import { useAuth } from "../context/AuthContext.js";
 import AvatarProfil from "../components/AvatarProfil.js";
 import EditeurApparence from "../components/EditeurApparence.js";
+import PreferencesNotifications from "../components/PreferencesNotifications.js";
 import { libelleRole } from "../utils/format.js";
 
 /** Mon compte : changement de son propre mot de passe (le mot de passe actuel est exigé) et apparence. */
@@ -123,6 +124,8 @@ export default function Compte() {
           Modifier le mot de passe
         </Button>
       </form>
+
+      <PreferencesNotifications />
 
       <EditeurApparence />
     </main>

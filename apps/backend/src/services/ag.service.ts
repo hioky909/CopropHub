@@ -1,6 +1,7 @@
 import { agRepository, type ResolutionACreer } from '../repositories/ag.repository.js';
 import { immeubleRepository } from '../repositories/immeuble.repository.js';
 import { ImmeubleNonInitialiseError } from './lot.service.js';
+import { evenementsService } from './evenements.service.js';
 import { calculerResultat } from './resultat-calculateur.js';
 
 /** Business Layer — T-08 (F-04, US-07) : création d'une AG avec ses résolutions typées. */
@@ -108,6 +109,7 @@ export const agService = {
     if (!cloturee) {
       throw new ClotureAgImpossibleError();
     }
+    evenementsService.emettre('AG_CLOTUREE', { idAg });
     return cloturee;
   },
 
@@ -133,6 +135,7 @@ export const agService = {
     if (!ouverte) {
       throw new OuvertureAgImpossibleError();
     }
+    evenementsService.emettre('AG_OUVERTE', { idAg });
     return ouverte;
   },
 

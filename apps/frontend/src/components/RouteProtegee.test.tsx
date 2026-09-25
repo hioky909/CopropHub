@@ -22,6 +22,7 @@ function etatAuth(surcharge: Partial<ReturnType<typeof useAuth>>) {
     connecter: vi.fn(),
     inscrire: vi.fn(),
     deconnecter: vi.fn(),
+    definirNotificationsEmail: vi.fn(),
     ...surcharge,
   });
 }

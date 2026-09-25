@@ -1,5 +1,6 @@
 import type { StatutIncident } from '@prisma/client';
 import { incidentRepository } from '../repositories/incident.repository.js';
+import { evenementsService } from './evenements.service.js';
 import { lotRepository } from '../repositories/lot.repository.js';
 import { immeubleRepository } from '../repositories/immeuble.repository.js';
 import { ImmeubleNonInitialiseError } from './lot.service.js';
@@ -93,6 +94,7 @@ export const incidentService = {
       // Requête concurrente : le statut a changé entre la lecture et l'écriture.
       throw new TransitionInvalideError();
     }
+    evenementsService.emettre('INCIDENT_STATUT_MODIFIE', { idIncident });
     return transitionne;
   },
 

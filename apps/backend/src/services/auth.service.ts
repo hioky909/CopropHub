@@ -1,7 +1,7 @@
 import { createHash, randomBytes } from 'node:crypto';
 import { utilisateurRepository } from '../repositories/utilisateur.repository.js';
 import { reinitialisationRepository } from '../repositories/reinitialisation.repository.js';
-import { mailService } from './mail.service.js';
+import { mailService, urlApplication } from './mail.service.js';
 import { motDePasseService } from './mot-de-passe.service.js';
 import { sessionService } from './session.service.js';
 import type { TypeCompte, UtilisateurAuthentifie } from '../types/auth.js';
@@ -64,12 +64,14 @@ function versUtilisateurAuthentifie(utilisateur: {
   estMembreConseilSyndical: boolean;
   themeTeinte: number | null;
   themeIntensite: number | null;
+  notificationsEmail: boolean;
 }): UtilisateurAuthentifie {
   return {
     id: utilisateur.id,
     email: utilisateur.email,
     typeCompte: utilisateur.typeCompte,
     estMembreConseilSyndical: utilisateur.estMembreConseilSyndical,
+    notificationsEmail: utilisateur.notificationsEmail,
     theme:
       utilisateur.themeTeinte !== null && utilisateur.themeIntensite !== null
         ? { teinte: utilisateur.themeTeinte, intensite: utilisateur.themeIntensite }
@@ -179,7 +181,7 @@ export const authService = {
       new Date(Date.now() + DUREE_LIEN_MS),
     );
 
-    const base = process.env.APP_URL ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173';
+    const base = urlApplication();
     try {
       await mailService.envoyer({
         a: utilisateur.email,

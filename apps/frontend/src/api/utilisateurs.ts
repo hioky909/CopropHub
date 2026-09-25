@@ -22,6 +22,8 @@ export const utilisateursApi = {
       `/utilisateurs/${idUtilisateur}/conseil-syndical`,
       { estMembre },
     ),
+  definirNotificationsEmail: (actives: boolean) =>
+    api.put<{ notificationsEmail: boolean }>('/utilisateurs/moi/notifications', { actives }),
   listerLots: () => api.get<{ lots: LotAvecProprietaire[] }>('/utilisateurs/lots'),
   creerLot: (numero: string, typeLot: string) =>
     api.post<{ lot: { id: string; numero: string; typeLot: string } }>('/utilisateurs/lots', {

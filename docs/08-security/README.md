@@ -21,6 +21,10 @@ Décision (`ADR-002-authentification`) : cookie de session signé **HttpOnly/Sec
 
 Préférence par utilisateur (`PUT/DELETE /utilisateurs/moi/theme`). Risques traités : **injection CSS/HTML** impossible par construction — seuls deux entiers bornés sont acceptés et stockés (Zod `.strict()`, revalidation dans le service, contraintes CHECK en base) et la palette est recalculée côté client par une fonction pure, appliquée via le CSSOM (jamais de balise `<style>` ni de chaîne CSS assemblée) ; **modification du thème d'autrui** impossible : aucun identifiant n'est accepté, la cible est toujours l'utilisateur de la session ; champs de rôle refusés (anti mass assignment). Préférence non sensible : pas d'entrée d'audit ; supprimée avec le compte.
 
+## Notifications par email (F-12) — minimisation et RGPD
+
+Courriels de service uniquement (ouverture ou clôture d'une AG, avancement d'un incident, nouvelle charge), désactivables par chaque utilisateur (`notifications_email`, « Mon compte »), avec un lien de désabonnement dans chaque message. **Minimisation** : aucun courriel ne contient de valeur de vote ni de résultat détaillé (anonymat US-04), ni le montant d'une charge ; chaque destinataire ne reçoit que ce qui le concerne (le déclarant de l'incident, le propriétaire du lot, les copropriétaires habilités de l'immeuble). Les envois se font **hors requête** (bus d'événements) : une panne SMTP ne bloque ni ne fait échouer l'action métier, et le journal d'erreur ne contient ni adresse ni nom (seulement le nom de l'événement et des compteurs).
+
 ## Autorisation — matrice par ressource
 
 | Ressource | Syndic | Conseil syndical | Copropriétaire |

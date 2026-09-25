@@ -40,6 +40,11 @@ function transport(): Pick<Transporter, 'sendMail'> {
   return transportParDefaut;
 }
 
+/** Adresse publique de l'application, pour les liens des courriels (`APP_URL`, sinon l'origine du frontend). */
+export function urlApplication(): string {
+  return (process.env.APP_URL ?? process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173').replace(/\/+$/, '');
+}
+
 export const mailService = {
   async envoyer(courriel: Courriel): Promise<void> {
     await transport().sendMail({

@@ -1,4 +1,5 @@
 import { chargeRepository } from '../repositories/charge.repository.js';
+import { evenementsService } from './evenements.service.js';
 import { lotRepository } from '../repositories/lot.repository.js';
 import {
   autoriser,
@@ -79,7 +80,9 @@ export const chargeService = {
     if (!(await lotRepository.parId(donnees.idLot))) {
       throw new LotDeLaChargeIntrouvableError();
     }
-    return chargeRepository.creer(donnees);
+    const creee = await chargeRepository.creer(donnees);
+    evenementsService.emettre('CHARGE_CREEE', { idCharge: creee.id });
+    return creee;
   },
 
   /** Le passage à « payée » reste déclaratif au MVP (RM-09) : le syndic l'enregistre, aucune intégration bancaire. */

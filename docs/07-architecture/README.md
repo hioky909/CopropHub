@@ -34,6 +34,10 @@ Cookie de session signé HttpOnly/SameSite=Strict (Secure en production), sans t
 
 SPA React sans framework CSS : le design system (Doc 4) est appliqué via des styles inline et des variables CSS (`apps/frontend/src/index.css`), portés depuis une maquette Figma (`proto/`, conservée pour référence, non exécutée en CI). Routage basé sur le rôle du compte connecté (`RouteProtegee.tsx`, `Shell.tsx`). Voir [12-api/](../12-api/README.md) pour le contrat consommé.
 
+### Événements et notifications (F-12)
+
+`services/evenements.service.ts` est un petit bus interne : les services métier (`ag.service`, `incident.service`, `charge.service`) annoncent `AG_OUVERTE`, `AG_CLOTUREE`, `INCIDENT_STATUT_MODIFIE`, `CHARGE_CREEE` **après** le succès de l'écriture, sans savoir qui s'y intéresse. `services/notification.service.ts` s'y abonne au démarrage (`server.ts`, jamais dans `createApp()` : les tests restent silencieux tant qu'ils ne s'abonnent pas) et envoie les courriels via `mail.service.ts` (SMTP configurable, silencieux si `SMTP_HOST` est absent). Un abonné en erreur n'affecte ni l'émetteur ni les autres abonnés.
+
 ### Thème de couleur
 
 `apps/frontend/src/theme/` : `oklch.ts` (conversions et gamut), `contraste.ts` (ratios WCAG), `genererTheme.ts` (palette à partir de `{teinte, intensite}`, pure et déterministe), `appliquerTheme.ts` (variables CSS via le CSSOM), `themeStorage.ts` (cache `localStorage` anti-flash), `noms-teintes.ts`. `context/ThemeContext.tsx` (sous `AuthProvider`) applique le thème du compte sur `<html>` ; les composants lisent `var(--…)`, donc un changement de thème ne re-rend rien. Flux : `main.tsx` applique le cache avant le premier rendu → `/auth/moi` renvoie `utilisateur.theme` (le serveur a le dernier mot) → `PUT/DELETE /utilisateurs/moi/theme` à l'enregistrement → déconnexion : retour à Classique et cache effacé. Côté backend : `theme.service.ts`, deux méthodes dans `utilisateur.repository.ts`, colonnes `theme_teinte`/`theme_intensite` (migration `0005`). Décisions : ADR-003 et ADR-004.

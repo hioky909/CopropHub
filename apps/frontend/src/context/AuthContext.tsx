@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useState, type ReactNode } from 'react';
 import { authApi } from '../api/auth.js';
+import { utilisateursApi } from '../api/utilisateurs.js';
 import { ApiError } from '../api/client.js';
 import type { Utilisateur } from '../api/types.js';
 
@@ -13,6 +14,8 @@ interface AuthContextValue {
   connecter: (email: string, motDePasse: string) => Promise<void>;
   inscrire: (nom: string, email: string, motDePasse: string) => Promise<void>;
   deconnecter: () => Promise<void>;
+  /** F-12 : active ou désactive les courriels de service, puis met à jour l'utilisateur en mémoire. */
+  definirNotificationsEmail: (actives: boolean) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -52,8 +55,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUtilisateur(null);
   }, []);
 
+  const definirNotificationsEmail = useCallback(async (actives: boolean) => {
+    const reponse = await utilisateursApi.definirNotificationsEmail(actives);
+    setUtilisateur((courant) => (courant ? { ...courant, notificationsEmail: reponse.notificationsEmail } : courant));
+  }, []);
+
   return (
-    <AuthContext.Provider value={{ utilisateur, chargement, erreurServeur, connecter, inscrire, deconnecter }}>
+    <AuthContext.Provider
+      value={{ utilisateur, chargement, erreurServeur, connecter, inscrire, deconnecter, definirNotificationsEmail }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -7,6 +7,8 @@ export interface Utilisateur {
   estMembreConseilSyndical: boolean;
   /** Thème de couleur personnalisé ; `null` ou absent = thème CopropHub d'origine. */
   theme?: { teinte: number; intensite: number } | null;
+  /** F-12 : reçoit les courriels de service (assemblées, incidents, charges). Actif par défaut. */
+  notificationsEmail?: boolean;
 }
 
 export type StatutAg = 'PLANIFIEE' | 'OUVERTE' | 'CLOTUREE';

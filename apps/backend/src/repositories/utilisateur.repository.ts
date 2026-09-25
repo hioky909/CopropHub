@@ -31,6 +31,22 @@ export const utilisateurRepository = {
     });
   },
 
+  /** F-12 : copropriétaires habilités à voter dans l'immeuble (rattachement actif) qui ont gardé les notifications. */
+  coproprietairesANotifier(idImmeuble: string) {
+    return prisma.utilisateur.findMany({
+      where: {
+        typeCompte: 'COPROPRIETAIRE',
+        notificationsEmail: true,
+        rattachements: { some: { dateFin: null, lot: { idImmeuble } } },
+      },
+      select: { id: true, email: true, nom: true },
+    });
+  },
+
+  async definirNotificationsEmail(id: string, actives: boolean): Promise<void> {
+    await prisma.utilisateur.update({ where: { id }, data: { notificationsEmail: actives } });
+  },
+
   async reinitialiserTheme(id: string): Promise<void> {
     await prisma.utilisateur.update({ where: { id }, data: { themeTeinte: null, themeIntensite: null } });
   },

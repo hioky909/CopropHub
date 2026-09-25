@@ -29,6 +29,8 @@ Kanban simple : `BACKLOG → EN COURS → REVUE → TERMINÉ`, une tâche à la 
 
 ## Traçabilité découverte pendant l'implémentation (pas anticipée)
 
+**V1 (après le MVP)** : T-27 (F-12, notifications email) est réalisée et vérifiée ; voir le CHANGELOG pour le détail des étapes V1 suivantes.
+
 Une tâche n'existait pas dans le backlog initial, ajoutée après constat d'un manque réel :
 
 - **T-38** (ouverture du vote d'une AG) : le diagramme d'états de l'AG (Doc 3) prévoyait la transition PLANIFIEE→OUVERTE, mais aucune tâche du backlog initial ne la couvrait.

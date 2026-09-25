@@ -30,6 +30,7 @@ Rédigée à partir des endpoints réellement implémentés (principe « pas d'a
 | GET | `/utilisateurs/lots` | syndic | 200 `{lots: [{id, numero, typeLot, proprietaire: {id, nom} \| null}]}` — tous les lots avec leur rattachement actif (jamais l'historique). |
 | GET | `/utilisateurs/moi/lots` | authentifié (tout rôle) | 200 `{lots}`. Lots de l'appelant lui-même uniquement (anti-IDOR). |
 | PUT | `/utilisateurs/moi/theme` | authentifié (tout rôle) | `{teinte, intensite}` (entiers, teinte 0–359, intensité 0–100, aucun autre champ) → 200 `{theme}`. Thème de couleur de l'appelant lui-même ; 422 pour toute entrée invalide (rien n'est stocké). |
+| PUT | `/utilisateurs/moi/notifications` | authentifié (tout rôle) | `{actives: boolean}` (aucun autre champ) → 200 `{notificationsEmail}`. Active ou désactive les courriels de service (F-12) de l'appelant lui-même ; 422 sinon. |
 | DELETE | `/utilisateurs/moi/theme` | authentifié (tout rôle) | → 204. Remet le thème CopropHub d'origine (idempotent). |
 
 ## Assemblées générales — `/ags`, `/resolutions`

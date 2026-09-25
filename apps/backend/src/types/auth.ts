@@ -29,6 +29,8 @@ export interface UtilisateurAuthentifie {
   estMembreConseilSyndical: boolean;
   /** `null` = thème CopropHub d'origine. Toujours renseigné par `authService` ; optionnel pour les doublures de test. */
   theme?: ThemeUtilisateur | null;
+  /** F-12 : reçoit les courriels de service (AG, incidents, charges). Activé par défaut. */
+  notificationsEmail?: boolean;
 }
 
 /** Contenu signé du cookie de session (cf. Doc 5 § Authentification et gestion de session, décision Option A). */

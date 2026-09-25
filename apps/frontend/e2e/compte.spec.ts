@@ -33,3 +33,28 @@ test('un utilisateur change son mot de passe, puis se reconnecte avec le nouveau
   await login(page, email, nouveau)
   await expect(page.getByText(email).first()).toBeVisible() // connecté avec le nouveau mot de passe
 })
+
+test('les notifications par email se désactivent et se réactivent, et le réglage survit au rechargement (F-12)', async ({ page }) => {
+  const email = `notif-e2e-${Date.now()}@coprophub.local`
+  await page.goto('/connexion')
+  await page.getByRole('button', { name: 'Créer un compte' }).click()
+  await page.getByLabel('Nom').fill('Notif E2E')
+  await page.getByLabel('Email').fill(email)
+  await page.getByLabel('Mot de passe').fill('un-mot-de-passe-suffisamment-long')
+  await page.getByRole('button', { name: 'Créer mon compte' }).click()
+  await expect(page.getByRole('button', { name: 'Déconnexion' })).toBeVisible()
+
+  await page.goto('/compte')
+  const case_ = page.getByRole('checkbox', { name: /Recevoir les notifications par email/ })
+  await expect(case_).toBeChecked() // actif par défaut
+
+  await case_.click()
+  await expect(case_).not.toBeChecked()
+  await page.reload()
+  await expect(page.getByRole('checkbox', { name: /Recevoir les notifications par email/ })).not.toBeChecked()
+
+  await page.getByRole('checkbox', { name: /Recevoir les notifications par email/ }).click()
+  await expect(page.getByRole('checkbox', { name: /Recevoir les notifications par email/ })).toBeChecked()
+  await page.reload()
+  await expect(page.getByRole('checkbox', { name: /Recevoir les notifications par email/ })).toBeChecked()
+})
