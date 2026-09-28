@@ -2,7 +2,7 @@
 
 ## Pipeline CI (`.github/workflows/ci.yml`)
 
-Déclenché sur pull request et push vers `main`. Job `quality`, avec un service PostgreSQL 16 :
+Déclenché sur pull request et push vers `main`. Job `quality`, avec un service PostgreSQL 16 et un service Redis 7 (rate limiting/révocation de session, testés réellement, pas seulement le repli en mémoire) :
 
 ```
 checkout → npm ci → prisma generate → lint → typecheck
@@ -54,7 +54,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production --profile o
 
 **Mise à jour** : `git pull` (ou les images publiées par la CI : `IMAGE_PREFIX`/`IMAGE_TAG`), puis `docker compose … pull && up -d` ; les migrations s'appliquent automatiquement avant le démarrage du backend. **Retour arrière** : redéployer l'étiquette précédente (`IMAGE_TAG=<ancien commit>`) ; les migrations sont additives, restaurer la sauvegarde en cas de besoin. **Journaux d'audit** : lignes JSON sur la sortie standard du backend (`docker compose logs backend`) à collecter par l'outil de votre choix.
 
-**Limites assumées** : une seule instance du backend (la révocation d'un jeton à la déconnexion est en mémoire du processus ; les sessions fermées par un changement de mot de passe, elles, le sont en base) ; pas de haute disponibilité ni de répartition de charge ; jeton CSRF explicite non implémenté (protection par `SameSite=Strict` et origine unique).
+**Multi-instance** : la révocation de session (déconnexion) et le rate limiting sont partagés entre plusieurs instances du backend via Redis (`REDIS_URL`, service `redis` de `docker-compose.prod.yml`, aucun port publié) ; les sessions fermées par un changement de mot de passe le sont en base (déjà partagé sans Redis). Sans `REDIS_URL`, repli automatique en mémoire du processus (mono-instance). **Limites assumées restantes** : pas de haute disponibilité ni de répartition de charge fournie (à ajouter côté infrastructure si plusieurs instances du backend sont déployées) ; CSRF : vérification de l'origine des requêtes (`Origin`/`Referer`) plutôt qu'un jeton à double soumission, cf. Doc 8.
 
 ## Variables d'environnement clés
 
@@ -63,6 +63,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production --profile o
 | `DATABASE_URL` | Connexion PostgreSQL (backend, seed, migrations) |
 | `DB_PORT` | Port hôte publié par Docker Compose (évite un conflit avec un PostgreSQL local sur 5432) |
 | `SESSION_SECRET` | Signature du cookie de session |
+| `REDIS_URL` | Optionnel — révocation de session et rate limiting partagés entre instances (service `redis` de Docker Compose) ; absent, repli en mémoire du processus |
 | `FRONTEND_ORIGIN` | Origine autorisée par CORS côté backend |
 | `VITE_API_URL` | Origine de l'API consommée par le frontend (optionnelle, défaut `http://localhost:3000`) |
 | `TRUST_PROXY` | Nombre de proxys de confiance devant le backend (1 en production avec Caddy, 0 par défaut) : sans lui, les limites de débit compteraient tous les visiteurs sous l'adresse du proxy |

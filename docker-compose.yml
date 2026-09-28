@@ -38,6 +38,20 @@ services:
     ports:
       - "8025:8025"
 
+  # Révocation de session et rate limiting PARTAGÉS entre instances (compétence 8, NoSQL) —
+  # strictement optionnel : sans REDIS_URL, le backend se rabat automatiquement sur un état en
+  # mémoire du processus (cf. redis-client.ts). Présent ici pour que le comportement de
+  # production (multi-instance) soit exerçable dès le développement local.
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   backend:
     build:
       context: .
@@ -46,6 +60,7 @@ services:
     environment:
       DATABASE_URL: postgresql://coprophub:${DB_PASSWORD:-change-me}@db:5432/coprophub
       SESSION_SECRET: ${SESSION_SECRET:-change-me-to-a-long-random-string}
+      REDIS_URL: redis://redis:6379
       PORT: 3000
       NODE_ENV: production
       SMTP_HOST: mailpit
@@ -57,6 +72,8 @@ services:
         condition: service_healthy
       mailpit:
         condition: service_started
+      redis:
+        condition: service_healthy
       migrate:
         condition: service_completed_successfully
     ports:

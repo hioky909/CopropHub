@@ -14,6 +14,7 @@ import { sessionMiddleware } from './middleware/session.middleware.js';
 import { exigerOrigineDeConfiance } from './middleware/csrf.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
 import { sessionService } from './services/session.service.js';
+import { magasinLimiteRedis } from './repositories/redis-client.js';
 
 /**
  * Assemblage de l'application Express — reste la couche Presentation/API
@@ -89,8 +90,12 @@ export function createApp(): Express {
       standardHeaders: true,
       legacyHeaders: false,
       message: { erreur: 'Trop de requêtes, réessayez dans quelques instants.' },
-      keyGenerator: (req) => {
-        const session = sessionService.verifierJeton(req.cookies?.session as string | undefined);
+      // Magasin partagé (Redis) quand REDIS_URL est défini : le quota d'un utilisateur ne se
+      // réinitialise pas selon l'instance qui répond. `undefined` = magasin en mémoire par défaut
+      // d'express-rate-limit (comportement inchangé, mono-instance).
+      store: magasinLimiteRedis('rl_global:'),
+      keyGenerator: async (req) => {
+        const session = await sessionService.verifierJeton(req.cookies?.session as string | undefined);
         return session ? `u:${session.utilisateurId}` : (req.ip ?? 'inconnu');
       },
     }),

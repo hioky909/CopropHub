@@ -61,6 +61,6 @@ describe('changerMotDePasse — nouveau jeton pour la session qui agit', () => {
     vi.spyOn(utilisateurRepository, 'mettreAJourMotDePasse').mockResolvedValue(depuis);
 
     const jeton = await authService.changerMotDePasse('u-1', 'ancien-mot-de-passe', 'nouveau-mot-de-passe-1');
-    expect(sessionService.verifierJeton(jeton)).toEqual({ utilisateurId: 'u-1', emisLe: depuis + 1 });
+    expect(await sessionService.verifierJeton(jeton)).toEqual({ utilisateurId: 'u-1', emisLe: depuis + 1 });
   });
 });

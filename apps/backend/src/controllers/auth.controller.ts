@@ -18,6 +18,7 @@ import {
   supprimerCookieSession,
 } from '../middleware/session.middleware.js';
 import { asyncHandler } from '../middleware/async-handler.js';
+import { magasinLimiteRedis } from '../repositories/redis-client.js';
 
 /**
  * Controller — T-05 (F-01). Ne contient aucune règle métier : validation
@@ -37,20 +38,23 @@ const limiteurConnexion = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  store: magasinLimiteRedis('rl_connexion:'),
 });
 
 // Complément par compte (audit pré-production) : le limiteur par IP ci-dessus
 // ne protège pas un compte précis contre un attaquant qui change d'IP. Clé =
 // email visé, indépendante de l'adresse source ; seuil un peu plus large que
 // celui par IP pour ne pas verrouiller un utilisateur légitime derrière un
-// NAT partagé. Comme le limiteur par IP, le compteur est en mémoire du
-// processus (mono-instance au MVP).
+// NAT partagé. Magasin Redis partagé entre instances quand REDIS_URL est
+// défini (sinon en mémoire du processus, mono-instance — comportement
+// inchangé).
 const limiteurParCompte = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: Number(process.env.AUTH_RATE_LIMIT_MAX ?? 5) * 2,
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  store: magasinLimiteRedis('rl_par_compte:'),
   skip: (req) => typeof req.body?.email !== 'string',
   keyGenerator: (req) => String(req.body.email).trim().toLowerCase(),
 });
@@ -127,12 +131,16 @@ authRouter.post(
   }),
 );
 
-authRouter.post('/deconnexion', exigerAuthentification, (req, res) => {
-  journalService.journaliser('DECONNEXION', req.utilisateur!.id);
-  sessionService.revoquerJeton(req.cookies?.session as string | undefined);
-  supprimerCookieSession(res);
-  res.status(204).send();
-});
+authRouter.post(
+  '/deconnexion',
+  exigerAuthentification,
+  asyncHandler(async (req, res) => {
+    journalService.journaliser('DECONNEXION', req.utilisateur!.id);
+    await sessionService.revoquerJeton(req.cookies?.session as string | undefined);
+    supprimerCookieSession(res);
+    res.status(204).send();
+  }),
+);
 
 // Changement de mot de passe : limité par utilisateur (même seuil que la
 // connexion) pour qu'une session volée ne serve pas à deviner le mot de passe actuel.
@@ -142,6 +150,7 @@ const limiteurMotDePasse = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  store: magasinLimiteRedis('rl_mdp:'),
   keyGenerator: (req) => `mdp:${req.utilisateur?.id ?? 'anonyme'}`,
 });
 
@@ -196,6 +205,7 @@ const limiteurOubliIp = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  store: magasinLimiteRedis('rl_oubli_ip:'),
 });
 const limiteurOubliAdresse = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -203,6 +213,7 @@ const limiteurOubliAdresse = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: { erreur: 'Trop de tentatives, réessayez plus tard.' },
+  store: magasinLimiteRedis('rl_oubli_adresse:'),
   skip: (req) => typeof req.body?.email !== 'string',
   keyGenerator: (req) => `oubli:${String(req.body.email).trim().toLowerCase()}`,
 });

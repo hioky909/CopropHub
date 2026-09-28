@@ -13,7 +13,7 @@ const NOM_COOKIE = 'session';
 export async function sessionMiddleware(req: Request, _res: Response, next: NextFunction) {
   // eslint-disable-next-line security/detect-object-injection -- NOM_COOKIE est une constante du module ('session'), jamais une entrée utilisateur.
   const jeton = req.cookies?.[NOM_COOKIE] as string | undefined;
-  const payload = sessionService.verifierJeton(jeton);
+  const payload = await sessionService.verifierJeton(jeton);
   if (payload) {
     const utilisateur = await authService.utilisateurCourant(payload.utilisateurId, payload.emisLe);
     if (utilisateur) {

@@ -21,6 +21,17 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
+      # Révocation de session / rate limiting partagés (compétence 8, NoSQL) : exercé réellement
+      # par les tests d'intégration dédiés (redis-partage.integration.test.ts), pas seulement le
+      # repli en mémoire — cf. apps/backend/src/repositories/redis-client.ts.
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
 
@@ -61,6 +72,7 @@ jobs:
         run: npm run test:integration
         env:
           DATABASE_URL: postgresql://postgres:test@localhost:5432/coprophub_test
+          REDIS_URL: redis://localhost:6379
 
       - name: Build
         run: npm run build

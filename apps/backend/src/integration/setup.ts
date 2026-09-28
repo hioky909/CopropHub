@@ -22,3 +22,16 @@ if (!nomBase.endsWith('_test')) {
 }
 
 process.env.SESSION_SECRET ??= 'secret-de-test-pour-les-tests-uniquement';
+
+// Si REDIS_URL est fourni (redis-partage.integration.test.ts, CI), les compteurs de rate limiting
+// sont RÉELLEMENT partagés entre tous les fichiers de test de cette exécution (c'est justement ce
+// qu'on veut prouver) — il faut donc les vider avant chaque fichier, sinon un fichier hérite du
+// quota déjà consommé par un précédent (contrairement au repli en mémoire, isolé par défaut).
+if (process.env.REDIS_URL) {
+  const { createClient } = await import('redis');
+  const client = createClient({ url: process.env.REDIS_URL });
+  await client.connect();
+  const cles = await client.keys('rl_*');
+  if (cles.length > 0) await client.del(cles);
+  await client.quit();
+}

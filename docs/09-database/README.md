@@ -25,4 +25,8 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 - Les identifiants sont générés côté base (`gen_random_uuid()`), pas côté Prisma (`@default(uuid())`), pour rester alignés avec la migration écrite à la main.
 - `montant` (table `charge`) est un `NUMERIC(10,2)` sérialisé en chaîne à 2 décimales fixes côté API (`.toFixed(2)`, jamais `.toString()` qui tronquerait les zéros de fin).
 
+## Accès aux données NoSQL (Redis)
+
+En complément du relationnel (PostgreSQL, seule source de vérité des données métier) : Redis héberge exclusivement de l'**état technique éphémère**, jamais une donnée métier — révocation de session au logout et compteurs de rate limiting, chacun avec un TTL (`apps/backend/src/repositories/redis-client.ts`). Strictement optionnel (`REDIS_URL`) : absent, le backend se rabat automatiquement sur un état en mémoire du processus (mono-instance). Présent, il permet un déploiement multi-instance où la déconnexion d'un utilisateur et les quotas de tentatives sont partagés entre toutes les instances du backend — cf. [08-security](../08-security/README.md).
+
 Voir aussi [12-api/](../12-api/README.md) pour la forme des réponses JSON, et [10-testing/](../10-testing/README.md) pour les contraintes vérifiées par de vrais tests PostgreSQL.
