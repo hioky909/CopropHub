@@ -50,7 +50,12 @@ const MAJORITE: Record<DonneesProcesVerbal['resolutions'][number]['typeMajorite'
 const STATUT_CHARGE = { A_PAYER: 'À payer', PAYEE: 'Payée', EN_RETARD: 'En retard' } as const;
 
 export function dateLongue(date: Date): string {
-  return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', timeZone: 'UTC' });
+  return date.toLocaleDateString('fr-FR', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
 }
 
 /** 123450 → « 1 234,50 € » (espaces ordinaires : les espaces insécables fines ne sont pas dans le jeu de caractères des PDF standards). */
@@ -71,7 +76,11 @@ const BLEU = '#1E4B8F';
 const TRAIT = '#E0E0E0';
 
 /** Crée un document A4 avec pied de page, exécute `dessiner`, et retourne le PDF complet. Non compressé : le texte reste inspectable et les fichiers restent petits. */
-function construire(titre: string, genereLe: Date, dessiner: (doc: PDFKit.PDFDocument) => void): Promise<Buffer> {
+function construire(
+  titre: string,
+  genereLe: Date,
+  dessiner: (doc: PDFKit.PDFDocument) => void,
+): Promise<Buffer> {
   return new Promise((resolve, reject) => {
     const doc = new PDFDocument({
       size: 'A4',
@@ -102,13 +111,22 @@ function construire(titre: string, genereLe: Date, dessiner: (doc: PDFKit.PDFDoc
           bas,
           { width: doc.page.width - 100, align: 'left', lineBreak: false },
         )
-        .text(`Page ${i - start + 1} / ${count}`, 50, bas, { width: doc.page.width - 100, align: 'right', lineBreak: false });
+        .text(`Page ${i - start + 1} / ${count}`, 50, bas, {
+          width: doc.page.width - 100,
+          align: 'right',
+          lineBreak: false,
+        });
     }
     doc.end();
   });
 }
 
-function enTete(doc: PDFKit.PDFDocument, immeuble: { nom: string; adresse: string } | null, titre: string, sousTitre: string) {
+function enTete(
+  doc: PDFKit.PDFDocument,
+  immeuble: { nom: string; adresse: string } | null,
+  titre: string,
+  sousTitre: string,
+) {
   doc.fontSize(9).fillColor(BLEU).font('Helvetica-Bold').text('CopropHub');
   if (immeuble) {
     doc.font('Helvetica').fillColor(GRIS).text(`${immeuble.nom} — ${immeuble.adresse}`);
@@ -118,47 +136,81 @@ function enTete(doc: PDFKit.PDFDocument, immeuble: { nom: string; adresse: strin
   doc.moveDown(0.2);
   doc.font('Helvetica').fontSize(12).fillColor(GRIS).text(sousTitre);
   doc.moveDown(1);
-  doc.strokeColor(TRAIT).lineWidth(1).moveTo(50, doc.y).lineTo(doc.page.width - 50, doc.y).stroke();
+  doc
+    .strokeColor(TRAIT)
+    .lineWidth(1)
+    .moveTo(50, doc.y)
+    .lineTo(doc.page.width - 50, doc.y)
+    .stroke();
   doc.moveDown(1);
 }
 
 export function pdfProcesVerbal(d: DonneesProcesVerbal): Promise<Buffer> {
   const date = dateLongue(d.dateAg);
-  return construire(`Procès-verbal des résolutions — assemblée générale du ${date}`, d.genereLe, (doc) => {
-    enTete(doc, d.immeuble, 'Procès-verbal des résolutions', `Assemblée générale du ${date}`);
-    if (d.nombreInscrits !== null) {
-      doc.font('Helvetica').fontSize(11).fillColor(NOIR).text(`Copropriétaires inscrits au vote : ${d.nombreInscrits}`);
-      doc.moveDown(0.8);
-    }
-    d.resolutions.forEach((r, i) => {
-      if (doc.y > doc.page.height - 200) doc.addPage();
-      const votants = r.decomptes.oui + r.decomptes.non + r.decomptes.abstention;
-      const adoptee = r.statutResultat === 'ADOPTEE';
-      doc.font('Helvetica-Bold').fontSize(12).fillColor(NOIR).text(`Résolution ${i + 1} — ${r.libelle}`);
-      doc.font('Helvetica').fontSize(10).fillColor(GRIS).text(MAJORITE[r.typeMajorite]);
-      doc.moveDown(0.3);
-      doc.fillColor(NOIR).text(
-        `Pour : ${r.decomptes.oui}    Contre : ${r.decomptes.non}    Abstentions : ${r.decomptes.abstention}` +
-          (d.nombreInscrits !== null ? `    Non-votants : ${Math.max(0, d.nombreInscrits - votants)}` : ''),
-      );
-      doc.moveDown(0.2);
-      doc
-        .font('Helvetica-Bold')
-        .fillColor(adoptee ? '#1E7A4C' : '#B3261E')
-        .text(`Résultat : ${adoptee ? 'ADOPTÉE' : 'REJETÉE'}`);
-      if (secondVoteArt251Possible(r.typeMajorite, r.statutResultat === 'EN_ATTENTE' ? null : r.statutResultat, r.decomptes, d.nombreInscrits)) {
+  return construire(
+    `Procès-verbal des résolutions — assemblée générale du ${date}`,
+    d.genereLe,
+    (doc) => {
+      enTete(doc, d.immeuble, 'Procès-verbal des résolutions', `Assemblée générale du ${date}`);
+      if (d.nombreInscrits !== null) {
         doc
-          .font('Helvetica-Oblique')
-          .fontSize(9)
-          .fillColor(GRIS)
-          .text(
-            'Cette résolution a recueilli au moins un tiers des voix sans atteindre la majorité absolue : un second vote à la majorité simple (art. 25-1) pouvait être organisé séance tenante.',
-          );
+          .font('Helvetica')
+          .fontSize(11)
+          .fillColor(NOIR)
+          .text(`Copropriétaires inscrits au vote : ${d.nombreInscrits}`);
+        doc.moveDown(0.8);
       }
-      doc.moveDown(1);
-    });
-    doc.font('Helvetica').fontSize(9).fillColor(GRIS).text('Décomptes anonymes : l’identité des votants n’est jamais consignée dans ce document.');
-  });
+      d.resolutions.forEach((r, i) => {
+        if (doc.y > doc.page.height - 200) doc.addPage();
+        const votants = r.decomptes.oui + r.decomptes.non + r.decomptes.abstention;
+        const adoptee = r.statutResultat === 'ADOPTEE';
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(12)
+          .fillColor(NOIR)
+          .text(`Résolution ${i + 1} — ${r.libelle}`);
+        doc.font('Helvetica').fontSize(10).fillColor(GRIS).text(MAJORITE[r.typeMajorite]);
+        doc.moveDown(0.3);
+        doc
+          .fillColor(NOIR)
+          .text(
+            `Pour : ${r.decomptes.oui}    Contre : ${r.decomptes.non}    Abstentions : ${r.decomptes.abstention}` +
+              (d.nombreInscrits !== null
+                ? `    Non-votants : ${Math.max(0, d.nombreInscrits - votants)}`
+                : ''),
+          );
+        doc.moveDown(0.2);
+        doc
+          .font('Helvetica-Bold')
+          .fillColor(adoptee ? '#1E7A4C' : '#B3261E')
+          .text(`Résultat : ${adoptee ? 'ADOPTÉE' : 'REJETÉE'}`);
+        if (
+          secondVoteArt251Possible(
+            r.typeMajorite,
+            r.statutResultat === 'EN_ATTENTE' ? null : r.statutResultat,
+            r.decomptes,
+            d.nombreInscrits,
+          )
+        ) {
+          doc
+            .font('Helvetica-Oblique')
+            .fontSize(9)
+            .fillColor(GRIS)
+            .text(
+              'Cette résolution a recueilli au moins un tiers des voix sans atteindre la majorité absolue : un second vote à la majorité simple (art. 25-1) pouvait être organisé séance tenante.',
+            );
+        }
+        doc.moveDown(1);
+      });
+      doc
+        .font('Helvetica')
+        .fontSize(9)
+        .fillColor(GRIS)
+        .text(
+          'Décomptes anonymes : l’identité des votants n’est jamais consignée dans ce document.',
+        );
+    },
+  );
 }
 
 export function pdfReleveCharges(d: DonneesReleveCharges): Promise<Buffer> {
@@ -179,7 +231,13 @@ export function pdfReleveCharges(d: DonneesReleveCharges): Promise<Buffer> {
     const ligneTitres = () => {
       const y = doc.y;
       doc.font('Helvetica-Bold').fontSize(9).fillColor(GRIS);
-      colonnes.forEach((c) => doc.text(c.titre.toUpperCase(), c.x, y, { width: c.largeur - 8, align: c.droite ? 'right' : 'left', lineBreak: false }));
+      colonnes.forEach((c) =>
+        doc.text(c.titre.toUpperCase(), c.x, y, {
+          width: c.largeur - 8,
+          align: c.droite ? 'right' : 'left',
+          lineBreak: false,
+        }),
+      );
       doc.y = y + 16;
       doc.strokeColor(TRAIT).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
       doc.y += 6;
@@ -199,9 +257,24 @@ export function pdfReleveCharges(d: DonneesReleveCharges): Promise<Buffer> {
       if (l.statut === 'PAYEE') paye += centimes;
       if (l.statut === 'EN_RETARD') retard += centimes;
       const y = doc.y;
-      const cellules = [l.lot, l.periode, formaterEuros(centimes), l.echeance ? dateLongue(l.echeance) : '—', STATUT_CHARGE[l.statut]];
-      doc.font('Helvetica').fontSize(10).fillColor(l.statut === 'EN_RETARD' ? '#B3261E' : NOIR);
-      colonnes.forEach((c, i) => doc.text(cellules[i]!, c.x, y, { width: c.largeur - 8, align: c.droite ? 'right' : 'left', lineBreak: false }));
+      const cellules = [
+        l.lot,
+        l.periode,
+        formaterEuros(centimes),
+        l.echeance ? dateLongue(l.echeance) : '—',
+        STATUT_CHARGE[l.statut],
+      ];
+      doc
+        .font('Helvetica')
+        .fontSize(10)
+        .fillColor(l.statut === 'EN_RETARD' ? '#B3261E' : NOIR);
+      colonnes.forEach((c, i) =>
+        doc.text(cellules[i]!, c.x, y, {
+          width: c.largeur - 8,
+          align: c.droite ? 'right' : 'left',
+          lineBreak: false,
+        }),
+      );
       doc.y = y + 18;
     }
     if (d.lignes.length === 0) {
@@ -211,8 +284,19 @@ export function pdfReleveCharges(d: DonneesReleveCharges): Promise<Buffer> {
     doc.moveDown(1);
     doc.strokeColor(TRAIT).moveTo(50, doc.y).lineTo(545, doc.y).stroke();
     doc.moveDown(0.6);
-    doc.font('Helvetica-Bold').fontSize(11).fillColor(NOIR).text(`Total : ${formaterEuros(total)}`, 50);
-    doc.font('Helvetica').fontSize(10).fillColor(GRIS).text(`Payé : ${formaterEuros(paye)}    En retard : ${formaterEuros(retard)}    Restant dû : ${formaterEuros(total - paye)}`, 50);
+    doc
+      .font('Helvetica-Bold')
+      .fontSize(11)
+      .fillColor(NOIR)
+      .text(`Total : ${formaterEuros(total)}`, 50);
+    doc
+      .font('Helvetica')
+      .fontSize(10)
+      .fillColor(GRIS)
+      .text(
+        `Payé : ${formaterEuros(paye)}    En retard : ${formaterEuros(retard)}    Restant dû : ${formaterEuros(total - paye)}`,
+        50,
+      );
   });
 }
 
@@ -242,7 +326,9 @@ export const documentService = {
   },
 
   /** La portée (toutes les charges ou seulement celles de ses lots) est décidée par `chargeService.lister` selon le rôle (RM-10). */
-  async releveCharges(utilisateur: UtilisateurAuthentifie): Promise<{ pdf: Buffer; nomFichier: string }> {
+  async releveCharges(
+    utilisateur: UtilisateurAuthentifie,
+  ): Promise<{ pdf: Buffer; nomFichier: string }> {
     const charges = await chargeService.lister(utilisateur);
     const lots = await lotRepository.parIds([...new Set(charges.map((c) => c.idLot))]);
     const numeros = new Map(lots.map((l) => [l.id, l.numero]));
@@ -250,7 +336,10 @@ export const documentService = {
     const genereLe = new Date();
     const pdf = await pdfReleveCharges({
       immeuble: immeuble ? { nom: immeuble.nom, adresse: immeuble.adresse } : null,
-      perimetre: utilisateur.typeCompte === 'SYNDIC' || utilisateur.estMembreConseilSyndical ? 'immeuble' : 'lots',
+      perimetre:
+        utilisateur.typeCompte === 'SYNDIC' || utilisateur.estMembreConseilSyndical
+          ? 'immeuble'
+          : 'lots',
       lignes: charges
         .map((c) => ({
           lot: numeros.get(c.idLot) ?? '—',
@@ -259,7 +348,11 @@ export const documentService = {
           echeance: c.dateEcheance ?? null,
           statut: c.statut as 'A_PAYER' | 'PAYEE' | 'EN_RETARD',
         }))
-        .sort((a, b) => a.lot.localeCompare(b.lot, 'fr', { numeric: true }) || b.periode.localeCompare(a.periode)),
+        .sort(
+          (a, b) =>
+            a.lot.localeCompare(b.lot, 'fr', { numeric: true }) ||
+            b.periode.localeCompare(a.periode),
+        ),
       genereLe,
     });
     return { pdf, nomFichier: nomFichier('releve-charges', genereLe) };

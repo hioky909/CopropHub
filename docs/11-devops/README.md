@@ -14,7 +14,7 @@ checkout → npm ci → prisma generate → lint → typecheck
 
 Job `livraison`, déclenché seulement après le succès de `quality` sur un push vers `main` ou `master` :
 1. construit les trois images de production (`backend`, `web`, `outils`) ;
-2. les **vérifie en conditions réelles** : démarre la pile (base, migrations, backend, Caddy en HTTPS local), amorce un syndic et lance `deploy/verifier-production.sh` (11 contrôles : application, repli de la SPA, API, HSTS, CSP, en-têtes, pas de cookie sur une connexion refusée) ;
+2. les **vérifie en conditions réelles** : démarre la pile (base, migrations, backend, Caddy en HTTPS local), amorce un syndic et lance `deploy/verifier-production.sh` (12 contrôles : application, repli de la SPA, API, HSTS, CSP, en-têtes, pas de cookie sur une connexion refusée) ;
 3. les publie sur GitHub Container Registry (`ghcr.io/<organisation>/coprophub/{backend,web,outils}`, étiquettes = commit et `latest`) ;
 4. **si** les secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH` sont configurés : met le serveur à jour par SSH (`pull` puis `up -d`) et, avec `DEPLOY_DOMAINE`, relance le contrôle de fumée sur le site public. Sans ces secrets, la publication des images s'arrête là.
 

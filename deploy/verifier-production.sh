@@ -28,6 +28,7 @@ verifier "une route de l'application se replie sur index.html (200)" '[ "$(code 
 verifier "l'API répond : /api/health → {\"status\":\"ok\"}" 'corps /api/health | grep -q "\"status\":\"ok\""'
 verifier "l'API refuse un visiteur anonyme : /api/auth/moi → 401" '[ "$(code "$base/api/auth/moi")" = 401 ]'
 verifier "une route inconnue de l'API ne renvoie pas la page de l'application" '! corps /api/route-inexistante | grep -qi "<div id=\"root\">"'
+verifier "le manifeste d'installation et son icône sont servis" 'corps /manifest.webmanifest | grep -q "\"short_name\"" && [ "$(code "$base/icones/icone-192.png")" = 200 ]'
 verifier "HSTS présent" 'entetes / | grep -qi "^strict-transport-security: max-age="'
 verifier "Content-Security-Policy présente, sans ressource tierce" 'entetes / | grep -i "^content-security-policy:" | grep -q "default-src .self." && ! entetes / | grep -i "^content-security-policy:" | grep -qi "https://"'
 verifier "X-Content-Type-Options: nosniff" 'entetes / | grep -qi "^x-content-type-options: nosniff"'

@@ -29,7 +29,10 @@ describe('lireConfigurationSeed — développement', () => {
   });
 
   it('les variables SEED_* l’emportent sur les valeurs par défaut', () => {
-    const c = lireConfigurationSeed({ SEED_IMMEUBLE_NOM: 'Mon immeuble', SEED_SYNDIC_MOT_DE_PASSE: 'un-autre-mot-de-passe-12' });
+    const c = lireConfigurationSeed({
+      SEED_IMMEUBLE_NOM: 'Mon immeuble',
+      SEED_SYNDIC_MOT_DE_PASSE: 'un-autre-mot-de-passe-12',
+    });
     expect(c.immeuble.nom).toBe('Mon immeuble');
     expect(c.syndic.motDePasse).toBe('un-autre-mot-de-passe-12');
   });
@@ -37,7 +40,10 @@ describe('lireConfigurationSeed — développement', () => {
 
 describe('lireConfigurationSeed — production', () => {
   it('accepte une configuration complète, normalise l’email en minuscules, retire les espaces autour des noms', () => {
-    const c = lireConfigurationSeed({ ...COMPLETE, SEED_IMMEUBLE_NOM: '  Résidence des Tilleuls  ' });
+    const c = lireConfigurationSeed({
+      ...COMPLETE,
+      SEED_IMMEUBLE_NOM: '  Résidence des Tilleuls  ',
+    });
     expect(c.syndic.email).toBe('contact@cabinet-martin.fr');
     expect(c.immeuble.nom).toBe('Résidence des Tilleuls');
     expect(c.syndic.motDePasse).toBe('un-mot-de-passe-vraiment-solide');
@@ -54,20 +60,28 @@ describe('lireConfigurationSeed — production', () => {
   });
 
   it('refuse le mot de passe par défaut du dépôt', () => {
-    expect(problemes({ ...COMPLETE, SEED_SYNDIC_MOT_DE_PASSE: 'changez-ce-mot-de-passe' })).toContain(
-      'SEED_SYNDIC_MOT_DE_PASSE ne doit pas être le mot de passe par défaut du dépôt.',
-    );
+    expect(
+      problemes({ ...COMPLETE, SEED_SYNDIC_MOT_DE_PASSE: 'changez-ce-mot-de-passe' }),
+    ).toContain('SEED_SYNDIC_MOT_DE_PASSE ne doit pas être le mot de passe par défaut du dépôt.');
   });
 
-  it.each(['court', '12345678901'])('refuse un mot de passe de moins de 12 caractères (« %s »)', (motDePasse) => {
-    expect(problemes({ ...COMPLETE, SEED_SYNDIC_MOT_DE_PASSE: motDePasse })).toEqual([
-      'SEED_SYNDIC_MOT_DE_PASSE est requis et doit faire au moins 12 caractères.',
-    ]);
-  });
+  it.each(['court', '12345678901'])(
+    'refuse un mot de passe de moins de 12 caractères (« %s »)',
+    (motDePasse) => {
+      expect(problemes({ ...COMPLETE, SEED_SYNDIC_MOT_DE_PASSE: motDePasse })).toEqual([
+        'SEED_SYNDIC_MOT_DE_PASSE est requis et doit faire au moins 12 caractères.',
+      ]);
+    },
+  );
 
-  it.each(['pas-un-email', 'a@b', '@b.fr', 'a b@c.fr', ''])('refuse l’email invalide « %s »', (email) => {
-    expect(problemes({ ...COMPLETE, SEED_SYNDIC_EMAIL: email })).toContain('SEED_SYNDIC_EMAIL doit être une adresse email valide.');
-  });
+  it.each(['pas-un-email', 'a@b', '@b.fr', 'a b@c.fr', ''])(
+    'refuse l’email invalide « %s »',
+    (email) => {
+      expect(problemes({ ...COMPLETE, SEED_SYNDIC_EMAIL: email })).toContain(
+        'SEED_SYNDIC_EMAIL doit être une adresse email valide.',
+      );
+    },
+  );
 
   it('refuse des noms trop longs (limite de la colonne)', () => {
     const long = 'x'.repeat(121);
@@ -78,7 +92,10 @@ describe('lireConfigurationSeed — production', () => {
   });
 
   it('ne « trime » pas le mot de passe : les espaces comptent', () => {
-    const c = lireConfigurationSeed({ ...COMPLETE, SEED_SYNDIC_MOT_DE_PASSE: '  espaces autour  ' });
+    const c = lireConfigurationSeed({
+      ...COMPLETE,
+      SEED_SYNDIC_MOT_DE_PASSE: '  espaces autour  ',
+    });
     expect(c.syndic.motDePasse).toBe('  espaces autour  ');
   });
 

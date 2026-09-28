@@ -151,3 +151,23 @@ test('aucune requête vers un site tiers, et la police Inter est bien chargée d
   })
   expect(policeChargee).toBe(true)
 })
+
+test('l’application est installable : manifeste et icônes servis, aucune erreur d’installation détectée par Chromium', async ({ page, context, request }) => {
+  await page.goto('/connexion')
+  await expect(page.locator('link[rel="manifest"]')).toHaveAttribute('href', '/manifest.webmanifest')
+
+  const manifeste = await request.get('/manifest.webmanifest')
+  expect(manifeste.ok()).toBe(true)
+  const { icons } = (await manifeste.json()) as { icons: { src: string }[] }
+  for (const { src } of icons) {
+    const reponse = await request.get(src)
+    expect(reponse.ok(), src).toBe(true)
+    expect(reponse.headers()['content-type'], src).toContain('image/png')
+  }
+  expect((await request.get('/icones/apple-touch-icon.png')).ok()).toBe(true)
+
+  // Le vrai contrôle d'installabilité de Chromium (manifeste valide, icônes chargeables, page sécurisée).
+  const cdp = await context.newCDPSession(page)
+  const { installabilityErrors } = (await cdp.send('Page.getInstallabilityErrors')) as { installabilityErrors: { errorId: string }[] }
+  expect(installabilityErrors.map((e) => e.errorId)).toEqual([])
+})

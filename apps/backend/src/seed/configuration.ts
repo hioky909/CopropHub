@@ -43,22 +43,34 @@ export function lireConfigurationSeed(env: Record<string, string | undefined>): 
       nom: valeur('SEED_SYNDIC_NOM', PAR_DEFAUT.syndicNom),
       email: valeur('SEED_SYNDIC_EMAIL', PAR_DEFAUT.syndicEmail).toLowerCase(),
       // Le mot de passe n'est jamais « trimé » : les espaces en fin de mot de passe sont significatifs.
-      motDePasse: env.SEED_SYNDIC_MOT_DE_PASSE ? env.SEED_SYNDIC_MOT_DE_PASSE : production ? '' : PAR_DEFAUT.syndicMotDePasse,
+      motDePasse: env.SEED_SYNDIC_MOT_DE_PASSE
+        ? env.SEED_SYNDIC_MOT_DE_PASSE
+        : production
+          ? ''
+          : PAR_DEFAUT.syndicMotDePasse,
     },
   };
 
   const problemes: string[] = [];
   if (!configuration.immeuble.nom) problemes.push('SEED_IMMEUBLE_NOM est requis en production.');
-  if (configuration.immeuble.nom.length > 120) problemes.push('SEED_IMMEUBLE_NOM dépasse 120 caractères.');
-  if (!configuration.immeuble.adresse) problemes.push('SEED_IMMEUBLE_ADRESSE est requis en production.');
+  if (configuration.immeuble.nom.length > 120)
+    problemes.push('SEED_IMMEUBLE_NOM dépasse 120 caractères.');
+  if (!configuration.immeuble.adresse)
+    problemes.push('SEED_IMMEUBLE_ADRESSE est requis en production.');
   if (!configuration.syndic.nom) problemes.push('SEED_SYNDIC_NOM est requis en production.');
-  if (configuration.syndic.nom.length > 120) problemes.push('SEED_SYNDIC_NOM dépasse 120 caractères.');
-  if (!EMAIL.test(configuration.syndic.email)) problemes.push('SEED_SYNDIC_EMAIL doit être une adresse email valide.');
+  if (configuration.syndic.nom.length > 120)
+    problemes.push('SEED_SYNDIC_NOM dépasse 120 caractères.');
+  if (!EMAIL.test(configuration.syndic.email))
+    problemes.push('SEED_SYNDIC_EMAIL doit être une adresse email valide.');
   if (configuration.syndic.motDePasse.length < LONGUEUR_MIN_MOT_DE_PASSE) {
-    problemes.push(`SEED_SYNDIC_MOT_DE_PASSE est requis et doit faire au moins ${LONGUEUR_MIN_MOT_DE_PASSE} caractères.`);
+    problemes.push(
+      `SEED_SYNDIC_MOT_DE_PASSE est requis et doit faire au moins ${LONGUEUR_MIN_MOT_DE_PASSE} caractères.`,
+    );
   }
   if (production && configuration.syndic.motDePasse === PAR_DEFAUT.syndicMotDePasse) {
-    problemes.push('SEED_SYNDIC_MOT_DE_PASSE ne doit pas être le mot de passe par défaut du dépôt.');
+    problemes.push(
+      'SEED_SYNDIC_MOT_DE_PASSE ne doit pas être le mot de passe par défaut du dépôt.',
+    );
   }
   if (problemes.length > 0) throw new ConfigurationSeedInvalideError(problemes);
   return configuration;
