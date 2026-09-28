@@ -34,7 +34,9 @@
           "warn"
         ]
       }
-    ]
+    ],
+    "@typescript-eslint/no-floating-promises": "error",
+    "@typescript-eslint/no-misused-promises": "error"
   },
   "ignorePatterns": [
     "dist",
