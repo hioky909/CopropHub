@@ -56,6 +56,8 @@ docker compose -f docker-compose.prod.yml --env-file .env.production --profile o
 
 **Multi-instance** : la révocation de session (déconnexion) et le rate limiting sont partagés entre plusieurs instances du backend via Redis (`REDIS_URL`, service `redis` de `docker-compose.prod.yml`, aucun port publié) ; les sessions fermées par un changement de mot de passe le sont en base (déjà partagé sans Redis). Sans `REDIS_URL`, repli automatique en mémoire du processus (mono-instance). **Limites assumées restantes** : pas de haute disponibilité ni de répartition de charge fournie (à ajouter côté infrastructure si plusieurs instances du backend sont déployées) ; CSRF : vérification de l'origine des requêtes (`Origin`/`Referer`) plutôt qu'un jeton à double soumission, cf. Doc 8.
 
+**Pas d'environnement de recette séparé (choix assumé, pas un oubli)** : seuls dev et production existent. Pour un MVP mono-immeuble, la CI (`quality`) rejoue déjà l'intégralité du parcours — build des images réelles, migrations, amorçage, contrôle de fumée HTTPS, 37 tests E2E — sur une pile éphémère à chaque push, ce qui couvre l'essentiel de ce qu'une recette apporterait (détecter une régression avant la mise en production) sans la charge d'exploitation d'un troisième environnement permanent. À revoir si l'installation grandit au-delà d'un seul immeuble ou d'une seule instance de production.
+
 ## Variables d'environnement clés
 
 | Variable | Rôle |

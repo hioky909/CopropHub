@@ -13,6 +13,7 @@
     "test:watch": "vitest",
     "test:integration": "vitest run --config src/integration/vitest.config.ts",
     "test:coverage:combinee": "node scripts/couverture-combinee.mjs",
+    "loadtest": "node loadtest/charge.mjs",
     "prisma:generate": "prisma generate",
     "prisma:migrate:dev": "prisma migrate dev",
     "prisma:migrate:deploy": "prisma migrate deploy",

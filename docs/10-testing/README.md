@@ -25,6 +25,12 @@ Voir [evidence/](evidence/) pour le relevé réel du dernier passage complet.
 
 Rapport HTML détaillé (fichier par fichier) : `apps/backend/coverage/combinee/index.html` après exécution (non versionné, `coverage/` dans `.gitignore`).
 
+## Test de charge
+
+`npm run loadtest --workspace=apps/backend` (`loadtest/charge.mjs`) — manquait entièrement avant l'audit pré-production (compétence 9). Script Node pur, sans dépendance (`artillery` et `autocannon` traînent tous deux une vulnérabilité modérée transitive sans version qui l'évite — écartés). 10 utilisateurs virtuels pendant 20s, mélange visiteur anonyme / syndic / copropriétaire, contre une base de test jetable (jamais dev/prod). Seuils : p95 < 500 ms sur les routes de lecture, < 1000 ms sur `/auth/*` (délibérément plus lent : bcrypt facteur 12, résistance à la force brute — pas un défaut de performance).
+
+Résultat mesuré le 2026-09-28 : **1373 requêtes, 0 erreur**, tous les seuils respectés (p95 lecture 11–17 ms, p95 `/auth/connexion` 660 ms, dominé par bcrypt comme attendu). Reste un smoke test, pas une étude de capacité complète (pas de palier de montée en charge progressif, pas de test de rupture).
+
 ## Traçabilité UT/IT (Doc 6)
 
 Les 12 cas UT-01 à UT-12 (règles de majorité, cas dégénérés) et les 8 scénarios IT-01 à IT-08 (parcours bout en bout) définis au Doc 6 sont couverts par les tests écrits au fil de T-05 à T-14, plus deux cas littéraux ajoutés (UT-02, UT-05) lors de l'audit T-15/T-16 — voir `apps/backend/src/services/resultat-calculateur.test.ts` pour les cas de majorité.
