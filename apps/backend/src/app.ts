@@ -34,7 +34,34 @@ export function createApp(): Express {
 
   // En-têtes de sécurité, CORS restrictif et rate limiting :
   // cf. Doc 5 "Modèle de menace & sécurité" § Sécurité transverse.
-  app.use(helmet());
+  //
+  // Configuration explicite (pas seulement `helmet()` par défaut) : en production, Caddy
+  // pose déjà une CSP stricte et `X-Frame-Options: DENY` (deploy/Caddyfile), mais docker-
+  // compose.prod.yml ne publie AUCUN port pour le backend — Caddy est le seul point
+  // d'entrée. Cette config fait néanmoins que l'application reste sûre PAR ELLE-MÊME
+  // (défense en profondeur, pas seulement une garantie d'infrastructure) si jamais le
+  // backend était atteint autrement (débogage, mauvaise configuration future, appel
+  // interne depuis un autre conteneur). API JSON : aucun script/style en ligne à
+  // autoriser, jamais chargée dans une frame.
+  app.use(
+    helmet({
+      frameguard: { action: 'deny' },
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: ["'self'"],
+          styleSrc: ["'self'"],
+          imgSrc: ["'self'", 'data:'],
+          fontSrc: ["'self'"],
+          connectSrc: ["'self'"],
+          objectSrc: ["'none'"],
+          baseUri: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'none'"],
+        },
+      },
+    }),
+  );
   app.use(
     cors({
       origin: process.env.FRONTEND_ORIGIN ?? 'http://localhost:5173',

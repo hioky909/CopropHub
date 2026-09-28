@@ -53,7 +53,7 @@ Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, f
 - [x] Champs de rôle exclus des endpoints modifiables par l'utilisateur lui-même (anti mass assignment) — testé sur `/utilisateurs`
 - [x] Secrets uniquement en variables d'environnement, `.env` dans `.gitignore`, `.env.example` fourni
 - [x] Journalisation des actions sensibles (F-11) — `journal.service.ts`, testée ; stockage/collecte à la charge de la plateforme de déploiement
-- [x] Headers de sécurité (Helmet : HSTS, X-Content-Type-Options, X-Frame-Options…) — testés (T-25, `security-headers.test.ts`)
+- [x] Headers de sécurité (Helmet : HSTS, X-Content-Type-Options, `X-Frame-Options: DENY`, CSP stricte configurée explicitement — pas seulement les valeurs par défaut de Helmet) — l'application est sûre par elle-même, indépendamment de Caddy (défense en profondeur) ; testés (T-25, `security-headers.test.ts`)
 - [x] CORS restreint à l'origine du front, pas de wildcard — testé (T-25)
 - [x] HTTPS obligatoire en production — installation fournie (`docker-compose.prod.yml`, Caddy : certificat Let's Encrypt automatique, HSTS, CSP stricte, origine unique), vérifiée en conditions réelles par `deploy/verifier-production.sh` et un parcours navigateur ; reste à l'exploitant de fournir le domaine et la machine
 - [x] Audit des dépendances intégré à la CI (`npm audit --audit-level=high`)

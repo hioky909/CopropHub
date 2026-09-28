@@ -23,9 +23,24 @@ describe('En-têtes de sécurité (Helmet)', () => {
   it('pose les en-têtes de durcissement de base et retire X-Powered-By', async () => {
     const reponse = await request(createApp()).get('/health');
     expect(reponse.headers['x-content-type-options']).toBe('nosniff');
-    expect(reponse.headers['x-frame-options']).toBe('SAMEORIGIN');
+    expect(reponse.headers['x-frame-options']).toBe('DENY');
     expect(reponse.headers['strict-transport-security']).toBeDefined();
     expect(reponse.headers['x-powered-by']).toBeUndefined();
+  });
+
+  // Défense en profondeur (audit pré-production, Phase 1) : l'application reste sûre par
+  // elle-même même si elle était atteinte sans passer par Caddy (qui pose sa propre CSP
+  // stricte en production, cf. deploy/Caddyfile) — API JSON : aucune ressource externe.
+  it('pose une CSP stricte (aucun script/style en ligne, aucune ressource tierce, jamais en frame)', async () => {
+    const reponse = await request(createApp()).get('/health');
+    const csp = reponse.headers['content-security-policy'];
+    expect(csp).toBeDefined();
+    expect(csp).toContain("default-src 'self'");
+    expect(csp).toContain("script-src 'self'");
+    expect(csp).toContain("style-src 'self'");
+    expect(csp).toContain("object-src 'none'");
+    expect(csp).toContain("frame-ancestors 'none'");
+    expect(csp).not.toContain('https:'); // pas de ressource tierce autorisée par générosité
   });
 });
 
