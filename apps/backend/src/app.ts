@@ -11,6 +11,7 @@ import { voteRouter } from './controllers/vote.controller.js';
 import { incidentRouter } from './controllers/incident.controller.js';
 import { chargeRouter } from './controllers/charge.controller.js';
 import { sessionMiddleware } from './middleware/session.middleware.js';
+import { exigerOrigineDeConfiance } from './middleware/csrf.middleware.js';
 import { asyncHandler } from './middleware/async-handler.js';
 import { sessionService } from './services/session.service.js';
 
@@ -69,6 +70,11 @@ export function createApp(): Express {
   );
 
   app.use(express.json());
+
+  // CSRF (défense en profondeur, Doc 5/8) : toute méthode qui modifie un état
+  // (POST/PUT/PATCH/DELETE) doit venir de FRONTEND_ORIGIN si le navigateur
+  // annonce une origine — cf. middleware pour le raisonnement complet.
+  app.use(exigerOrigineDeConfiance);
 
   // sessionMiddleware renseigne req.utilisateur si un cookie de session
   // valide est présent ; il ne bloque rien lui-même (cf. middleware).
