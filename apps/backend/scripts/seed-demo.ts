@@ -88,6 +88,7 @@ async function main() {
         idLot: lot.id,
         montant: (350 + i * 47).toFixed(2),
         periode: '2026-T3',
+        // eslint-disable-next-line security/detect-object-injection -- script de démo local (npm run demo:seed), `i` est l'index de boucle sur `lots`.
         statut: statutsCharges[i]!,
       },
     });
@@ -181,10 +182,12 @@ async function main() {
     'OUI',
   ];
   for (const [resIndex, votes] of [votesResolution1, votesResolution2].entries()) {
+    // eslint-disable-next-line security/detect-object-injection -- script de démo local, `resIndex` est l'index de boucle sur un tableau littéral de deux éléments.
     const resolution = agCloturee.resolutions[resIndex]!;
     const comptes = { oui: 0, non: 0, abstention: 0 };
     for (const [i, valeur] of votes.entries()) {
       await prisma.vote.create({
+        // eslint-disable-next-line security/detect-object-injection -- `i` est l'index de boucle sur `votes`, tableau littéral local.
         data: { idResolution: resolution.id, idUtilisateur: utilisateurs[i]!.id, valeur },
       });
       if (valeur === 'OUI') comptes.oui += 1;

@@ -17,6 +17,7 @@ let instance: PrismaClient | undefined;
 export const prisma: PrismaClient = new Proxy({} as PrismaClient, {
   get(_cible, propriete: keyof PrismaClient) {
     instance ??= new PrismaClient();
+    // eslint-disable-next-line security/detect-object-injection -- `propriete` est typé `keyof PrismaClient`, restreint par TS aux membres réels du client généré.
     return instance[propriete];
   },
 });

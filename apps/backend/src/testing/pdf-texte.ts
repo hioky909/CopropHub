@@ -7,6 +7,7 @@ export function texteDuPdf(pdf: Buffer): string {
   const contenu = pdf.toString('latin1');
   const decodeur = new TextDecoder('windows-1252');
   const lignes: string[] = [];
+  // eslint-disable-next-line security/detect-unsafe-regex -- utilitaire de TEST interne (parsing du PDF généré par pdfkit, jamais une entrée utilisateur) ; alternatives non ambiguës, pas de backtracking exponentiel réel.
   const motif = /\[((?:<[0-9a-fA-F]*>|\s|-?\d+(?:\.\d+)?)*)\]\s*TJ|<([0-9a-fA-F]+)>\s*Tj/g;
   let m: RegExpExecArray | null;
   while ((m = motif.exec(contenu)) !== null) {

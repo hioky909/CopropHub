@@ -80,6 +80,7 @@ export const incidentService = {
       throw new IncidentIntrouvableError();
     }
 
+    // eslint-disable-next-line security/detect-object-injection -- `statutCible` est typé 'EN_COURS' | 'RESOLU' (union littérale, validée par Zod côté contrôleur), pas une clé arbitraire.
     const statutAttendu = STATUT_ATTENDU_POUR[statutCible];
     if (incident.statut !== statutAttendu) {
       throw new TransitionInvalideError();

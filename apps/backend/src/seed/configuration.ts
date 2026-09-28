@@ -30,6 +30,7 @@ const PAR_DEFAUT = {
 export function lireConfigurationSeed(env: Record<string, string | undefined>): ConfigurationSeed {
   const production = env.NODE_ENV === 'production';
   const valeur = (cle: string, defaut: string): string => {
+    // eslint-disable-next-line security/detect-object-injection -- `cle` est toujours un littéral fourni par les appels ci-dessous (ex. 'SEED_IMMEUBLE_NOM'), jamais une entrée externe.
     const brut = env[cle]?.trim();
     return brut ? brut : production ? '' : defaut;
   };

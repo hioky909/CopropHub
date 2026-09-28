@@ -62,6 +62,7 @@ export function dateLongue(date: Date): string {
 export function formaterEuros(centimes: number): string {
   const signe = centimes < 0 ? '-' : '';
   const absolu = Math.abs(centimes);
+  // eslint-disable-next-line security/detect-unsafe-regex -- motif classique de séparation par milliers, chaîne source bornée (un nombre), pas d'entrée utilisateur.
   const entier = String(Math.floor(absolu / 100)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
   return `${signe}${entier},${String(absolu % 100).padStart(2, '0')} €`;
 }
@@ -269,6 +270,7 @@ export function pdfReleveCharges(d: DonneesReleveCharges): Promise<Buffer> {
         .fontSize(10)
         .fillColor(l.statut === 'EN_RETARD' ? '#B3261E' : NOIR);
       colonnes.forEach((c, i) =>
+        // eslint-disable-next-line security/detect-object-injection -- `i` est l'index de boucle sur `colonnes`, tableau littéral fixe défini plus haut dans ce fichier.
         doc.text(cellules[i]!, c.x, y, {
           width: c.largeur - 8,
           align: c.droite ? 'right' : 'left',

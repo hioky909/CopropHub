@@ -57,4 +57,5 @@ Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, f
 - [x] CORS restreint à l'origine du front, pas de wildcard — testé (T-25)
 - [x] HTTPS obligatoire en production — installation fournie (`docker-compose.prod.yml`, Caddy : certificat Let's Encrypt automatique, HSTS, CSP stricte, origine unique), vérifiée en conditions réelles par `deploy/verifier-production.sh` et un parcours navigateur ; reste à l'exploitant de fournir le domaine et la machine
 - [x] Audit des dépendances intégré à la CI (`npm audit --audit-level=high`)
+- [x] Analyse statique de sécurité (`eslint-plugin-security`) — 13 alertes initiales passées en revue une par une (toutes des faux positifs confirmés : accès à des index/clés littéraux ou validés par Zod, jamais une entrée externe brute), documentées par un commentaire `eslint-disable-next-line` justifié à chaque site plutôt que désactivées globalement
 - [x] Contraintes CHECK/UNIQUE/clés composites en base comme dernière ligne de défense

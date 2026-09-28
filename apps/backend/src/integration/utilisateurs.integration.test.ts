@@ -39,6 +39,7 @@ describe('autorisation (RM-14) sur /utilisateurs', () => {
   ] as const;
 
   it.each(routes)('%s %s : 401 sans session', async (methode, url) => {
+    // eslint-disable-next-line security/detect-object-injection -- `methode` vient de `routes`, tableau littéral fixe défini juste au-dessus dans ce test.
     expect((await request(app)[methode](url)).status).toBe(401);
   });
 
@@ -48,6 +49,7 @@ describe('autorisation (RM-14) sur /utilisateurs', () => {
       const copro = await creerUtilisateur();
       const conseil = await creerUtilisateur({ conseilSyndical: true });
       for (const utilisateur of [copro, conseil]) {
+        // eslint-disable-next-line security/detect-object-injection -- même `methode` que ci-dessus, tableau littéral fixe.
         const reponse = await request(app)
           [methode](url)
           .set('Cookie', cookieSession(utilisateur.id));

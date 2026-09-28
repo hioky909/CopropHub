@@ -11,6 +11,7 @@ const NOM_COOKIE = 'session';
  * ci-dessous est ce qui bloque réellement.
  */
 export async function sessionMiddleware(req: Request, _res: Response, next: NextFunction) {
+  // eslint-disable-next-line security/detect-object-injection -- NOM_COOKIE est une constante du module ('session'), jamais une entrée utilisateur.
   const jeton = req.cookies?.[NOM_COOKIE] as string | undefined;
   const payload = sessionService.verifierJeton(jeton);
   if (payload) {

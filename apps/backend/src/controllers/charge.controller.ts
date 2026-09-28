@@ -55,6 +55,7 @@ chargeRouter.get(
 /** Date calendaire réelle AAAA-MM-JJ (rejette 2026-02-30, que `new Date` corrigerait silencieusement). */
 const dateCalendaire = z
   .string()
+  // eslint-disable-next-line security/detect-unsafe-regex -- motif borné (4+2+2 chiffres, aucune répétition imbriquée) : pas de backtracking catastrophique possible.
   .regex(/^\d{4}-\d{2}-\d{2}$/)
   .refine((valeur) => {
     const date = new Date(`${valeur}T00:00:00.000Z`);
@@ -66,6 +67,7 @@ const creerChargeSchema = z.object({
   // Montant en euros avec au plus 2 décimales, strictement positif (CHECK montant > 0 en base).
   montant: z
     .string()
+    // eslint-disable-next-line security/detect-unsafe-regex -- motif borné (8 chiffres + 2 décimales max), pas de répétition imbriquée : pas de backtracking catastrophique possible.
     .regex(/^\d{1,8}(\.\d{1,2})?$/)
     .refine((valeur) => Number(valeur) > 0),
   periode: z.string().trim().min(1).max(20),

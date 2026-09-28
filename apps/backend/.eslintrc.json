@@ -5,10 +5,14 @@
     "project": "./tsconfig.json",
     "sourceType": "module"
   },
-  "plugins": ["@typescript-eslint"],
+  "plugins": [
+    "@typescript-eslint",
+    "security"
+  ],
   "extends": [
     "eslint:recommended",
     "plugin:@typescript-eslint/recommended",
+    "plugin:security/recommended-legacy",
     "prettier"
   ],
   "env": {
@@ -16,8 +20,26 @@
     "es2022": true
   },
   "rules": {
-    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-    "no-console": ["warn", { "allow": ["error", "warn"] }]
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": [
+          "error",
+          "warn"
+        ]
+      }
+    ]
   },
-  "ignorePatterns": ["dist", "generated", "node_modules", "vitest.config.ts"]
+  "ignorePatterns": [
+    "dist",
+    "generated",
+    "node_modules",
+    "vitest.config.ts"
+  ]
 }
