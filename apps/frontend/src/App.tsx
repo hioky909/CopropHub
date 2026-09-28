@@ -13,6 +13,7 @@ import Coproprietaires from "./screens/Coproprietaires.js";
 import Compte from "./screens/Compte.js";
 import MotDePasseOublie from "./screens/MotDePasseOublie.js";
 import Reinitialisation from "./screens/Reinitialisation.js";
+import MentionsLegales from "./screens/MentionsLegales.js";
 
 function Accueil() {
   const { utilisateur } = useAuth();
@@ -35,6 +36,7 @@ export default function App() {
                 element={<MotDePasseOublie />}
               />
               <Route path="/reinitialisation" element={<Reinitialisation />} />
+              <Route path="/mentions-legales" element={<MentionsLegales />} />
               <Route
                 path="/"
                 element={

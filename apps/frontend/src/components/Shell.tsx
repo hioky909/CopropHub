@@ -112,6 +112,14 @@ export default function Shell({ children }: { children: ReactNode }) {
         </div>
       </header>
       {children}
+      <footer style={{ padding: '24px', textAlign: 'center' }}>
+        <NavLink
+          to="/mentions-legales"
+          style={{ fontSize: 12, color: 'var(--color-neutral-500)', textDecoration: 'underline' }}
+        >
+          Mentions légales et confidentialité
+        </NavLink>
+      </footer>
     </div>
   )
 }

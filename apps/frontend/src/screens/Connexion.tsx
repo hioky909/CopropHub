@@ -134,6 +134,14 @@ export default function Connexion() {
             La création de compte crée un compte copropriétaire ; le syndic rattache ensuite votre lot.
           </p>
         )}
+        <p style={{ marginTop: 24, textAlign: 'center' }}>
+          <Link
+            to="/mentions-legales"
+            style={{ fontSize: 12, color: 'var(--color-neutral-500)', textDecoration: 'underline' }}
+          >
+            Mentions légales et confidentialité
+          </Link>
+        </p>
       </div>
     </main>
   )

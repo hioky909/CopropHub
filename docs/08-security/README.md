@@ -29,6 +29,8 @@ Le procès-verbal et le relevé de charges sont produits à la volée à partir 
 
 Courriels de service uniquement (ouverture ou clôture d'une AG, avancement d'un incident, nouvelle charge), désactivables par chaque utilisateur (`notifications_email`, « Mon compte »), avec un lien de désabonnement dans chaque message. **Minimisation** : aucun courriel ne contient de valeur de vote ni de résultat détaillé (anonymat US-04), ni le montant d'une charge ; chaque destinataire ne reçoit que ce qui le concerne (le déclarant de l'incident, le propriétaire du lot, les copropriétaires habilités de l'immeuble). Les envois se font **hors requête** (bus d'événements) : une panne SMTP ne bloque ni ne fait échouer l'action métier, et le journal d'erreur ne contient ni adresse ni nom (seulement le nom de l'événement et des compteurs).
 
+**Information légale (Phase 4 de l'audit)** : page publique `/mentions-legales` (`apps/frontend/src/screens/MentionsLegales.tsx`, testée) — responsable de traitement, finalités et base légale des données collectées, durée de conservation, droits RGPD (accès/rectification/effacement/opposition, lien CNIL), politique de cookies (un seul cookie technique, aucune mesure d'audience ni publicité), hébergement. Liée depuis le pied de page de `/connexion`, `/mot-de-passe-oublie`, `/reinitialisation` et de toutes les pages authentifiées. Contenu générique à personnaliser par le syndic exploitant l'installation (raison sociale, contact réels).
+
 ## Autorisation — matrice par ressource
 
 | Ressource | Syndic | Conseil syndical | Copropriétaire |
