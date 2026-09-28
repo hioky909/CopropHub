@@ -51,7 +51,9 @@ describe('CSRF — validation de l’origine sur les méthodes qui modifient un 
   });
 
   it('ne bloque jamais une lecture (GET), même depuis une origine tierce', async () => {
-    const reponse = await request(createApp()).get('/health').set('Origin', 'https://tiers.example');
+    const reponse = await request(createApp())
+      .get('/health')
+      .set('Origin', 'https://tiers.example');
     expect(reponse.status).toBe(200);
   });
 

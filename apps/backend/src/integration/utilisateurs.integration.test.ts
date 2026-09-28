@@ -295,7 +295,10 @@ describe('GET /utilisateurs/lots — lots et propriétaire actuel (réservé au 
 
     expect(reponse.status).toBe(200);
     expect(reponse.body.lots).toEqual([
-      expect.objectContaining({ numero: '1', proprietaire: { id: proprietaire.id, nom: proprietaire.nom } }),
+      expect.objectContaining({
+        numero: '1',
+        proprietaire: { id: proprietaire.id, nom: proprietaire.nom },
+      }),
       expect.objectContaining({ numero: '2', proprietaire: null }),
       expect.objectContaining({ numero: '3', proprietaire: null }),
     ]);
@@ -317,12 +320,16 @@ describe('comptes syndic supplémentaires (réservé au syndic)', () => {
       .send({ nom: 'Second Syndic', email: 'second@test.local', motDePasse: MOT_DE_PASSE });
 
     expect(creation.status).toBe(201);
-    const enBase = await prisma.utilisateur.findUniqueOrThrow({ where: { email: 'second@test.local' } });
+    const enBase = await prisma.utilisateur.findUniqueOrThrow({
+      where: { email: 'second@test.local' },
+    });
     expect(enBase.typeCompte).toBe('SYNDIC');
     expect(enBase.motDePasseHash).not.toBe(MOT_DE_PASSE);
 
     const cookieSecond = cookieSession(enBase.id);
-    expect((await request(app).get('/utilisateurs/lots').set('Cookie', cookieSecond)).status).toBe(200);
+    expect((await request(app).get('/utilisateurs/lots').set('Cookie', cookieSecond)).status).toBe(
+      200,
+    );
     const liste = await request(app).get('/utilisateurs/syndics').set('Cookie', cookieSyndic);
     expect(liste.body.syndics.map((u: { email: string }) => u.email).sort()).toEqual([
       'second@test.local',
@@ -377,7 +384,8 @@ describe('conseil syndical : désigner et retirer un membre', () => {
       .set('Cookie', cookieSession(autre.id))
       .send({ titre: 'Fuite chez autre', idLot: lot.id });
     const voit = async () =>
-      (await request(app).get('/incidents').set('Cookie', cookieSession(membre.id))).body.incidents.length;
+      (await request(app).get('/incidents').set('Cookie', cookieSession(membre.id))).body.incidents
+        .length;
 
     expect(await voit()).toBe(0); // simple copropriétaire : ne voit pas l'incident du lot d'un autre
 
@@ -391,17 +399,22 @@ describe('conseil syndical : désigner et retirer un membre', () => {
   });
 
   it('refuse un compte syndic (422), un inconnu (404), un corps invalide (422) et un copropriétaire (403)', async () => {
-    const syndic = await creerUtilisateur({ typeCompte: 'SYNDIC', email: 'autre-syndic@test.local' });
+    const syndic = await creerUtilisateur({
+      typeCompte: 'SYNDIC',
+      email: 'autre-syndic@test.local',
+    });
     const copro = await creerUtilisateur({ email: 'copro@test.local' });
 
     expect((await patch(cookieSyndic, syndic.id, { estMembre: true })).status).toBe(422);
     expect(
-      (await patch(cookieSyndic, '99999999-9999-4999-8999-999999999999', { estMembre: true })).status,
+      (await patch(cookieSyndic, '99999999-9999-4999-8999-999999999999', { estMembre: true }))
+        .status,
     ).toBe(404);
     expect((await patch(cookieSyndic, copro.id, { estMembre: 'oui' })).status).toBe(422);
     expect((await patch(cookieSession(copro.id), copro.id, { estMembre: true })).status).toBe(403);
     expect(
-      (await prisma.utilisateur.findUniqueOrThrow({ where: { id: copro.id } })).estMembreConseilSyndical,
+      (await prisma.utilisateur.findUniqueOrThrow({ where: { id: copro.id } }))
+        .estMembreConseilSyndical,
     ).toBe(false);
   });
 });

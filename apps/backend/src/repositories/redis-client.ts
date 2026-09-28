@@ -32,7 +32,10 @@ export async function redisClient(): Promise<RedisClientType | null> {
     client.on('error', (erreur: unknown) => {
       // eslint-disable-next-line no-console -- pas de donnée personnelle, juste un message technique.
       console.error(
-        JSON.stringify({ type: 'redis_erreur', message: erreur instanceof Error ? erreur.message : 'erreur inconnue' }),
+        JSON.stringify({
+          type: 'redis_erreur',
+          message: erreur instanceof Error ? erreur.message : 'erreur inconnue',
+        }),
       );
     });
     await client.connect();
@@ -46,7 +49,10 @@ export async function redisClient(): Promise<RedisClientType | null> {
     connexion = undefined; // permet une nouvelle tentative au prochain appel
     // eslint-disable-next-line no-console -- pas de donnée personnelle.
     console.error(
-      JSON.stringify({ type: 'redis_connexion_echouee', message: erreur instanceof Error ? erreur.message : 'erreur inconnue' }),
+      JSON.stringify({
+        type: 'redis_connexion_echouee',
+        message: erreur instanceof Error ? erreur.message : 'erreur inconnue',
+      }),
     );
     return null;
   }

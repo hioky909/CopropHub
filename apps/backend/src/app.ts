@@ -95,7 +95,9 @@ export function createApp(): Express {
       // d'express-rate-limit (comportement inchangé, mono-instance).
       store: magasinLimiteRedis('rl_global:'),
       keyGenerator: async (req) => {
-        const session = await sessionService.verifierJeton(req.cookies?.session as string | undefined);
+        const session = await sessionService.verifierJeton(
+          req.cookies?.session as string | undefined,
+        );
         return session ? `u:${session.utilisateurId}` : (req.ip ?? 'inconnu');
       },
     }),
