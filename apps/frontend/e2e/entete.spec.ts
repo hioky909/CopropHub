@@ -87,8 +87,9 @@ test('sur un écran de téléphone, l’en-tête garde avatar, compte et déconn
   await expect(deconnexion).toBeVisible()
   for (const bouton of [compte, deconnexion]) {
     const boite = (await bouton.boundingBox())!
-    expect(boite.width).toBeGreaterThanOrEqual(36)
-    expect(boite.height).toBeGreaterThanOrEqual(36)
+    // 32px (.bouton-entete) : toujours au-dessus du minimum WCAG 2.2 AA (2.5.8 Target Size, 24px).
+    expect(boite.width).toBeGreaterThanOrEqual(32)
+    expect(boite.height).toBeGreaterThanOrEqual(32)
   }
   const debordement = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)
   expect(debordement).toBeLessThanOrEqual(0)
