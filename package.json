@@ -13,6 +13,7 @@
     "test": "npm run test --workspace=apps/backend --",
     "test:frontend": "npm run test --workspace=apps/frontend --",
     "test:integration": "npm run test:integration --workspace=apps/backend --",
+    "test:coverage:combinee": "npm run test:coverage:combinee --workspace=apps/backend",
     "build": "npm run build --workspaces --if-present",
     "prisma:migrate:deploy": "npm run prisma:migrate:deploy --workspace=apps/backend",
     "prisma:generate": "npm run prisma:generate --workspace=apps/backend",

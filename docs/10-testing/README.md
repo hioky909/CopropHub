@@ -12,6 +12,19 @@
 
 Voir [evidence/](evidence/) pour le relevé réel du dernier passage complet.
 
+## Couverture combinée (unitaire + intégration)
+
+`npm run test:coverage:combinee --workspace=apps/backend` (`scripts/couverture-combinee.mjs`) — la couverture unitaire seule (`npm run test -- --coverage`) est **trompeuse lue isolément** : elle tombe à 58 % car les repositories et deux contrôleurs (`auth`, `utilisateurs`) sont couverts par les tests d'intégration, pas par des tests unitaires dédiés. Le script fusionne les deux rapports v8 (`nyc merge`) et donne le chiffre réel, mesuré le 2026-09-28 :
+
+| Métrique | Combinée |
+|---|---|
+| Lignes | 93,11 % |
+| Instructions | 92,96 % |
+| Branches | 86,32 % |
+| Fonctions | 98,26 % |
+
+Rapport HTML détaillé (fichier par fichier) : `apps/backend/coverage/combinee/index.html` après exécution (non versionné, `coverage/` dans `.gitignore`).
+
 ## Traçabilité UT/IT (Doc 6)
 
 Les 12 cas UT-01 à UT-12 (règles de majorité, cas dégénérés) et les 8 scénarios IT-01 à IT-08 (parcours bout en bout) définis au Doc 6 sont couverts par les tests écrits au fil de T-05 à T-14, plus deux cas littéraux ajoutés (UT-02, UT-05) lors de l'audit T-15/T-16 — voir `apps/backend/src/services/resultat-calculateur.test.ts` pour les cas de majorité.
