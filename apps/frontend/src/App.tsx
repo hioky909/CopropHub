@@ -5,6 +5,7 @@ import { RouteProtegee } from "./components/RouteProtegee.js";
 import Shell from "./components/Shell.js";
 import Connexion from "./screens/Connexion.js";
 import DashboardSyndic from "./screens/DashboardSyndic.js";
+import DashboardCoproprietaire from "./screens/DashboardCoproprietaire.js";
 import Assemblees from "./screens/Assemblees.js";
 import AssembleeDetail from "./screens/AssembleeDetail.js";
 import ListeIncidents from "./screens/ListeIncidents.js";
@@ -20,7 +21,7 @@ function Accueil() {
   if (utilisateur?.typeCompte === "SYNDIC") {
     return <DashboardSyndic />;
   }
-  return <Navigate to="/charges" replace />;
+  return <DashboardCoproprietaire />;
 }
 
 export default function App() {

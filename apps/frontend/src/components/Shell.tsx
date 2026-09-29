@@ -9,7 +9,7 @@ import Icone, { type NomIcone } from './Icones.js'
 import { LogoHorizontal } from './Logo.js'
 
 const NAV_ITEMS: { to: string; label: string; icone: NomIcone; roles: TypeCompte[] }[] = [
-  { to: '/', label: 'Tableau de bord', icone: 'tableau-de-bord', roles: ['SYNDIC'] },
+  { to: '/', label: 'Tableau de bord', icone: 'tableau-de-bord', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
   { to: '/coproprietaires', label: 'Copropriétaires', icone: 'coproprietaires', roles: ['SYNDIC'] },
   { to: '/assemblees', label: 'Assemblées', icone: 'assemblees', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
   { to: '/incidents', label: 'Incidents', icone: 'incidents', roles: ['SYNDIC', 'COPROPRIETAIRE'] },
