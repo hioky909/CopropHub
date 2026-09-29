@@ -11,8 +11,8 @@ apps/
     src/
       controllers/    point d'entrée HTTP (Express), aucune règle métier
       services/       Business Layer — logique métier, autorisation
-      repositories/   Data Access Layer — seul point d'accès à Prisma
-      middleware/     session (cookie signé), gestion des erreurs async
+      repositories/   Data Access Layer — seul point d'accès à Prisma ET à Redis (état technique éphémère uniquement)
+      middleware/     session (cookie signé), CSRF (vérification d'origine), gestion des erreurs async
       types/          types partagés entre couches
     prisma/           schéma + migrations (reflète le MPD, Doc 3)
 ```
@@ -28,7 +28,20 @@ apps/
 
 ## Authentification et session
 
-Cookie de session signé HttpOnly/SameSite=Strict (Secure en production), sans table de session en base (le cookie porte l'identifiant utilisateur + un timestamp, signé avec `SESSION_SECRET`, durée de vie 8h). Décision documentée : pas de session côté serveur à révoquer individuellement, cohérent avec le périmètre MVP mono-immeuble.
+Cookie de session signé HttpOnly/SameSite=Strict (Secure en production), sans table de session en base (le cookie porte l'identifiant utilisateur + un timestamp, signé avec `SESSION_SECRET`, durée de vie 8h). La révocation à la déconnexion (`session_revoquee:<signature>`, TTL) et le rate limiting sont partagés entre plusieurs instances du backend via Redis quand `REDIS_URL` est défini (`repositories/redis-client.ts`), avec repli automatique en mémoire du processus sinon — seul usage NoSQL du projet, strictement limité à de l'état technique éphémère (jamais une donnée métier). Défense CSRF complémentaire : `middleware/csrf.middleware.ts` vérifie l'en-tête `Origin`/`Referer` sur toute requête qui modifie un état.
+
+## Réseau des couches et sécurité
+
+```mermaid
+flowchart LR
+    Client["Navigateur (SPA React)"] -->|"fetch + cookie de session"| Helmet["Helmet · CORS · rate limit · CSRF"]
+    Helmet --> Session["sessionMiddleware"]
+    Session --> Controllers["controllers/ (Zod, aucune règle métier)"]
+    Controllers --> Services["services/ (autoriser(), machine à états, calculs)"]
+    Services --> Repos["repositories/ (seul point d'accès Prisma/Redis)"]
+    Repos --> PG[(PostgreSQL)]
+    Repos --> Redis[(Redis — état éphémère)]
+```
 
 ## Frontend
 

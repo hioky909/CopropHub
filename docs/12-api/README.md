@@ -1,6 +1,6 @@
 # API REST
 
-Rédigée à partir des endpoints réellement implémentés (principe « pas d'anticipation » — jamais rédigée par anticipation). Base URL locale : `http://localhost:3000`. Authentification par cookie de session (`credentials: 'include'` côté client). Toutes les réponses d'erreur ont la forme `{"erreur": "message"}`.
+Rédigée à partir des endpoints réellement implémentés (principe « pas d'anticipation » — jamais rédigée par anticipation). Base URL locale : `http://localhost:3000`. Authentification par cookie de session (`credentials: 'include'` côté client). Toutes les réponses d'erreur ont la forme `{"erreur": "message"}`. **CSRF** (audit pré-production) : toute requête `POST`/`PUT`/`PATCH`/`DELETE` doit être envoyée depuis l'origine du frontend (`FRONTEND_ORIGIN`) — un navigateur l'ajoute automatiquement (en-tête `Origin`), aucune action requise côté client légitime ; cf. [08-security](../08-security/README.md).
 
 ## Authentification — `/auth`
 

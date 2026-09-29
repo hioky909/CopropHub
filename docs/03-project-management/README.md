@@ -11,8 +11,9 @@ Kanban simple : `BACKLOG → EN COURS → REVUE → TERMINÉ`, une tâche à la 
 ## Jalons
 
 - **MVP** : F-01 à F-10, NF-01 à NF-06/NF-11/NF-12 — 27 tâches (T-01 à T-26, plus T-38 ajoutée en cours de route), **toutes terminées**.
-- **V1** : notifications email (F-12), export PDF (F-13), déploiement cloud (F-15) — non commencé. La réinitialisation de mot de passe (F-14) a été livrée après le MVP.
-- **V1.1** : améliorations diverses (pondération des votes par tantièmes, multi-immeubles…) — non commencé.
+- **V1** : notifications email (F-12), export PDF (F-13), outillage de déploiement (F-15 — HTTPS/CI-CD/sauvegarde, vérifié en conditions réelles ; la mise en ligne publique reste en attente du choix d'hébergeur), réinitialisation de mot de passe (F-14), installabilité PWA — **toutes terminées et vérifiées**.
+- **Audit pré-production** (2026-09-28/29) : revue de sécurité, qualité de code et couverture des 11 compétences RNCP 37873 formalisée ; 9 écarts identifiés et comblés — défense CSRF (vérification d'origine), durcissement Helmet (CSP stricte), `eslint-plugin-security`, `no-floating-promises` appliqué par l'outil, révocation de session et rate limiting partagés entre instances (Redis, première brique NoSQL du projet), couverture de tests combinée unitaire+intégration mesurée (93 %), veille technologique en anglais, page RGPD/mentions légales, repasse d'accessibilité, test de charge. Détail : `CHANGELOG.md`.
+- **V1.1** : tableau de bord copropriétaire (2026-09-29, vue d'ensemble équivalente à celle du syndic). Améliorations futures identifiées mais non engagées (dépôt de documents partagés, vote par procuration, pondération des votes par tantièmes, multi-immeubles…) — écartées du périmètre de certification, cf. principe « pas d'anticipation ».
 
 ## Backlog MVP — état réel final
 
