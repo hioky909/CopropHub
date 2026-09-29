@@ -12,7 +12,7 @@ test('un utilisateur change son mot de passe, puis se reconnecte avec le nouveau
   await page.getByLabel('Email').fill(email)
   await page.getByLabel('Mot de passe').fill(ancien)
   await page.getByRole('button', { name: 'Créer mon compte' }).click()
-  await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
 
   await page.getByRole('link', { name: 'Mon compte' }).click() // bouton dédié de l'en-tête
   await expect(page.getByRole('heading', { name: 'Mon compte' })).toBeVisible()

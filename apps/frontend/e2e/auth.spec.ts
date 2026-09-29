@@ -25,7 +25,7 @@ test.describe('Connexion et inscription (F-01)', () => {
     await expect(page.getByRole('button', { name: 'Se connecter' })).toBeVisible()
   })
 
-  test('un copropriétaire se connecte et atterrit sur ses charges (pas de tableau de bord syndic)', async ({
+  test('un copropriétaire se connecte et atterrit sur son propre tableau de bord (pas celui du syndic)', async ({
     page,
   }) => {
     await page.goto('/connexion')
@@ -33,9 +33,13 @@ test.describe('Connexion et inscription (F-01)', () => {
     await page.getByLabel('Mot de passe').fill(COPRO.motDePasse)
     await page.getByRole('button', { name: 'Se connecter' }).click()
 
-    await expect(page).toHaveURL(/\/charges/)
+    await expect(page).toHaveURL('http://localhost:5173/')
+    await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
+    // Distingue du tableau de bord syndic : bouton de création d'AG réservé au syndic (RM-14).
+    await expect(page.getByRole('button', { name: 'Créer une AG' })).toHaveCount(0)
+
+    await page.getByRole('link', { name: 'Charges' }).click()
     await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
-    await expect(page.getByRole('link', { name: 'Tableau de bord' })).toHaveCount(0)
   })
 
   test('un nouveau copropriétaire peut créer son compte par auto-inscription', async ({ page }) => {
@@ -48,6 +52,7 @@ test.describe('Connexion et inscription (F-01)', () => {
     await page.getByLabel('Mot de passe').fill('un-mot-de-passe-suffisamment-long')
     await page.getByRole('button', { name: 'Créer mon compte' }).click()
 
-    await expect(page).toHaveURL(/\/charges/)
+    await expect(page).toHaveURL('http://localhost:5173/')
+    await expect(page.getByRole('heading', { name: 'Tableau de bord' })).toBeVisible()
   })
 })

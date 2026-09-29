@@ -8,6 +8,7 @@ test('un copropriétaire consulte la charge réelle de son lot (F-09, US-01)', a
   await page.getByLabel('Mot de passe').fill(COPRO.motDePasse)
   await page.getByRole('button', { name: 'Se connecter' }).click()
 
+  await page.getByRole('link', { name: 'Charges' }).click()
   await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
   const ligne = page.getByRole('row', { name: new RegExp(CHARGE_PERIODE) })
   await expect(ligne).toBeVisible()
@@ -20,6 +21,7 @@ test('un copropriétaire exporte son relevé de charges en PDF (F-13)', async ({
   await page.getByLabel('Email').fill(COPRO.email)
   await page.getByLabel('Mot de passe').fill(COPRO.motDePasse)
   await page.getByRole('button', { name: 'Se connecter' }).click()
+  await page.getByRole('link', { name: 'Charges' }).click()
   await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
 
   const [telechargement] = await Promise.all([
