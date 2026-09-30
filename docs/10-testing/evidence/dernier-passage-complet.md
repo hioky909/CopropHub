@@ -40,4 +40,4 @@ $ npm run test:e2e --workspace=apps/frontend   (backend + frontend + PostgreSQL 
 - Modal de création d'AG sans fermeture clavier ni focus initial — trouvé en testant au clavier seul (audit T-24).
 - Hypothèse de test CORS erronée (pas un bug applicatif) — trouvée en écrivant `security-headers.test.ts` (T-25), corrigée après investigation du comportement réel de `cors({origin: '<chaîne fixe>'})`.
 
-Journal complet de chaque vérification : Doc 10 (document « CopropHub — Traçabilité & structure documentaire »), entrées « Onzième » à « Quinzième vérification réelle ».
+Journal complet de chaque vérification : Doc 10 (« Traçabilité & structure documentaire »), entrées « Onzième » à « Quinzième vérification réelle ».
