@@ -8,7 +8,7 @@ import { chargesApi } from '../api/charges.js'
 import { useAuth } from '../context/AuthContext.js'
 
 /**
- * Tableau de bord copropriétaire (brainstorm de session, Phase A) : vue d'ensemble équivalente à
+ * Tableau de bord copropriétaire : vue d'ensemble équivalente à
  * celle du syndic mais scellée à SES données. N'ajoute aucune règle d'autorisation (les trois
  * endpoints appelés sont déjà scellés côté serveur), donc ce test couvre l'affichage, pas la
  * sécurité — déjà couverte par les tests d'intégration de charges/incidents/AG existants.

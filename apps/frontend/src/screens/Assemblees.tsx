@@ -34,7 +34,7 @@ export default function Assemblees() {
       try {
         const r = await agsApi.lister()
         if (utilisateur?.typeCompte === 'COPROPRIETAIRE') {
-          // Comme dans le proto (VoteResolution.tsx) : un copropriétaire est
+          // Comme dans la maquette : un copropriétaire est
           // envoyé directement sur l'AG en cours de vote — mais seulement
           // tant qu'il lui reste des résolutions à voter. Une AG déjà
           // entièrement votée n'y est plus poussée : elle reste accessible

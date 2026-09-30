@@ -275,8 +275,7 @@ function VoteLabel({ choix, enAttente }: { choix: VoteChoice | 'DEJA_VOTE' | und
 }
 
 /**
- * Écran de vote copropriétaire : porté fidèlement du design proto
- * (`proto/.../VoteResolution.tsx`) — une résolution affichée à la fois,
+ * Écran de vote copropriétaire, conforme à la maquette — une résolution affichée à la fois,
  * barre de progression par résolution, gros boutons de vote colorés,
  * récapitulatif ; après le dernier vote, retour direct à la liste (pas
  * d'écran de confirmation intermédiaire). Données 100% réelles (aucune valeur
