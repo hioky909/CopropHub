@@ -25,6 +25,39 @@ La source de vérité du schéma est `apps/backend/prisma/schema.prisma` (géné
 - Les identifiants sont générés côté base (`gen_random_uuid()`), pas côté Prisma (`@default(uuid())`), pour rester alignés avec la migration écrite à la main.
 - `montant` (table `charge`) est un `NUMERIC(10,2)` sérialisé en chaîne à 2 décimales fixes côté API (`.toFixed(2)`, jamais `.toString()` qui tronquerait les zéros de fin).
 
+## Exemple SQL avec jointure
+
+L'application interroge PostgreSQL exclusivement via Prisma (paramétré, jamais de concaténation — `docs/08-security`). L'équivalent SQL de ce que fait réellement `chargeRepository.listerPourLots` (`apps/backend/src/repositories/charge.repository.ts`) combiné à `lotRepository.parIds`, utilisé par `documentService.releveCharges` pour construire le relevé de charges d'un copropriétaire (F-13) :
+
+```sql
+SELECT
+  c.id_charge,
+  c.periode,
+  c.montant,
+  c.statut,
+  c.date_echeance,
+  l.numero AS numero_lot
+FROM charge c
+JOIN lot l ON l.id_lot = c.id_lot
+WHERE c.id_lot IN (
+  SELECT r.id_lot
+  FROM rattachement r
+  WHERE r.id_utilisateur = $1 AND r.date_fin IS NULL
+)
+ORDER BY l.numero, c.periode DESC;
+```
+
+Le sous-`SELECT` reproduit `lotRepository.lotsRattachesAUtilisateur` (RM-10 : un copropriétaire ne voit que les charges des lots qu'il possède **actuellement**, `date_fin IS NULL`). Prisma exécute en réalité deux requêtes séparées (une pour les charges, une pour les numéros de lot) plutôt qu'une jointure unique — choix du générateur de requêtes, sans jointure explicite écrite à la main dans le code applicatif ; la requête ci-dessus est l'équivalent fonctionnel à une seule requête.
+
+## Sécurité du SGBD
+
+État réel (`docker-compose.yml`, `docker-compose.prod.yml`, `.env.example`), y compris ses limites :
+
+- **Compte applicatif unique** : `POSTGRES_USER=coprophub`, propriétaire de la base `coprophub` (variable `POSTGRES_PASSWORD`, jamais en dur — `${DB_PASSWORD}` fourni par l'environnement, absent du dépôt). Ce compte est aussi, de fait, le superutilisateur de **cette instance** PostgreSQL dédiée (image officielle `postgres:16` : le premier utilisateur créé au démarrage du conteneur est superutilisateur) — **limite assumée, pas cachée** : il n'y a pas de séparation entre un rôle applicatif à privilèges réduits et un rôle d'administration, parce que l'instance ne sert que cette seule base et n'est jamais partagée. Un compte applicatif à privilèges limités (sans `CREATEDB`/`CREATEROLE`) serait la prochaine étape si l'instance devait un jour héberger plusieurs bases.
+- **Exposition réseau** : en développement (`docker-compose.yml`), le port PostgreSQL est publié sur l'hôte (`${DB_PORT:-5432}`) pour permettre les outils locaux (Prisma Studio, `psql`). **En production** (`docker-compose.prod.yml`), la base ne publie **aucun port** — seul le réseau Docker interne y donne accès, jamais Internet.
+- **Mot de passe** : généré et stocké dans `.env`/`.env.production` (jamais commités, `.gitignore`), jamais en dur dans le code ou les fichiers Compose.
+- **Migrations** : appliquées par un compte dédié dans un conteneur `migrate` séparé, qui s'arrête après exécution — n'a pas de connexion permanente à la base.
+
 ## Accès aux données NoSQL (Redis)
 
 En complément du relationnel (PostgreSQL, seule source de vérité des données métier) : Redis héberge exclusivement de l'**état technique éphémère**, jamais une donnée métier — révocation de session au logout et compteurs de rate limiting, chacun avec un TTL (`apps/backend/src/repositories/redis-client.ts`). Strictement optionnel (`REDIS_URL`) : absent, le backend se rabat automatiquement sur un état en mémoire du processus (mono-instance). Présent, il permet un déploiement multi-instance où la déconnexion d'un utilisateur et les quotas de tentatives sont partagés entre toutes les instances du backend — cf. [08-security](../08-security/README.md).

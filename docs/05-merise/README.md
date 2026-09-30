@@ -16,6 +16,69 @@ Export condensé du Doc 3 § Merise. Le MPD réellement en base vit dans [09-dat
 
 `UTILISATEUR.type_compte` ∈ { SYNDIC, COPROPRIETAIRE }. `est_membre_conseil_syndical` n'a de sens que pour un COPROPRIETAIRE (contrainte CHECK en base, `chk_conseil_syndical_coproprietaire`).
 
+```mermaid
+erDiagram
+  IMMEUBLE ||--o{ LOT : POSSEDE
+  IMMEUBLE ||--o{ AG : ORGANISE
+  IMMEUBLE ||--o{ INCIDENT : CONCERNE_IMMEUBLE
+  UTILISATEUR }o--o{ LOT : RATTACHE
+  AG ||--|{ RESOLUTION : COMPORTE
+  UTILISATEUR }o--o{ RESOLUTION : VOTE
+  LOT ||--o{ CHARGE : CONCERNE
+  UTILISATEUR ||--o{ INCIDENT : SIGNALE
+  LOT o|--o{ INCIDENT : PORTE_SUR
+
+  IMMEUBLE {
+    uuid id_immeuble PK
+    string nom
+    string adresse
+  }
+  UTILISATEUR {
+    uuid id_utilisateur PK
+    string nom
+    string email UK
+    string mot_de_passe_hash
+    enum type_compte
+    boolean est_membre_conseil_syndical
+  }
+  LOT {
+    uuid id_lot PK
+    uuid id_immeuble FK
+    string numero
+    string type_lot
+  }
+  AG {
+    uuid id_ag PK
+    uuid id_immeuble FK
+    date date_ag
+    enum statut
+    int nombre_inscrits_geles
+  }
+  RESOLUTION {
+    uuid id_resolution PK
+    uuid id_ag FK
+    string libelle
+    enum type_majorite
+    enum statut_resultat
+  }
+  CHARGE {
+    uuid id_charge PK
+    uuid id_lot FK
+    decimal montant
+    string periode
+    enum statut
+    date date_echeance
+  }
+  INCIDENT {
+    uuid id_incident PK
+    uuid id_immeuble FK
+    uuid id_lot FK
+    uuid id_utilisateur_declarant FK
+    string titre
+    enum statut
+  }
+```
+
 ## MCD — associations
 
 | Association | Entités liées | Cardinalités | Attributs portés | Règle liée |
