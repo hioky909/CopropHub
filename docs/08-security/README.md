@@ -42,6 +42,14 @@ Courriels de service uniquement (ouverture ou clôture d'une AG, avancement d'un
 
 Implémentation réelle : `apps/backend/src/services/autorisation.service.ts`, fonction `autoriser(utilisateur, action, ressource, permissions)`, appelée **avant** tout accès aux données (jamais « charger puis filtrer »). Un membre du conseil syndical **cumule** ses droits de base (copropriétaire, conditionnés à l'appartenance) avec ses droits étendus (conseil syndical, inconditionnels) — jamais un remplacement de l'un par l'autre (bug réel trouvé et corrigé en implémentation, cf. CHANGELOG).
 
+## Alignement avec les guides ANSSI
+
+Les guides ANSSI n'ont pas été consultés pendant le développement lui-même ; relus après coup pour vérifier l'alignement des choix déjà faits (et non l'inverse) :
+
+- [Recommandations relatives à l'authentification multifacteur et aux mots de passe](https://cyber.gouv.fr/publications/recommandations-relatives-lauthentification-multifacteur-et-aux-mots-de-passe) : bcrypt (facteur de coût élevé), longueur maximale bornée (128 caractères, anti déni de service par mot de passe très long), verrouillage progressif par rate limiting plutôt qu'un compteur d'essais bloquant — conforme à l'esprit du guide ; MFA explicitement hors périmètre MVP (risque résiduel assumé, cf. tableau STRIDE ci-dessus).
+- [Recommandations de sécurité relatives à TLS](https://cyber.gouv.fr/publications/recommandations-de-securite-relatives-tls) : HTTPS obligatoire en production (Caddy, Let's Encrypt, HSTS), aucun contenu servi en clair — conforme.
+- [Recommandations pour la mise en œuvre d'un système de journalisation](https://cyber.gouv.fr/publications/recommandations-pour-la-mise-en-oeuvre-dun-systeme-de-journalisation) : horodatage, type d'événement, identifiant de l'auteur, sans donnée sensible (mot de passe, jeton, valeur de vote) — conforme à l'esprit du guide ; la centralisation/rétention des journaux reste à la charge de l'exploitant (limite assumée, cf. 11-devops).
+
 ## Checklist sécurité — état réel
 
 - [x] Mots de passe hachés (bcrypt, facteur 12), jamais en clair, jamais loggés (NF-01)
