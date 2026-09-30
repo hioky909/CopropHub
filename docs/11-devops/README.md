@@ -58,6 +58,17 @@ docker compose -f docker-compose.prod.yml --env-file .env.production --profile o
 
 **Pas d'environnement de recette séparé (choix assumé, pas un oubli)** : seuls dev et production existent. Pour un MVP mono-immeuble, la CI (`quality`) rejoue déjà l'intégralité du parcours — build des images réelles, migrations, amorçage, contrôle de fumée HTTPS, 37 tests E2E — sur une pile éphémère à chaque push, ce qui couvre l'essentiel de ce qu'une recette apporterait (détecter une régression avant la mise en production) sans la charge d'exploitation d'un troisième environnement permanent. À revoir si l'installation grandit au-delà d'un seul immeuble ou d'une seule instance de production.
 
+## Poste de travail
+
+- **Matériel/OS** : Windows 11, développement sous PowerShell/Git Bash, Docker Desktop pour les conteneurs locaux (PostgreSQL, Redis, Mailpit).
+- **Éditeur** : Visual Studio Code, extensions TypeScript/ESLint/Prisma pour la cohérence avec la CI (mêmes règles de lint/format qu'en pipeline).
+- **Outils en ligne de commande** : Node.js 22, npm (workspaces du monorepo), Docker Compose, `git`.
+- **Stack logicielle** (détail des choix : [ADR-005](../13-decisions/ADR-005-choix-de-la-pile.md)) :
+  - Backend : Node.js 22, Express, TypeScript, Prisma/PostgreSQL, Zod, bcrypt.
+  - Frontend : React 18, Vite, TypeScript.
+  - Tests : Vitest (unitaire + intégration), Playwright (E2E), React Testing Library.
+  - Infrastructure : Docker Compose (dev et prod), Caddy (reverse proxy HTTPS en production), Redis (état technique éphémère), GitHub Actions (CI/CD).
+
 ## Variables d'environnement clés
 
 | Variable | Rôle |

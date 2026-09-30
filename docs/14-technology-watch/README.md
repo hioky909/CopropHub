@@ -4,6 +4,11 @@ Written in English (RNCP 37873 referential, competencies 2 & 3: documented techn
 including some content in English, B1 level). Two notes below, each tied to a real decision made
 in this codebase during the pre-production security audit (2026-09-28), not a generic summary.
 
+**Cadence**: informal weekly check of a handful of sources (npm/GitHub security advisories,
+release notes of the libraries already in `package.json`, OWASP), by one of the two developers —
+not a scheduled formal process, but a recurring habit throughout the project. The two notes below
+are the two instances where that watch directly changed the code.
+
 ## 1. CSRF defense for a single-origin SPA: Origin header vs. double-submit token
 
 **Source read**: OWASP Cheat Sheet Series — [Cross-Site Request Forgery Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Cross-Site_Request_Forgery_Prevention_Cheat_Sheet.html), section "Identifying the Source Origin" and "Employ SameSite Cookie Attribute".

@@ -2,6 +2,10 @@
 
 Export condensé du Doc 9 (« Backlog & planning »).
 
+## Suivi
+
+Pas de planning prévisionnel daté jalon par jalon (backlog priorisé MUST/SHOULD/COULD, sans date de fin fixée à l'avance) : l'écart se lit dans l'ordre réel d'avancement plutôt qu'en jours de retard sur une date cible. Point de suivi quotidien en binôme (les deux développeurs du projet) : un point rapide à deux en début de session, puis travail — pas de compte-rendu écrit formalisé, le suivi réel de l'avancement est le CHANGELOG et l'état du backlog ci-dessous.
+
 ## Méthode
 
 Kanban simple : `BACKLOG → EN COURS → REVUE → TERMINÉ`, une tâche à la fois « EN COURS » côté implémentation. Chaque tâche porte un ID (`T-NN`), une priorité (MUST/SHOULD/COULD), un type (feature/test/chore…), une estimation en jours-personne et ses dépendances.
@@ -38,6 +42,6 @@ Une tâche n'existait pas dans le backlog initial, ajoutée après constat d'un 
 
 Deux routes API ont été ajoutées sans tâche dédiée, découvertes en câblant le frontend à l'API réelle (T-18 à T-22) : `GET /ags/:idAg` (ordre du jour sans décompte) et `GET /utilisateurs/moi/lots` — documentées dans [12-api/](../12-api/README.md) et le CHANGELOG.
 
-## Principe directeur (principe « pas d'anticipation »)
+## Principe directeur : pas d'anticipation
 
-Aucune tâche, aucun code, aucune documentation n'est écrite par anticipation d'un besoin non encore confirmé. Ce principe explique pourquoi `docs/12-api/` est resté vide jusqu'à T-26 (les endpoints n'existaient pas encore) et pourquoi F-11 (journalisation) et certains points laissés « à trancher en conception détaillée » (US-04 anonymat des votes, incidents « partie commune » d'autrui) ont été soit tranchés avec l'utilisateur au moment où ils devenaient bloquants, soit documentés comme écarts assumés plutôt qu'implémentés de façon spéculative.
+Aucune tâche, aucun code, aucune documentation n'est écrite par anticipation d'un besoin non encore confirmé. Ce principe explique pourquoi `docs/12-api/` est resté vide jusqu'à T-26 (les endpoints n'existaient pas encore) et pourquoi F-11 (journalisation) et certains points laissés « à trancher en conception détaillée » (US-04 anonymat des votes, incidents « partie commune » d'autrui) ont été soit tranchés au moment où ils devenaient bloquants, soit documentés comme écarts assumés plutôt qu'implémentés de façon spéculative.

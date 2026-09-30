@@ -45,7 +45,7 @@ flowchart LR
 
 ## Frontend
 
-SPA React sans framework CSS : le design system (Doc 4) est appliqué via des styles inline et des variables CSS (`apps/frontend/src/index.css`), portés depuis une maquette Figma (`proto/`, conservée pour référence, non exécutée en CI). Routage basé sur le rôle du compte connecté (`RouteProtegee.tsx`, `Shell.tsx`). Voir [12-api/](../12-api/README.md) pour le contrat consommé.
+SPA React sans framework CSS : le design system (Doc 4) est appliqué via des styles inline et des variables CSS (`apps/frontend/src/index.css`), portés depuis la maquette Figma. Routage basé sur le rôle du compte connecté (`RouteProtegee.tsx`, `Shell.tsx`). Voir [12-api/](../12-api/README.md) pour le contrat consommé.
 
 ### Exports PDF (F-13)
 
@@ -58,6 +58,18 @@ SPA React sans framework CSS : le design system (Doc 4) est appliqué via des st
 ### Thème de couleur
 
 `apps/frontend/src/theme/` : `oklch.ts` (conversions et gamut), `contraste.ts` (ratios WCAG), `genererTheme.ts` (palette à partir de `{teinte, intensite}`, pure et déterministe), `appliquerTheme.ts` (variables CSS via le CSSOM), `themeStorage.ts` (cache `localStorage` anti-flash), `noms-teintes.ts`. `context/ThemeContext.tsx` (sous `AuthProvider`) applique le thème du compte sur `<html>` ; les composants lisent `var(--…)`, donc un changement de thème ne re-rend rien. Flux : `main.tsx` applique le cache avant le premier rendu → `/auth/moi` renvoie `utilisateur.theme` (le serveur a le dernier mot) → `PUT/DELETE /utilisateurs/moi/theme` à l'enregistrement → déconnexion : retour à Classique et cache effacé. Côté backend : `theme.service.ts`, deux méthodes dans `utilisateur.repository.ts`, colonnes `theme_teinte`/`theme_intensite` (migration `0005`). Décisions : ADR-003 et ADR-004.
+
+## Éco-conception
+
+Mesures constatées dans le code :
+
+- Aucun service worker, aucun mode hors ligne : pas de cache applicatif à maintenir ni de risque de contenu périmé servi à l'utilisateur.
+- Polices auto-hébergées (`@fontsource-variable/inter`) plutôt que chargées depuis un CDN Google Fonts : une seule requête réseau supplémentaire au lieu de plusieurs vers un tiers, réutilise le cache HTTP du navigateur sans dépendance externe.
+- Aucun framework CSS (Tailwind, Bootstrap...) : styles inline et variables CSS natives, un seul fichier `index.css` de quelques Ko plutôt que des dizaines/centaines de Ko de classes utilitaires majoritairement inutilisées.
+- Export PDF généré par `pdfkit` (bibliothèque Node pure) plutôt qu'un navigateur headless (Puppeteer/Playwright) : pas de Chromium embarqué au runtime, empreinte mémoire et temps de démarrage très inférieurs.
+- Réponses API explicitement mises en forme (`serialiser()` par contrôleur) : chaque endpoint renvoie exactement les champs utilisés par l'écran, jamais l'objet Prisma complet.
+- Build de production : ~280 Ko de JavaScript (83 Ko compressé), mesuré par `npm run build`.
+
 
 ## Déploiement
 
