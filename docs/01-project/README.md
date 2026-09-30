@@ -1,6 +1,6 @@
 # Périmètre, parties prenantes, glossaire
 
-Export condensé du Doc 2 (« Expression des besoins & spécifications fonctionnelles »). La version vivante et complète (avec tableaux interactifs) reste le document source ; ce fichier est la référence versionnée dans le dépôt.
+Export condensé du Doc 2 (« Expression des besoins & spécifications fonctionnelles »). Ce fichier est la référence versionnée dans le dépôt.
 
 ## Périmètre
 

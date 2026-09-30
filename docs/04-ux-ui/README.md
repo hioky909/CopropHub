@@ -83,7 +83,7 @@ Chaque utilisateur peut choisir la couleur principale de l'interface (carte **Ap
 
 **Lisibilité garantie** (WCAG 2.1 AA) : le primaire, utilisé comme texte, atteint au moins 6:1 sur blanc, fond de page et teinte claire ; le texte sur bouton primaire au moins 4,5:1 (repos et survol). Prouvé par un test qui balaie 360 teintes × 5 intensités, et par l'audit axe-core en e2e avec un thème vert et un jaune très vif.
 
-**Limites** : pas de test avec un vrai lecteur d'écran ; les bordures de champ `#E0E0E0` restent sous les 3:1 du critère 1.4.11 (héritage du design system d'origine) ; passer de Personnalisé à Classique ne conserve pas le dernier réglage. Le prototype `proto/` ne prévoit aucun écran de paramètres : la carte reprend le langage des cartes existantes (fond blanc, bordure `neutral-200`, rayon 8, titre 15/600).
+**Limites** : pas de test avec un vrai lecteur d'écran ; les bordures de champ `#E0E0E0` restent sous les 3:1 du critère 1.4.11 (héritage du design system d'origine) ; passer de Personnalisé à Classique ne conserve pas le dernier réglage. La maquette ne prévoit aucun écran de paramètres : la carte reprend le langage des cartes existantes (fond blanc, bordure `neutral-200`, rayon 8, titre 15/600).
 
 ## Responsive
 
@@ -93,4 +93,4 @@ Implémentation : classes CSS dans `apps/frontend/src/index.css` (`grille-stats`
 
 ## Origine du style visuel réellement livré
 
-Le rendu visuel de `apps/frontend` est un portage d'une maquette générée par l'outil **Figma** à partir de ce design system (prompt généré par l'assistant, conforme aux tokens ci-dessus, exigence « qualité entreprise multinationale »). La maquette brute est conservée sous `proto/` à la racine du dépôt, non exécutée en CI, pour référence historique.
+Le rendu visuel de `apps/frontend` est un portage d'une maquette réalisée sous **Figma** à partir de ce design system. L'export de cette maquette a servi de référence pendant le développement ; il a été retiré du dépôt une fois le portage terminé.

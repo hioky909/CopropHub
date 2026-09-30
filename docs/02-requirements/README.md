@@ -19,10 +19,12 @@ Export condensé du Doc 2. Chaque exigence pointe vers son état réel dans [Doc
 | F-11 | Journalisation des actions sensibles (vote, création d'AG, changement de statut d'incident) | Bloc 3 — logs |
 | F-12 | Notifications par email (V1) : ouverture et clôture d'une AG, avancement d'un incident, nouvelle charge ; désactivables par chaque utilisateur | Bloc 2 — logique métier |
 | F-13 | Export PDF (V1) : procès-verbal des résolutions d'une AG clôturée (décomptes anonymes) et relevé de charges (selon le rôle) | Bloc 2 — logique métier |
+| F-14 | Réinitialisation de mot de passe par email (V1) : jeton à usage unique valable 1h, empreinte SHA-256 seule stockée, réponse identique que le compte existe ou non | Bloc 1 — sécurité |
+| F-15 | Outillage de déploiement (V1) : images de production, HTTPS automatique, sauvegarde/restauration, CI de livraison — vérifié en conditions réelles en local ; mise en ligne publique en attente du choix d'hébergeur | Bloc 3 — DevOps |
 
 F-11 (journalisation) est implémentée (`journal.service.ts`) : lignes JSON d'audit sur la sortie standard, sans valeur de vote.
 
-Les niveaux SHOULD HAVE, COULD HAVE et le détail complet vivent dans le document source (tableaux interactifs).
+**Niveaux SHOULD HAVE et COULD HAVE : non exportés.** Ils ne sont pas repris dans cette version, limitée aux exigences retenues.
 
 ## Hors périmètre (OUT OF SCOPE)
 
@@ -102,7 +104,7 @@ Le périmètre MVP retient les **4 mêmes types de résolution**, pour rester fi
 - **US-01** : En tant que copropriétaire, je veux voir la liste des charges de mes lots, afin de savoir ce que je dois payer. *Critères* : je ne vois que les charges des lots qui me sont rattachés (RM-10) ; chaque charge affiche montant, période et statut ; tentative d'accès à la charge d'un autre lot → erreur 403.
 - **US-02** : En tant que copropriétaire, je veux voter sur une résolution d'AG ouverte, afin de participer aux décisions de l'immeuble. *Critères* : le vote n'est possible que si l'AG est « ouverte au vote » (RM-05) ; un seul vote par résolution et par copropriétaire (RM-02) ; le vote est bloqué après clôture (RM-04).
 - **US-03** : En tant que copropriétaire, je veux déclarer un incident concernant mon lot ou une partie commune, afin qu'il soit pris en charge par le syndic. *Critères* : l'incident est créé au statut « déclaré » (RM-11) ; je peux suivre son statut mais pas le faire progresser (RM-12).
-- **US-04** : En tant que copropriétaire, je veux consulter le résultat des résolutions passées, afin de comprendre les décisions prises. *Critères* : liste des résolutions clôturées avec résultat et détail des voix (anonymat des votes — point laissé ouvert par le Doc 2, tranché avec l'utilisateur en implémentation : décomptes anonymes uniquement, jamais l'identité du votant).
+- **US-04** : En tant que copropriétaire, je veux consulter le résultat des résolutions passées, afin de comprendre les décisions prises. *Critères* : liste des résolutions clôturées avec résultat et détail des voix (anonymat des votes — point laissé ouvert par le Doc 2, tranché en implémentation : décomptes anonymes uniquement, jamais l'identité du votant).
 
 ### Conseil syndical
 
