@@ -5,7 +5,7 @@ import type { StatutResolution, TypeMajorite } from '@prisma/client';
  * selon son type de majorité. Fonction pure, sans accès aux données.
  *
  * `nombreInscrits` = nombre de copropriétaires habilités à voter (rattachés
- * à au moins un lot, RM-06) au moment de la clôture, votants ET non-votants.
+ * à au moins un lot, RM-06) figé à l'ouverture du vote (`ag.nombre_inscrits_geles`), votants ET non-votants.
  * Une voix par copropriétaire (RM-02).
  *
  * Arithmétique entière uniquement (jamais de division) : les seuils « la
