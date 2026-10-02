@@ -2,41 +2,9 @@
 
 Dérivé du routeur réel (`apps/frontend/src/App.tsx`, `RouteProtegee.tsx`, `Shell.tsx`) — pas d'une maquette, pour rester fidèle à ce qui est réellement navigable.
 
-```mermaid
-flowchart TD
-  Start([Visite]) --> Connexion["/connexion<br/>(public)"]
-  Connexion -->|identifiants valides| Accueil
-  Connexion -->|« Mot de passe oublié ? »| Oubli["/mot-de-passe-oublie<br/>(public)"]
-  Oubli -->|lien reçu par email| Reinit["/reinitialisation<br/>(public)"]
-  Reinit -->|mot de passe changé| Connexion
-  Connexion -->|« Mentions légales »| Legal["/mentions-legales<br/>(public)"]
+![Schéma d'enchaînement des écrans](schemas/enchainement-ecrans.png)
 
-  Accueil{"/ (Accueil)<br/>selon le rôle"}
-  Accueil -->|SYNDIC| DashSyndic["Tableau de bord syndic<br/>AG · incidents · charges"]
-  Accueil -->|COPROPRIETAIRE| DashCopro["Tableau de bord copropriétaire<br/>ses AG · ses incidents · ses charges"]
-
-  DashSyndic --> Assemblees["/assemblees"]
-  DashSyndic --> Incidents["/incidents"]
-  DashSyndic --> Charges["/charges"]
-  DashSyndic --> Coproprietaires["/coproprietaires<br/>(SYNDIC uniquement)"]
-  DashSyndic -->|modale| CreerAG[Créer une AG]
-
-  DashCopro --> Assemblees
-  DashCopro --> Incidents
-  DashCopro --> Charges
-
-  Assemblees --> AGDetail["/assemblees/:idAg<br/>vote ou résultats selon le statut"]
-  AGDetail -->|PDF, AG clôturée| PVPdf[Procès-verbal PDF]
-
-  Charges -->|PDF| RelevePdf[Relevé de charges PDF]
-
-  DashSyndic --> Compte["/compte<br/>mot de passe · apparence · notifications"]
-  DashCopro --> Compte
-
-  Compte -->|Déconnexion| Connexion
-  DashSyndic -->|Déconnexion| Connexion
-  DashCopro -->|Déconnexion| Connexion
-```
+Fichier vectoriel : [`schemas/enchainement-ecrans.svg`](schemas/enchainement-ecrans.svg). Le point de départ est la page de connexion ; l'accueil (`/`) affiche le tableau de bord du copropriétaire ou celui du syndic selon le rôle ; les écrans publics sont en gris, ceux réservés au copropriétaire en vert, ceux réservés au syndic en bleu ; la déconnexion ramène toujours à `/connexion`.
 
 ## Règles de navigation réelles
 

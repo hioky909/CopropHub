@@ -12,6 +12,19 @@
 
 Voir [evidence/](evidence/) pour le relevé réel du dernier passage complet.
 
+## Code des tests (captures pour le dossier)
+
+Captures du code des tests, une par type de test, prises sur les fichiers réels du dépôt (dossier `code/` des captures du dossier) :
+
+| Capture | Fichier | Ce qui est vérifié |
+|---|---|---|
+| `test-01-unitaire-resultat-calculateur` | `apps/backend/src/services/resultat-calculateur.test.ts` | règles de majorité (UT-01 à UT-12), sans base ni mock |
+| `test-02-integration-double-vote-concurrent` | `apps/backend/src/integration/ag-vote-cloture.integration.test.ts` | 20 votes simultanés du même copropriétaire : un seul enregistré (IT-07) |
+| `test-03-integration-electorat-fige` | idem | le dénominateur du vote reste celui figé à l'ouverture |
+| `test-04-securite-csrf` | `apps/backend/src/middleware/csrf.middleware.test.ts` | refus des requêtes d'origine étrangère |
+| `test-05-e2e-vote` | `apps/frontend/e2e/ag-vote.spec.ts` | cycle de vote d'une AG dans un vrai navigateur |
+| `test-06-e2e-accessibilite` | `apps/frontend/e2e/accessibilite.spec.ts` | audit d'accessibilité axe-core des écrans |
+
 ## Couverture combinée (unitaire + intégration)
 
 `npm run test:coverage:combinee --workspace=apps/backend` (`scripts/couverture-combinee.mjs`) — la couverture unitaire seule (`npm run test -- --coverage`) est **trompeuse lue isolément** : elle tombe à 58 % car les repositories et deux contrôleurs (`auth`, `utilisateurs`) sont couverts par les tests d'intégration, pas par des tests unitaires dédiés. Le script fusionne les deux rapports v8 (`nyc merge`) et donne le chiffre réel, mesuré le 2026-09-28 :

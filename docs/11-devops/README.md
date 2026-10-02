@@ -20,6 +20,18 @@ Job `livraison`, déclenché seulement après le succès de `quality` sur un pus
 
 > Jusqu'au 2026-09-25 la CI ne se déclenchait que sur `main` alors que la branche du dépôt est `master` : elle n'a donc jamais tourné. Les déclencheurs couvrent maintenant les deux.
 
+## Fichiers de déploiement (captures pour le dossier)
+
+Captures du code des fichiers de déploiement, prises sur les fichiers réels (dossier `code/` des captures du dossier) :
+
+| Capture | Fichier | Rôle |
+|---|---|---|
+| `deploiement-01` à `03-ci-partie-*` | `.github/workflows/ci.yml` | pipeline CI/CD : qualité (lint, types, tests, build, audit) puis livraison des images |
+| `deploiement-04-dockerfile-backend` | `apps/backend/Dockerfile` | image du backend en plusieurs étapes (construction, exécution) |
+| `deploiement-05-dockerfile-web` | `deploy/Dockerfile.web` | image du serveur web : application construite + Caddy |
+| `deploiement-06-caddyfile` | `deploy/Caddyfile` | HTTPS automatique, en-têtes de sécurité, proxy vers le backend |
+| `deploiement-07` et `08-compose-prod-*` | `docker-compose.prod.yml` | orchestration de production : base, migrations, backend, Redis, serveur web |
+
 ## Docker Compose local
 
 `docker-compose.yml` : service `migrate` (applique `prisma migrate deploy` avec l'image de build du backend) dont dépend `backend` (`service_completed_successfully`), puis `backend` et `frontend`, plus `db` (PostgreSQL, port `${DB_PORT:-5432}` pour éviter un conflit avec un PostgreSQL local déjà installé).

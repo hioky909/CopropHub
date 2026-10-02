@@ -1,102 +1,87 @@
 # Modélisation Merise
 
-Export condensé du Doc 3 § Merise. Le MPD réellement en base vit dans [09-database/](../09-database/README.md) (`apps/backend/prisma/schema.prisma` + `migrations/0001_init/migration.sql`) — ce fichier documente le raisonnement MCD → MLD qui y mène.
+Démarche suivie, dans l'ordre : **dictionnaire de données → MCD → MLD → MPD**.
 
-## MCD — entités
+1. [Dictionnaire de données](dictionnaire-donnees.md) : toutes les données élémentaires, avec leur type, leur taille et leurs règles.
+2. **MCD** (modèle conceptuel) : les entités, les associations et leurs cardinalités, sans aucune notion technique.
+3. **MLD** (modèle logique) : le MCD traduit en tables relationnelles avec clés primaires et clés étrangères.
+4. [MPD](mpd.md) (modèle physique) : les tables telles qu'elles existent en PostgreSQL, avec leurs types réels, contraintes et index.
 
-| Entité | Attributs | Identifiant |
+Les schémas sont fournis en image (PNG) et en vectoriel (SVG) dans [`schemas/`](schemas/), dans la notation habituelle de Merise (entités et associations pour le MCD, tables reliées par des flèches pour le MLD).
+
+## MCD — modèle conceptuel des données
+
+![Modèle conceptuel des données](schemas/mcd.png)
+
+Entités en jaune (l'identifiant est en gras et souligné), associations en bleu, cardinalités écrites **du côté de l'entité** : `(0,n)` signifie que l'entité participe à l'association de zéro à plusieurs fois.
+
+### Entités
+
+| Entité | Identifiant | Attributs |
 |---|---|---|
-| UTILISATEUR | nom, email, mot_de_passe_hash, type_compte, est_membre_conseil_syndical | id_utilisateur |
-| IMMEUBLE | nom, adresse | id_immeuble |
-| LOT | numero, type_lot | id_lot |
-| AG | date, statut | id_ag |
-| RESOLUTION | libelle, type_majorite, statut_resultat | id_resolution |
-| CHARGE | montant, periode, statut | id_charge |
-| INCIDENT | titre, description, statut, date_creation | id_incident |
+| IMMEUBLE | id_immeuble | nom, adresse |
+| LOT | id_lot | numero, type_lot |
+| UTILISATEUR | id_utilisateur | nom, email, mot_de_passe_hash, type_compte, est_membre_conseil_syndical, date_creation, theme_teinte, theme_intensite, sessions_valides_depuis, notifications_email |
+| AG | id_ag | date_ag, statut, nombre_inscrits_geles |
+| RESOLUTION | id_resolution | libelle, type_majorite, statut_resultat |
+| CHARGE | id_charge | montant, periode, statut, date_echeance |
+| INCIDENT | id_incident | titre, description, statut, date_creation |
+| REINITIALISATION_MDP | id_reinitialisation | jeton_hash, date_creation, date_expiration, date_utilisation |
 
-`UTILISATEUR.type_compte` ∈ { SYNDIC, COPROPRIETAIRE }. `est_membre_conseil_syndical` n'a de sens que pour un COPROPRIETAIRE (contrainte CHECK en base, `chk_conseil_syndical_coproprietaire`).
+`type_compte` prend les valeurs SYNDIC ou COPROPRIETAIRE. `est_membre_conseil_syndical` n'a de sens que pour un COPROPRIETAIRE (contrainte CHECK en base).
 
-```mermaid
-erDiagram
-  IMMEUBLE ||--o{ LOT : POSSEDE
-  IMMEUBLE ||--o{ AG : ORGANISE
-  IMMEUBLE ||--o{ INCIDENT : CONCERNE_IMMEUBLE
-  UTILISATEUR }o--o{ LOT : RATTACHE
-  AG ||--|{ RESOLUTION : COMPORTE
-  UTILISATEUR }o--o{ RESOLUTION : VOTE
-  LOT ||--o{ CHARGE : CONCERNE
-  UTILISATEUR ||--o{ INCIDENT : SIGNALE
-  LOT o|--o{ INCIDENT : PORTE_SUR
+### Associations et cardinalités
 
-  IMMEUBLE {
-    uuid id_immeuble PK
-    string nom
-    string adresse
-  }
-  UTILISATEUR {
-    uuid id_utilisateur PK
-    string nom
-    string email UK
-    string mot_de_passe_hash
-    enum type_compte
-    boolean est_membre_conseil_syndical
-  }
-  LOT {
-    uuid id_lot PK
-    uuid id_immeuble FK
-    string numero
-    string type_lot
-  }
-  AG {
-    uuid id_ag PK
-    uuid id_immeuble FK
-    date date_ag
-    enum statut
-    int nombre_inscrits_geles
-  }
-  RESOLUTION {
-    uuid id_resolution PK
-    uuid id_ag FK
-    string libelle
-    enum type_majorite
-    enum statut_resultat
-  }
-  CHARGE {
-    uuid id_charge PK
-    uuid id_lot FK
-    decimal montant
-    string periode
-    enum statut
-    date date_echeance
-  }
-  INCIDENT {
-    uuid id_incident PK
-    uuid id_immeuble FK
-    uuid id_lot FK
-    uuid id_utilisateur_declarant FK
-    string titre
-    enum statut
-  }
-```
-
-## MCD — associations
-
-| Association | Entités liées | Cardinalités | Attributs portés | Règle liée |
+| Association | Entité (min,max) | Entité (min,max) | Attributs portés | Lecture |
 |---|---|---|---|---|
-| POSSEDE | IMMEUBLE — LOT | IMMEUBLE (1,1), LOT (0,n) | — | un lot appartient à un seul immeuble |
-| RATTACHE | UTILISATEUR — LOT | UTILISATEUR (0,n), LOT (0,n) | date_debut, date_fin | historique de propriété ; un seul rattachement actif par lot à la fois (contrôlé en Business Layer + index unique partiel) |
-| ORGANISE | IMMEUBLE — AG | IMMEUBLE (1,1), AG (0,n) | — | un immeuble a plusieurs AG dans le temps |
-| COMPORTE | AG — RESOLUTION | AG (1,1), RESOLUTION (1,n) | — | une AG contient au moins une résolution (RM : ordre du jour non vide) |
-| VOTE | UTILISATEUR — RESOLUTION | UTILISATEUR (0,n), RESOLUTION (0,n) | valeur, date_vote | association porteuse ; un seul vote par couple (RM-02, clé primaire composite) |
-| CONCERNE | LOT — CHARGE | LOT (1,1), CHARGE (0,n) | — | une charge concerne un seul lot |
-| SIGNALE | UTILISATEUR — INCIDENT | UTILISATEUR (1,1), INCIDENT (0,n) | — | un incident a un déclarant unique |
-| PORTE_SUR | LOT — INCIDENT | LOT (0,1), INCIDENT (0,n) | — | un incident peut concerner un lot précis ou une partie commune (LOT absent, US-03) |
+| POSSEDE | IMMEUBLE (0,n) | LOT (1,1) | — | un immeuble possède plusieurs lots ; un lot appartient à un seul immeuble |
+| ORGANISE | IMMEUBLE (0,n) | AG (1,1) | — | un immeuble organise plusieurs assemblées dans le temps |
+| COMPORTE | AG (1,n) | RESOLUTION (1,1) | — | une assemblée comporte au moins une résolution (ordre du jour non vide) |
+| RATTACHE | LOT (0,n) | UTILISATEUR (0,n) | date_debut, date_fin | un lot a eu plusieurs propriétaires au fil du temps ; un copropriétaire peut avoir plusieurs lots |
+| VOTE | RESOLUTION (0,n) | UTILISATEUR (0,n) | valeur, date_vote | un copropriétaire vote sur plusieurs résolutions, une résolution reçoit plusieurs votes (un seul vote par couple) |
+| CONCERNE | LOT (0,n) | CHARGE (1,1) | — | une charge concerne un seul lot |
+| SURVIENT_DANS | IMMEUBLE (0,n) | INCIDENT (1,1) | — | un incident survient dans un seul immeuble |
+| PORTE_SUR | LOT (0,n) | INCIDENT (0,1) | — | un incident concerne au plus un lot ; aucun lot signifie une partie commune |
+| SIGNALE | UTILISATEUR (0,n) | INCIDENT (1,1) | — | un incident a un seul déclarant |
+| DEMANDE | UTILISATEUR (0,n) | REINITIALISATION_MDP (1,1) | — | une demande de réinitialisation émane d'un seul utilisateur |
 
-## MLD → MPD : choix de conception réels
+## MLD — modèle logique des données
 
-- `RATTACHE` devient la table `rattachement`, avec un index unique **partiel** (`WHERE date_fin IS NULL`) plutôt qu'une contrainte unique classique — c'est le seul moyen d'exprimer « un seul rattachement actif par lot » tout en conservant l'historique complet.
-- `VOTE` devient la table `vote`, clé primaire composite `(id_resolution, id_utilisateur)` — empêche structurellement un second vote, pas seulement applicativement.
-- `PORTE_SUR` : `incident.id_lot` est nullable — `NULL` signifie « partie commune », jamais une valeur magique.
-- Identifiants générés côté base (`gen_random_uuid()`), pas côté ORM, pour rester alignés avec la migration écrite à la main.
+![Modèle logique des données](schemas/mld.png)
 
-Voir [09-database/](../09-database/README.md) pour le détail complet des tables telles que réellement migrées, et [13-decisions/](../13-decisions/) pour les décisions d'architecture associées.
+Les clés primaires sont soulignées, les clés étrangères précédées de `#`.
+
+Règles de passage du MCD au MLD :
+
+- une entité devient une table, son identifiant devient la clé primaire ;
+- une association de cardinalités `(x,n)` / `(1,1)` disparaît : l'identifiant du côté `n` migre dans la table du côté `(1,1)` comme clé étrangère (par exemple `id_immeuble` dans `lot`) ;
+- une association `(0,n)` / `(0,n)` devient une table : `RATTACHE` donne `rattachement`, `VOTE` donne `vote`, qui reçoivent les attributs portés par l'association ;
+- `PORTE_SUR` étant `(0,1)` côté incident, la clé étrangère `id_lot` de `incident` peut être vide (partie commune).
+
+Schéma relationnel :
+
+- immeuble (<u>id_immeuble</u>, nom, adresse)
+- lot (<u>id_lot</u>, numero, type_lot, #id_immeuble)
+- utilisateur (<u>id_utilisateur</u>, nom, email, mot_de_passe_hash, type_compte, est_membre_conseil_syndical, date_creation, theme_teinte, theme_intensite, sessions_valides_depuis, notifications_email)
+- rattachement (<u>id_rattachement</u>, date_debut, date_fin, #id_lot, #id_utilisateur)
+- ag (<u>id_ag</u>, date_ag, statut, nombre_inscrits_geles, #id_immeuble)
+- resolution (<u>id_resolution</u>, libelle, type_majorite, statut_resultat, #id_ag)
+- vote (<u>#id_resolution</u>, <u>#id_utilisateur</u>, valeur, date_vote)
+- charge (<u>id_charge</u>, montant, periode, statut, date_echeance, #id_lot)
+- incident (<u>id_incident</u>, titre, description, statut, date_creation, #id_immeuble, #id_lot, #id_utilisateur_declarant)
+- reinitialisation_mot_de_passe (<u>id_reinitialisation</u>, jeton_hash, date_creation, date_expiration, date_utilisation, #id_utilisateur)
+
+## MPD — modèle physique des données
+
+![Modèle physique des données](schemas/mpd.png)
+
+Le détail table par table (types PostgreSQL, contraintes, index) est dans [mpd.md](mpd.md). Le schéma réellement migré se trouve dans `apps/backend/prisma/schema.prisma` et `apps/backend/prisma/migrations/`.
+
+## Choix de conception
+
+- `RATTACHE` devient la table `rattachement` avec un identifiant propre et un index unique **partiel** (`WHERE date_fin IS NULL`) : c'est le moyen d'exprimer « un seul rattachement actif par lot » tout en gardant l'historique complet.
+- `VOTE` devient la table `vote`, de clé primaire composite `(id_resolution, id_utilisateur)` : un second vote est impossible par construction, pas seulement par le code applicatif.
+- `incident.id_lot` est facultatif : l'absence de valeur signifie « partie commune », jamais une valeur factice.
+- Les identifiants sont générés par la base (`gen_random_uuid()`), pas par l'ORM.
+
+Voir aussi [09-database](../09-database/README.md) et [13-decisions](../13-decisions/).

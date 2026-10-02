@@ -2,6 +2,10 @@
 
 Transcrit depuis les fichiers réellement appliqués en base — `apps/backend/prisma/schema.prisma` et les 7 migrations (`apps/backend/prisma/migrations/0001_init` à `0007_notifications_email`) — vérifié sans dérive par `npm run prisma:drift` (branché en CI). Types PostgreSQL réels, pas les types Prisma déclaratifs.
 
+![Modèle physique des données](schemas/mpd.png)
+
+Schéma vectoriel : [`schemas/mpd.svg`](schemas/mpd.svg). Le détail de chaque table suit.
+
 ## `immeuble`
 
 | Colonne | Type | Contraintes |

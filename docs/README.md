@@ -7,9 +7,9 @@ Cette arborescence contient, en version contrôlée, la documentation de concept
 | [01-project/](01-project/) | Périmètre, parties prenantes, glossaire, personas | Doc 2 |
 | [02-requirements/](02-requirements/) | F-01→F-11, NF-01→NF-14, RM-01→RM-14, US-01→US-10 | Doc 2 |
 | [03-project-management/](03-project-management/) | Méthode, jalons, backlog, suivi, [rétrospective](03-project-management/retrospective.md) | Doc 9 |
-| [04-ux-ui/](04-ux-ui/) | Design system, écrans, accessibilité, responsive, [enchaînement des écrans](04-ux-ui/enchainement-ecrans.md) | Doc 4 |
-| [05-merise/](05-merise/) | MCD (+ diagramme Mermaid), [MPD](05-merise/mpd.md), [dictionnaire de données](05-merise/dictionnaire-donnees.md) | Doc 3 § Merise |
-| [06-uml/](06-uml/) | Cas d'usage (diagramme Mermaid), classes, séquence (réelles, dérivées du code), états-transitions | Doc 3 § UML |
+| [04-ux-ui/](04-ux-ui/) | Démarche zoning → wireframe → maquette → prototype, design system, écrans, accessibilité, responsive, [enchaînement des écrans](04-ux-ui/enchainement-ecrans.md) | Doc 4 |
+| [05-merise/](05-merise/) | [dictionnaire de données](05-merise/dictionnaire-donnees.md), puis MCD, MLD (schémas en notation Merise, images et SVG dans `schemas/`), [MPD](05-merise/mpd.md) | Doc 3 § Merise |
+| [06-uml/](06-uml/) | Cas d'utilisation (notation UML standard, image et SVG dans `schemas/`), classes, séquence (réelles, dérivées du code), états-transitions | Doc 3 § UML |
 | [07-architecture/](07-architecture/) | Architecture 3 couches, mapping des dossiers, éco-conception | Doc 7 (ADR-001) |
 | [08-security/](08-security/) | STRIDE, authN/authZ, checklist sécurité, alignement ANSSI, [correspondance OWASP Top 10](08-security/owasp-top10.md) | Doc 5 |
 | [09-database/](09-database/) | Schéma Prisma, migrations, exemple SQL, sécurité du SGBD | découle du MPD |

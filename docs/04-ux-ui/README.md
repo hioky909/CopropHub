@@ -2,6 +2,25 @@
 
 Export condensé du Doc 4. Le design system décrit ici est celui réellement appliqué dans `apps/frontend/src/index.css` et les composants `apps/frontend/src/components/`.
 
+## Démarche de conception : du zoning au prototype
+
+Les écrans ont été conçus en quatre niveaux de fidélité croissante, du plus grossier au plus abouti.
+
+1. **Zoning** : on découpe l'écran en grandes zones fonctionnelles (entête, indicateurs, liste, action principale, pied de page), sans aucun contenu, pour décider de l'organisation et de la hiérarchie avant de dessiner quoi que ce soit.
+2. **Wireframe** : on place dans chaque zone les éléments réels en niveaux de gris (titres, champs, boutons, listes), sans couleur ni identité visuelle, pour valider le contenu et les actions de l'écran.
+3. **Maquette** : l'écran en haute fidélité, avec le design system ci-dessous (couleurs, typographie, composants). Les captures réelles de l'application, prises sur le même écran, sont celles du dossier.
+4. **Prototype** : les écrans reliés entre eux en parcours cliquable, conforme au [schéma d'enchaînement des écrans](enchainement-ecrans.md).
+
+Planches zoning + wireframe de trois écrans clés (fichiers vectoriels `.svg` à côté de chaque image) :
+
+![Connexion : zoning et wireframe](schemas/zoning-wireframe-connexion.png)
+
+![Tableau de bord du copropriétaire : zoning et wireframe](schemas/zoning-wireframe-tableau-de-bord.png)
+
+![Vote d'une assemblée générale : zoning et wireframe](schemas/zoning-wireframe-vote-ag.png)
+
+Les contraintes d'accessibilité (contrastes, cibles tactiles, navigation au clavier), de RGPD (données minimales, mentions légales en pied de page) et d'éco-conception (cf. [07-architecture](../07-architecture/README.md)) sont prises en compte dès l'étape de zoning : une zone est supprimée si elle n'apporte pas d'action ou d'information utile à l'utilisateur.
+
 ## Design system
 
 ### Couleurs (contrastes WCAG pré-calculés)

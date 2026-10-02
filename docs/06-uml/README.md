@@ -19,33 +19,16 @@ Export condensé du Doc 3 § UML.
 
 Complétés depuis le backlog MVP par les fonctionnalités V1 (F-12 à F-15, livrées après le Doc 2 initial — non rattachées à une US du MVP) : export PDF, notifications par email, réinitialisation de mot de passe, personnalisation du thème.
 
-```mermaid
-flowchart LR
-  Copro((Copropriétaire))
-  Conseil((Membre du<br/>conseil syndical))
-  Syndic((Syndic))
+![Diagramme de cas d'utilisation](schemas/cas-utilisation.png)
 
-  Copro --> UC1[Consulter ses charges]
-  Copro --> UC2[Voter une résolution]
-  Copro --> UC3[Déclarer un incident]
-  Copro --> UC4[Consulter les résolutions passées]
-  Copro --> UC11[Exporter son relevé de charges PDF]
-  Copro --> UC12[Gérer ses préférences de notification]
-  Copro --> UC13[Personnaliser le thème de couleur]
-  Copro --> UC14[Réinitialiser son mot de passe]
+Diagramme en notation UML standard (fichier vectoriel : [`schemas/cas-utilisation.svg`](schemas/cas-utilisation.svg)) :
 
-  Conseil -.hérite.-> Copro
-  Conseil --> UC5[Consulter toutes les charges]
-  Conseil --> UC6[Consulter tous les incidents]
+- la frontière du système (le rectangle « CopropHub ») contient les cas d'utilisation (ellipses) ; les acteurs sont à l'extérieur ;
+- **généralisation** (flèche à triangle creux) : le membre du conseil syndical est un copropriétaire avec des droits supplémentaires ; le copropriétaire et le syndic sont deux sortes d'« Utilisateur » (acteur abstrait), ce qui évite de relier quatre fois les cas d'utilisation communs (authentification, réinitialisation du mot de passe, thème, préférences de notification) ;
+- **acteur secondaire** : le serveur SMTP, système externe, intervient pour les e-mails (réinitialisation du mot de passe, notifications) ;
+- **«include»** : la clôture d'une AG inclut toujours le calcul du résultat de chaque résolution.
 
-  Syndic --> UC7[Créer une AG et ses résolutions]
-  Syndic --> UC8[Clôturer une AG]
-  Syndic --> UC9[Faire progresser le statut d'un incident]
-  Syndic --> UC10[Gérer les copropriétaires et leurs lots]
-  Syndic --> UC15[Exporter le procès-verbal PDF]
-```
-
-Le conseil syndical est un compte copropriétaire avec un drapeau supplémentaire (`est_membre_conseil_syndical`) : il hérite de tous les cas d'usage du copropriétaire et en cumule d'autres (RM-14) — jamais un remplacement.
+Le conseil syndical est un compte copropriétaire avec un drapeau supplémentaire (`est_membre_conseil_syndical`) : il hérite de tous les cas d'utilisation du copropriétaire et en cumule d'autres (RM-14) — jamais un remplacement.
 
 ## Diagramme de classes (Business Layer)
 
