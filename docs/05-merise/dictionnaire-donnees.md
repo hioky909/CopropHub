@@ -1,109 +1,100 @@
 # Dictionnaire de données
 
-Première étape de la démarche Merise : on recense toutes les données élémentaires avant de les regrouper en entités (MCD), puis en tables (MLD, MPD). Chaque ligne décrit **une donnée** : son code (le nom retenu en base), sa désignation, son type, sa taille et les règles qui s'y appliquent.
+Première étape de la démarche Merise : on recense toutes les données que l'application doit conserver, avant de les regrouper en entités (MCD), puis en tables (MLD, MPD). Le dictionnaire reste volontairement **non technique**, compréhensible par un client : chaque donnée est décrite par son nom, son format, sa longueur et ses contraintes.
 
-Source : le schéma réellement appliqué en base (`apps/backend/prisma/schema.prisma` et les 7 migrations). Types : `UUID` (identifiant), `VARCHAR(n)` (texte borné), `TEXT` (texte libre), `ENUM` (liste fermée de valeurs), `BOOLEAN`, `INT`/`SMALLINT` (entier), `NUMERIC(p,s)` (décimal exact), `DATE`, `TIMESTAMPTZ` (date et heure avec fuseau).
+Formats utilisés : **Alphabétique** (lettres uniquement), **Alphanumérique** (lettres et chiffres), **Numérique**, **Date**, **Logique** (vrai ou faux). Les types techniques (UUID, VARCHAR, ENUM…) n'apparaissent qu'au [MPD](mpd.md) ; les identifiants ne sont introduits qu'à partir du MCD. La colonne « Code » donne le nom repris dans les modèles suivants.
 
 Colonne « RGPD » : **personnelle** (identifie une personne), **sensible** (financière ou liée à la sécurité, à protéger même sans nom), **technique** (aucune portée personnelle).
 
-## Entité IMMEUBLE
+## Immeuble
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_immeuble | Identifiant de l'immeuble | UUID | — | oui | clé primaire, généré par la base | technique |
-| nom | Nom de la copropriété | VARCHAR | 120 | oui | — | technique |
-| adresse | Adresse de l'immeuble | VARCHAR | 255 | oui | — | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Nom de la copropriété | nom | Alphanumérique | 120 | Obligatoire | technique |
+| Adresse de l'immeuble | adresse | Alphanumérique | 255 | Obligatoire | technique |
 
-## Entité UTILISATEUR
+## Utilisateur
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_utilisateur | Identifiant de l'utilisateur | UUID | — | oui | clé primaire | technique |
-| nom | Nom affiché | VARCHAR | 120 | oui | — | **personnelle** |
-| email | Adresse e-mail de connexion | VARCHAR | 255 | oui | unique | **personnelle** |
-| mot_de_passe_hash | Empreinte du mot de passe | VARCHAR | 255 | oui | jamais le mot de passe en clair (bcrypt, facteur 12) | **sensible** |
-| type_compte | Type de compte | ENUM | — | oui | SYNDIC ou COPROPRIETAIRE | technique |
-| est_membre_conseil_syndical | Appartient au conseil syndical | BOOLEAN | — | oui, défaut faux | vrai uniquement pour un COPROPRIETAIRE (contrainte CHECK) | technique |
-| date_creation | Date de création du compte | TIMESTAMPTZ | — | oui, défaut maintenant | — | technique |
-| theme_teinte | Teinte du thème de couleur | SMALLINT | — | non | de 0 à 359 ; renseignée avec theme_intensite ou pas du tout | technique |
-| theme_intensite | Intensité du thème de couleur | SMALLINT | — | non | de 0 à 100 | technique |
-| sessions_valides_depuis | Date avant laquelle les sessions sont refusées | TIMESTAMPTZ | — | non | mise à jour à chaque changement de mot de passe | technique |
-| notifications_email | Accepte les e-mails de service | BOOLEAN | — | oui, défaut vrai | — | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Nom affiché | nom | Alphanumérique | 120 | Obligatoire | personnelle |
+| Adresse e-mail | email | Alphanumérique | 255 | Obligatoire, unique | personnelle |
+| Mot de passe | mot_de_passe_hash | Alphanumérique | 12 à 128 | Obligatoire ; conservé uniquement sous forme d'empreinte, jamais en clair | sensible |
+| Type de compte | type_compte | Alphabétique | — | Obligatoire ; syndic ou copropriétaire | technique |
+| Membre du conseil syndical | est_membre_conseil_syndical | Logique | — | Obligatoire, faux par défaut ; vrai uniquement pour un copropriétaire | technique |
+| Date de création du compte | date_creation | Date | — | Obligatoire, renseignée automatiquement | technique |
+| Teinte du thème de couleur | theme_teinte | Numérique | 3 | Facultatif ; de 0 à 359 ; renseignée avec l'intensité ou pas du tout | technique |
+| Intensité du thème de couleur | theme_intensite | Numérique | 3 | Facultatif ; de 0 à 100 | technique |
+| Date de validité des sessions | sessions_valides_depuis | Date | — | Facultatif ; les sessions ouvertes avant cette date sont refusées ; mise à jour à chaque changement de mot de passe | technique |
+| Accepte les e-mails de service | notifications_email | Logique | — | Obligatoire, vrai par défaut | technique |
 
-## Entité LOT
+## Lot
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_lot | Identifiant du lot | UUID | — | oui | clé primaire | technique |
-| numero | Numéro du lot | VARCHAR | 20 | oui | unique dans un immeuble | technique |
-| type_lot | Nature du lot | VARCHAR | 50 | oui | ex. « appartement », « cave » | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Numéro du lot | numero | Alphanumérique | 20 | Obligatoire ; unique dans un immeuble | technique |
+| Nature du lot | type_lot | Alphanumérique | 50 | Obligatoire ; par exemple « appartement » ou « cave » | technique |
 
-## Association RATTACHE (utilisateur — lot)
+## Rattachement d'un lot à un copropriétaire
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_rattachement | Identifiant du rattachement | UUID | — | oui | clé primaire | technique |
-| date_debut | Début de la propriété | DATE | — | oui, défaut aujourd'hui | — | technique |
-| date_fin | Fin de la propriété | DATE | — | non | postérieure à date_debut ; un seul rattachement sans date de fin par lot | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Début de la propriété | date_debut | Date | — | Obligatoire, date du jour par défaut | technique |
+| Fin de la propriété | date_fin | Date | — | Facultatif ; postérieure au début ; un seul propriétaire sans date de fin par lot | technique |
 
-## Entité AG (assemblée générale)
+## Assemblée générale
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_ag | Identifiant de l'assemblée | UUID | — | oui | clé primaire | technique |
-| date_ag | Date de l'assemblée | DATE | — | oui | — | technique |
-| statut | Étape de l'assemblée | ENUM | — | oui, défaut PLANIFIEE | PLANIFIEE, OUVERTE ou CLOTUREE (dans cet ordre) | technique |
-| nombre_inscrits_geles | Nombre de votants figé | INT | — | non | fixé à l'ouverture du vote, jamais recalculé | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Date de l'assemblée | date_ag | Date | — | Obligatoire | technique |
+| Étape de l'assemblée | statut | Alphabétique | — | Obligatoire, planifiée par défaut ; planifiée, ouverte puis clôturée | technique |
+| Nombre de votants figé | nombre_inscrits_geles | Numérique | — | Facultatif ; fixé à l'ouverture du vote, jamais recalculé | technique |
 
-## Entité RESOLUTION
+## Résolution
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_resolution | Identifiant de la résolution | UUID | — | oui | clé primaire | technique |
-| libelle | Intitulé de la résolution | VARCHAR | 500 | oui | — | technique |
-| type_majorite | Règle de majorité applicable | ENUM | — | oui | SIMPLE, ABSOLUE, DOUBLE_MAJORITE ou UNANIMITE | technique |
-| statut_resultat | Résultat du vote | ENUM | — | oui, défaut EN_ATTENTE | EN_ATTENTE, ADOPTEE ou REJETEE | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Intitulé de la résolution | libelle | Alphanumérique | 500 | Obligatoire | technique |
+| Règle de majorité | type_majorite | Alphabétique | — | Obligatoire ; simple, absolue, double majorité ou unanimité | technique |
+| Résultat du vote | statut_resultat | Alphabétique | — | Obligatoire, en attente par défaut ; en attente, adoptée ou rejetée | technique |
 
-## Association VOTE (utilisateur — résolution)
+## Vote
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| valeur | Sens du vote | ENUM | — | oui | OUI, NON ou ABSTENTION ; jamais exposé nominativement (anonymat) | **sensible** |
-| date_vote | Date et heure du vote | TIMESTAMPTZ | — | oui, défaut maintenant | — | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Sens du vote | valeur | Alphabétique | — | Obligatoire ; oui, non ou abstention ; jamais montré nominativement | sensible |
+| Date et heure du vote | date_vote | Date | — | Obligatoire, renseignée automatiquement | technique |
 
-Un seul vote par couple (résolution, utilisateur) : clé primaire composite.
+Un copropriétaire ne vote qu'une seule fois par résolution.
 
-## Entité CHARGE
+## Charge
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_charge | Identifiant de la charge | UUID | — | oui | clé primaire | technique |
-| montant | Montant dû | NUMERIC | (10,2) | oui | strictement positif | **sensible** (donnée financière visible du seul propriétaire du lot, du syndic et du conseil syndical) |
-| periode | Période concernée | VARCHAR | 20 | oui | ex. « 2026-T3 » | technique |
-| statut | État du paiement | ENUM | — | oui, défaut A_PAYER | A_PAYER, PAYEE ou EN_RETARD (déduit si l'échéance est dépassée) | **sensible** |
-| date_echeance | Date limite de paiement | DATE | — | non | — | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Montant dû | montant | Numérique | 10, dont 2 décimales | Obligatoire ; strictement positif | sensible (visible du seul propriétaire du lot, du syndic et du conseil syndical) |
+| Période concernée | periode | Alphanumérique | 20 | Obligatoire ; par exemple « 2026-T3 » | technique |
+| État du paiement | statut | Alphabétique | — | Obligatoire, à payer par défaut ; à payer, payée ou en retard (déduit si l'échéance est dépassée) | sensible |
+| Date limite de paiement | date_echeance | Date | — | Facultatif | technique |
 
-## Entité INCIDENT
+## Incident
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_incident | Identifiant de l'incident | UUID | — | oui | clé primaire | technique |
-| titre | Titre de l'incident | VARCHAR | 200 | oui | `<` et `>` refusés | technique |
-| description | Description détaillée | TEXT | — | non | `<` et `>` refusés | technique |
-| statut | Avancement | ENUM | — | oui, défaut DECLARE | DECLARE, EN_COURS ou RESOLU, transitions strictes | technique |
-| date_creation | Date de déclaration | TIMESTAMPTZ | — | oui, défaut maintenant | — | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Titre de l'incident | titre | Alphanumérique | 200 | Obligatoire ; caractères `<` et `>` refusés | technique |
+| Description détaillée | description | Alphanumérique | — | Facultatif ; caractères `<` et `>` refusés | technique |
+| Avancement | statut | Alphabétique | — | Obligatoire, déclaré par défaut ; déclaré, en cours puis résolu | technique |
+| Date de déclaration | date_creation | Date | — | Obligatoire, renseignée automatiquement | technique |
 
-Le déclarant (lien vers UTILISATEUR) n'est jamais montré à un autre copropriétaire ; le lot concerné est facultatif (absent = partie commune).
+Le déclarant n'est jamais montré à un autre copropriétaire ; le lot concerné est facultatif (absent, il s'agit d'une partie commune).
 
-## Entité REINITIALISATION_MOT_DE_PASSE
+## Réinitialisation du mot de passe
 
-| Code | Désignation | Type | Taille | Obligatoire | Règles | RGPD |
-|---|---|---|---|---|---|---|
-| id_reinitialisation | Identifiant de la demande | UUID | — | oui | clé primaire | technique |
-| jeton_hash | Empreinte du jeton envoyé par e-mail | VARCHAR | 64 | oui | unique, SHA-256 ; jamais le jeton en clair | **sensible** |
-| date_creation | Date de la demande | TIMESTAMPTZ | — | oui, défaut maintenant | — | technique |
-| date_expiration | Date limite d'utilisation | TIMESTAMPTZ | — | oui | valable 1 heure | technique |
-| date_utilisation | Date d'utilisation du lien | TIMESTAMPTZ | — | non | vide tant que non utilisé ; usage unique | technique |
+| Donnée | Code | Format | Longueur | Contraintes | RGPD |
+| --- | --- | --- | --- | --- | --- |
+| Jeton envoyé par e-mail | jeton_hash | Alphanumérique | 64 | Obligatoire, unique ; conservé uniquement sous forme d'empreinte | sensible |
+| Date de la demande | date_creation | Date | — | Obligatoire, renseignée automatiquement | technique |
+| Date limite d'utilisation | date_expiration | Date | — | Obligatoire ; une heure après la demande | technique |
+| Date d'utilisation | date_utilisation | Date | — | Facultatif ; vide tant que le lien n'est pas utilisé ; usage unique | technique |
 
 ## Principe de minimisation
 

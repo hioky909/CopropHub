@@ -8,8 +8,10 @@ Les écrans ont été conçus en quatre niveaux de fidélité croissante, du plu
 
 1. **Zoning** : on découpe l'écran en grandes zones fonctionnelles (entête, indicateurs, liste, action principale, pied de page), sans aucun contenu, pour décider de l'organisation et de la hiérarchie avant de dessiner quoi que ce soit.
 2. **Wireframe** : on place dans chaque zone les éléments réels en niveaux de gris (titres, champs, boutons, listes), sans couleur ni identité visuelle, pour valider le contenu et les actions de l'écran.
-3. **Maquette** : l'écran en haute fidélité, avec le design system ci-dessous (couleurs, typographie, composants). Les captures réelles de l'application, prises sur le même écran, sont celles du dossier.
-4. **Prototype** : les écrans reliés entre eux en parcours cliquable, conforme au [schéma d'enchaînement des écrans](enchainement-ecrans.md).
+3. **Maquette** : l'écran en haute fidélité, réalisé sous **Figma** avec le design system ci-dessous (couleurs, typographie, composants), avant le développement (écrans tableau de bord, vote d'une AG, incidents, charges).
+4. **Prototype** : les maquettes Figma reliées entre elles en parcours cliquable (barre d'onglets Tableau de bord, Vote AG, Incidents, Charges), pour vérifier la navigation avant d'écrire le code. L'enchaînement réel de l'application développée est ensuite formalisé par le [schéma d'enchaînement des écrans](enchainement-ecrans.md).
+
+![Prototype Figma : tableau de bord et onglets reliant les écrans](schemas/prototype-figma.png)
 
 Planches zoning + wireframe de trois écrans clés (fichiers vectoriels `.svg` à côté de chaque image) :
 
