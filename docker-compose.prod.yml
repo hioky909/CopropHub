@@ -38,16 +38,20 @@ services:
     command:
       - |
         psql -v ON_ERROR_STOP=1 -v mdp="$$DB_APP_PASSWORD" <<'SQL'
-        SELECT 'CREATE ROLE coprophub_app' WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'coprophub_app') \gexec
-        ALTER ROLE coprophub_app WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD :'mdp';
+        SELECT 'CREATE ROLE coprophub_app'
+          WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'coprophub_app') \gexec
+        ALTER ROLE coprophub_app WITH LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS
+          PASSWORD :'mdp';
         REVOKE ALL ON DATABASE coprophub FROM PUBLIC;
         GRANT CONNECT ON DATABASE coprophub TO coprophub_app;
         REVOKE CREATE ON SCHEMA public FROM PUBLIC;
         GRANT USAGE ON SCHEMA public TO coprophub_app;
         GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO coprophub_app;
         GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO coprophub_app;
-        ALTER DEFAULT PRIVILEGES FOR ROLE coprophub IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO coprophub_app;
-        ALTER DEFAULT PRIVILEGES FOR ROLE coprophub IN SCHEMA public GRANT USAGE, SELECT ON SEQUENCES TO coprophub_app;
+        ALTER DEFAULT PRIVILEGES FOR ROLE coprophub IN SCHEMA public
+          GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO coprophub_app;
+        ALTER DEFAULT PRIVILEGES FOR ROLE coprophub IN SCHEMA public
+          GRANT USAGE, SELECT ON SEQUENCES TO coprophub_app;
         SQL
     environment:
       PGHOST: db

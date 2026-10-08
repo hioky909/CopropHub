@@ -30,7 +30,7 @@ Captures du code des fichiers de déploiement, prises sur les fichiers réels (d
 | `deploiement-04-dockerfile-backend` | `apps/backend/Dockerfile` | image du backend en plusieurs étapes (construction, exécution) |
 | `deploiement-05-dockerfile-web` | `deploy/Dockerfile.web` | image du serveur web : application construite + Caddy |
 | `deploiement-06-caddyfile` | `deploy/Caddyfile` | HTTPS automatique, en-têtes de sécurité, proxy vers le backend |
-| `deploiement-07` et `08-compose-prod-*` | `docker-compose.prod.yml` | orchestration de production : base, migrations, backend, Redis, serveur web |
+| `deploiement-07` à `09-compose-prod-*` | `docker-compose.prod.yml` | orchestration de production : base, rôle applicatif, migrations, backend, Redis, serveur web |
 
 ## Docker Compose local
 

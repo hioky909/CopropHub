@@ -149,11 +149,12 @@ jobs:
 
       - name: Droits du rôle applicatif de la base (lit et écrit des lignes, ne touche pas au schéma)
         run: |
-          app="docker compose -f docker-compose.prod.yml --env-file .env.ci exec -T db psql -v ON_ERROR_STOP=1 -U coprophub_app -d coprophub -c"
-          $app "SELECT count(*) FROM utilisateur"
-          if $app "CREATE TABLE intrus (id int)"; then echo "le rôle applicatif peut créer une table" >&2; exit 1; fi
-          if $app "DROP TABLE vote"; then echo "le rôle applicatif peut supprimer une table" >&2; exit 1; fi
-          if $app "TRUNCATE charge"; then echo "le rôle applicatif peut vider une table" >&2; exit 1; fi
+          compose="docker compose -f docker-compose.prod.yml --env-file .env.ci"
+          app() { $compose exec -T db psql -v ON_ERROR_STOP=1 -U coprophub_app -d coprophub -c "$1"; }
+          app "SELECT count(*) FROM utilisateur"
+          for interdit in "CREATE TABLE intrus (id int)" "DROP TABLE vote" "TRUNCATE charge"; do
+            if app "$interdit"; then echo "le rôle applicatif a pu exécuter : $interdit" >&2; exit 1; fi
+          done
 
       - name: Journaux en cas d'échec
         if: failure()
