@@ -4,8 +4,8 @@
 
 | Niveau | Commande | Ce qui est exercé |
 |---|---|---|
-| Unitaires (backend) | `npm run test` | Services et contrôleurs avec repositories simulés — aucune base requise. 310 tests (2026-09-29). |
-| Intégration | `npm run test:integration` | Vraies routes contre PostgreSQL réel (migration appliquée) : contraintes du MPD, parcours AG, concurrence vote/clôture. 178 tests (181 avec `REDIS_URL` défini), refusent de démarrer si `DATABASE_URL` n'est pas une base `_test`. |
+| Unitaires (backend) | `npm run test` | Services et contrôleurs avec repositories simulés — aucune base requise. 322 tests (2026-10-08). |
+| Intégration | `npm run test:integration` | Vraies routes contre PostgreSQL réel (migration appliquée) : contraintes du MPD, parcours AG, concurrence vote/clôture. 181 tests (184 avec `REDIS_URL` défini), refusent de démarrer si `DATABASE_URL` n'est pas une base `_test`. |
 | Frontend (composants) | `npm run test:frontend` | Vitest + React Testing Library (jsdom) : garde de route par rôle (`RouteProtegee`), logique de vote d'une AG (`AssembleeDetail`), tableaux de bord syndic et copropriétaire, contexte du thème, éditeur d'apparence et anneau de teinte, tokens du design system (`tokens.test.ts` : valeurs par défaut exactes, aucun hex hors `index.css`/`theme/`), et moteur de couleurs (`theme/*.test.ts` : conversions OKLCH sur valeurs de référence, balayage de 360 teintes × 5 intensités pour tous les seuils de contraste) avec l'API mockée. 150 tests. Branché en CI. |
 | E2E | `npm run test:e2e --workspace=apps/frontend` | Backend + frontend + PostgreSQL réellement démarrés (Playwright) : connexion/inscription, cycle complet d'une AG, incident, charges. 37 scénarios, dont l'audit d'accessibilité axe-core de tous les écrans (et, avec un thème vert puis un jaune très vif, de la page Mon compte et des écrans principaux) le parcours complet de personnalisation des couleurs, et l'en-tête (bouton « Mon compte », avatar qui suit le thème, mobile). |
 | Sécurité transverse | `apps/backend/src/security-headers.test.ts` | Helmet, CORS, rate limiting global (T-25). |
@@ -42,7 +42,7 @@ Rapport HTML détaillé (fichier par fichier) : `apps/backend/coverage/combinee/
 
 `npm run loadtest --workspace=apps/backend` (`loadtest/charge.mjs`) — manquait entièrement avant l'audit pré-production (compétence 9). Script Node pur, sans dépendance (`artillery` et `autocannon` traînent tous deux une vulnérabilité modérée transitive sans version qui l'évite — écartés). 10 utilisateurs virtuels pendant 20s, mélange visiteur anonyme / syndic / copropriétaire, contre une base de test jetable (jamais dev/prod). Seuils : p95 < 500 ms sur les routes de lecture, < 1000 ms sur `/auth/*` (délibérément plus lent : bcrypt facteur 12, résistance à la force brute — pas un défaut de performance).
 
-Résultat mesuré le 2026-09-28 : **1373 requêtes, 0 erreur**, tous les seuils respectés (p95 lecture 11–17 ms, p95 `/auth/connexion` 660 ms, dominé par bcrypt comme attendu). Reste un smoke test, pas une étude de capacité complète (pas de palier de montée en charge progressif, pas de test de rupture).
+Dernier résultat, mesuré le 2026-09-29 lors du passage complet (`evidence/passage-complet-2026-09-29.md`) : **1222 requêtes, 0 erreur**, tous les seuils respectés (p95 lecture 51–56 ms, p95 `/auth/connexion` 676 ms, dominé par bcrypt comme attendu). Une première mesure, le 2026-09-28, avait donné 1373 requêtes sans erreur (p95 lecture 11–17 ms, connexion 660 ms) : le nombre de requêtes et les temps varient d'une exécution à l'autre selon la charge de la machine. Reste un smoke test, pas une étude de capacité complète (pas de palier de montée en charge progressif, pas de test de rupture).
 
 ## Traçabilité UT/IT (Doc 6)
 

@@ -4,6 +4,18 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ## [Unreleased]
 
+### Security
+
+- **Rôle applicatif à droits limités pour la base de production** : le backend ne se connecte plus avec le compte propriétaire `coprophub` (superutilisateur de l'instance) mais avec `coprophub_app`, qui ne peut que lire et écrire des lignes (`SELECT, INSERT, UPDATE, DELETE`), sans créer, modifier, supprimer ou vider une table, ni créer de rôle. Nouveau service `roles` dans `docker-compose.prod.yml`, exécuté avant les migrations à chaque démarrage (base neuve comme base existante), droits par défaut pour les tables des migrations suivantes, nouvelle variable `DB_APP_PASSWORD`. Vérifié sur PostgreSQL 16 local (droits accordés et refusés, base neuve et existante) ; les 184 tests d'intégration passent avec ce rôle ; nouvelle étape de CI qui rejoue les refus sur la pile de production construite.
+
+### Added
+
+- **Droit à l'effacement (RGPD)** : `POST /utilisateurs/:idUtilisateur/anonymisation` (syndic) anonymise un ancien copropriétaire (nom, e-mail, mot de passe remplacés ; sessions fermées ; notifications coupées ; demandes de réinitialisation supprimées) en conservant ses votes, nécessaires aux résultats des AG clôturées. 409 si le copropriétaire possède encore un lot. Journalisé (`COPROPRIETAIRE_ANONYMISE`). Tests : 12 unitaires, 3 d'intégration sur base réelle.
+
+### Docs
+
+- Corrections de cohérence : 37 cas de test du calculateur de résultats (et non 29), dernier test de charge (1222 requêtes le 2026-09-29) aligné sur le relevé de passage, déclencheurs de la CI (`main` et `master`), « Nombre d'inscrits figé » dans le dictionnaire de données, décomptes de tests mis à jour (322 unitaires backend, 184 d'intégration).
+
 ### Removed
 
 - Export de la maquette Figma (`proto/`), qui ne servait plus que de référence visuelle : le portage dans `apps/frontend` est terminé.

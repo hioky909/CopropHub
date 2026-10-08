@@ -48,7 +48,7 @@ Colonne « RGPD » : **personnelle** (identifie une personne), **sensible** (fin
 | --- | --- | --- | --- | --- | --- |
 | Date de l'assemblée | date_ag | Date | — | Obligatoire | technique |
 | Étape de l'assemblée | statut | Alphabétique | — | Obligatoire, planifiée par défaut ; planifiée, ouverte puis clôturée | technique |
-| Nombre de votants figé | nombre_inscrits_geles | Numérique | — | Facultatif ; fixé à l'ouverture du vote, jamais recalculé | technique |
+| Nombre d'inscrits figé | nombre_inscrits_geles | Numérique | — | Facultatif ; fixé à l'ouverture du vote, jamais recalculé | technique |
 
 ## Résolution
 

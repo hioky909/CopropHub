@@ -32,7 +32,7 @@ Le conseil syndical est un compte copropriétaire avec un drapeau supplémentair
 
 ## Diagramme de classes (Business Layer)
 
-Les classes du Business Layer (`apps/backend/src/services/`) portent les règles métier, pas les entités du MPD elles-mêmes (celles-ci sont gérées par Prisma). La classe clé pour la certification est `ResultatCalculateur` — logique pure, sans dépendance à Express ni Prisma, entièrement testable en isolation (voir `resultat-calculateur.test.ts`, 29 cas aux frontières).
+Les classes du Business Layer (`apps/backend/src/services/`) portent les règles métier, pas les entités du MPD elles-mêmes (celles-ci sont gérées par Prisma). La classe clé pour la certification est `ResultatCalculateur` — logique pure, sans dépendance à Express ni Prisma, entièrement testable en isolation (voir `resultat-calculateur.test.ts`, 37 cas aux frontières).
 
 ```mermaid
 classDiagram
@@ -60,7 +60,7 @@ classDiagram
   IncidentService --> AutorisationService : vérifie le rôle
 ```
 
-`ResultatCalculateur` n'a pas d'état — une fonction pure `(type, comptes, nombreInscrits) → statut`, ce qui permet de la tester en 29 cas aux frontières sans aucun mock.
+`ResultatCalculateur` n'a pas d'état — une fonction pure `(type, comptes, nombreInscrits) → statut`, ce qui permet de la tester en 37 cas aux frontières sans aucun mock.
 
 ## Diagrammes de séquence
 
