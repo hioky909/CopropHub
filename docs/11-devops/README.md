@@ -2,7 +2,7 @@
 
 ## Pipeline CI (`.github/workflows/ci.yml`)
 
-Déclenché sur pull request et push vers `main`. Job `quality`, avec un service PostgreSQL 16 et un service Redis 7 (rate limiting/révocation de session, testés réellement, pas seulement le repli en mémoire) :
+Déclenché sur pull request et push vers `main` ou `master`. Job `quality`, avec un service PostgreSQL 16 et un service Redis 7 (rate limiting/révocation de session, testés réellement, pas seulement le repli en mémoire) :
 
 ```
 checkout → npm ci → prisma generate → lint → typecheck
@@ -14,7 +14,7 @@ checkout → npm ci → prisma generate → lint → typecheck
 
 Job `livraison`, déclenché seulement après le succès de `quality` sur un push vers `main` ou `master` :
 1. construit les trois images de production (`backend`, `web`, `outils`) ;
-2. les **vérifie en conditions réelles** : démarre la pile (base, migrations, backend, Caddy en HTTPS local), amorce un syndic et lance `deploy/verifier-production.sh` (12 contrôles : application, repli de la SPA, API, HSTS, CSP, en-têtes, pas de cookie sur une connexion refusée) ;
+2. les **vérifie en conditions réelles** : démarre la pile (base, migrations, backend, Caddy en HTTPS local), amorce un syndic et lance `deploy/verifier-production.sh` (12 contrôles : application, repli de la SPA, API, HSTS, CSP, en-têtes, pas de cookie sur une connexion refusée), puis vérifie les droits du rôle applicatif de la base (il lit une table ; créer une table, en supprimer une ou la vider est refusé) ;
 3. les publie sur GitHub Container Registry (`ghcr.io/<organisation>/coprophub/{backend,web,outils}`, étiquettes = commit et `latest`) ;
 4. **si** les secrets `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_SSH_KEY`, `DEPLOY_PATH` sont configurés : met le serveur à jour par SSH (`pull` puis `up -d`) et, avec `DEPLOY_DOMAINE`, relance le contrôle de fumée sur le site public. Sans ces secrets, la publication des images s'arrête là.
 
@@ -52,13 +52,13 @@ npm run demo:seed --workspace=apps/backend
 Prérequis : une machine avec Docker, un nom de domaine dont le DNS pointe dessus, les ports 80 et 443 ouverts. Fichiers : `docker-compose.prod.yml`, `deploy/` (Caddyfile, Dockerfile.web, scripts), `.env.production.example`.
 
 ```bash
-cp .env.production.example .env.production        # renseigner DOMAINE, DB_PASSWORD, SESSION_SECRET, SMTP_*, SEED_*
+cp .env.production.example .env.production        # renseigner DOMAINE, DB_PASSWORD, DB_APP_PASSWORD, SESSION_SECRET, SMTP_*, SEED_*
 docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
 docker compose -f docker-compose.prod.yml --env-file .env.production --profile outils run --rm seed   # une seule fois
 ./deploy/verifier-production.sh https://votre-domaine
 ```
 
-**Architecture** : seul `web` (Caddy) publie des ports. Il obtient et renouvelle seul le certificat Let's Encrypt (HTTPS, HTTP/2 et HTTP/3), sert l'application et transmet `/api/*` au backend (préfixe retiré) : **une seule origine**, donc cookie de session `Secure; HttpOnly; SameSite=Strict` sans CORS, et aucune requête vers un site tiers (la police Inter est auto-hébergée). Il ajoute HSTS, une CSP stricte (`default-src 'self'`, aucun script en ligne), `X-Frame-Options: DENY`, `nosniff`. La base et le backend ne sont pas joignables depuis l'extérieur. `TRUST_PROXY=1` fait lire au backend l'adresse réelle du visiteur (Caddy écrase tout `X-Forwarded-For` reçu : un client ne peut pas usurper son adresse pour échapper aux limites de débit).
+**Architecture** : seul `web` (Caddy) publie des ports. Il obtient et renouvelle seul le certificat Let's Encrypt (HTTPS, HTTP/2 et HTTP/3), sert l'application et transmet `/api/*` au backend (préfixe retiré) : **une seule origine**, donc cookie de session `Secure; HttpOnly; SameSite=Strict` sans CORS, et aucune requête vers un site tiers (la police Inter est auto-hébergée). Il ajoute HSTS, une CSP stricte (`default-src 'self'`, aucun script en ligne), `X-Frame-Options: DENY`, `nosniff`. La base et le backend ne sont pas joignables depuis l'extérieur. Le backend se connecte à la base avec le rôle `coprophub_app`, qui ne peut que lire et écrire des lignes ; le compte propriétaire `coprophub` ne sert qu'aux migrations et à l'amorçage (service `roles`, cf. `docs/09-database`). `TRUST_PROXY=1` fait lire au backend l'adresse réelle du visiteur (Caddy écrase tout `X-Forwarded-For` reçu : un client ne peut pas usurper son adresse pour échapper aux limites de débit).
 
 **Premier compte** : aucune valeur par défaut en production. `SEED_IMMEUBLE_*` et `SEED_SYNDIC_*` sont obligatoires (mot de passe d'au moins 12 caractères, le mot de passe de développement du dépôt est refusé) ; à changer ensuite depuis « Mon compte ».
 

@@ -83,6 +83,7 @@ jobs:
         env:
           DOMAINE: copro.example.org
           DB_PASSWORD: ci
+          DB_APP_PASSWORD: ci
           SESSION_SECRET: ci
 
       - name: Installer les navigateurs Playwright
@@ -127,6 +128,7 @@ jobs:
           cat > .env.ci <<EOF
           DOMAINE=localhost
           DB_PASSWORD=$(openssl rand -hex 16)
+          DB_APP_PASSWORD=$(openssl rand -hex 16)
           SESSION_SECRET=$(openssl rand -base64 36)
           HTTP_PORT=18080
           HTTPS_PORT=18443
@@ -144,6 +146,14 @@ jobs:
           docker compose -f docker-compose.prod.yml --env-file .env.ci --profile outils run --rm seed
           for i in $(seq 1 30); do curl -sk -o /dev/null https://localhost:18443/api/health && break; sleep 2; done
           bash ./deploy/verifier-production.sh https://localhost:18443 --insecure
+
+      - name: Droits du rôle applicatif de la base (lit et écrit des lignes, ne touche pas au schéma)
+        run: |
+          app="docker compose -f docker-compose.prod.yml --env-file .env.ci exec -T db psql -v ON_ERROR_STOP=1 -U coprophub_app -d coprophub -c"
+          $app "SELECT count(*) FROM utilisateur"
+          if $app "CREATE TABLE intrus (id int)"; then echo "le rôle applicatif peut créer une table" >&2; exit 1; fi
+          if $app "DROP TABLE vote"; then echo "le rôle applicatif peut supprimer une table" >&2; exit 1; fi
+          if $app "TRUNCATE charge"; then echo "le rôle applicatif peut vider une table" >&2; exit 1; fi
 
       - name: Journaux en cas d'échec
         if: failure()
