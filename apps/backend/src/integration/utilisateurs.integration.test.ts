@@ -3,6 +3,8 @@ import request from 'supertest';
 import { createApp } from '../app.js';
 import {
   cookieSession,
+  creerAg,
+  creerCoproprietaireHabilite,
   creerImmeuble,
   creerLot,
   creerUtilisateur,
@@ -416,5 +418,66 @@ describe('conseil syndical : désigner et retirer un membre', () => {
       (await prisma.utilisateur.findUniqueOrThrow({ where: { id: copro.id } }))
         .estMembreConseilSyndical,
     ).toBe(false);
+  });
+});
+
+describe("anonymisation d'un ancien copropriétaire (RGPD, droit à l'effacement)", () => {
+  const anonymiser = (idUtilisateur: string, cookie = cookieSyndic) =>
+    request(app).post(`/utilisateurs/${idUtilisateur}/anonymisation`).set('Cookie', cookie);
+
+  it('efface nom et e-mail, ferme le compte et conserve ses votes', async () => {
+    const ancien = await creerUtilisateur({ email: 'ancien@test.local', conseilSyndical: true });
+    const lot = await creerLot(immeuble.id, '1');
+    await prisma.rattachement.create({
+      data: {
+        idLot: lot.id,
+        idUtilisateur: ancien.id,
+        dateDebut: new Date('2024-01-01'),
+        dateFin: new Date('2026-01-01'),
+      },
+    });
+    const ag = await creerAg(immeuble.id, 'CLOTUREE', [{ libelle: 'R', typeMajorite: 'SIMPLE' }]);
+    await prisma.vote.create({
+      data: { idResolution: ag.resolutions[0]!.id, idUtilisateur: ancien.id, valeur: 'OUI' },
+    });
+    await prisma.reinitialisationMotDePasse.create({
+      data: {
+        idUtilisateur: ancien.id,
+        jetonHash: 'a'.repeat(64),
+        dateExpiration: new Date(Date.now() + 3_600_000),
+      },
+    });
+    const cookieAncien = cookieSession(ancien.id);
+
+    const reponse = await anonymiser(ancien.id);
+
+    expect(reponse.status).toBe(200);
+    const enBase = await prisma.utilisateur.findUniqueOrThrow({ where: { id: ancien.id } });
+    expect(enBase.nom).toBe('Copropriétaire anonymisé');
+    expect(enBase.email).toBe(`anonyme-${ancien.id}@anonymise.invalid`);
+    expect(enBase.motDePasseHash).not.toBe(ancien.motDePasseHash);
+    expect(enBase.estMembreConseilSyndical).toBe(false);
+    expect(enBase.notificationsEmail).toBe(false);
+    expect(await prisma.vote.count({ where: { idUtilisateur: ancien.id } })).toBe(1);
+    expect(await prisma.reinitialisationMotDePasse.count({ where: { idUtilisateur: ancien.id } })).toBe(0);
+    // La session ouverte avant l'anonymisation n'est plus acceptée.
+    expect((await request(app).get('/utilisateurs/moi/lots').set('Cookie', cookieAncien)).status).toBe(401);
+  });
+
+  it('409 tant que le copropriétaire possède encore un lot, sans rien modifier', async () => {
+    const proprietaire = await creerCoproprietaireHabilite(immeuble.id, '2');
+    const reponse = await anonymiser(proprietaire.id);
+    expect(reponse.status).toBe(409);
+    const enBase = await prisma.utilisateur.findUniqueOrThrow({ where: { id: proprietaire.id } });
+    expect(enBase.email).toBe(proprietaire.email);
+  });
+
+  it('422 pour un compte syndic, 404 pour un compte inconnu, 403 pour un copropriétaire', async () => {
+    const autreSyndic = await creerUtilisateur({ typeCompte: 'SYNDIC' });
+    expect((await anonymiser(autreSyndic.id)).status).toBe(422);
+    expect((await anonymiser('00000000-0000-4000-8000-000000000000')).status).toBe(404);
+    const copro = await creerUtilisateur();
+    const cible = await creerUtilisateur();
+    expect((await anonymiser(cible.id, cookieSession(copro.id))).status).toBe(403);
   });
 });

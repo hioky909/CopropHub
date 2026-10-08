@@ -109,6 +109,37 @@ export const utilisateurRepository = {
     return prisma.utilisateur.findUnique({ where: { id } });
   },
 
+  /**
+   * Droit à l'effacement (RGPD, art. 17) : remplace les données
+   * personnelles d'un copropriétaire et ferme le compte, dans une seule
+   * transaction. La ligne est conservée (et donc ses votes et ses incidents)
+   * pour que les résultats des AG clôturées restent exacts ; seuls les
+   * jetons de réinitialisation, devenus inutiles, sont supprimés.
+   * Retourne `null` si aucun copropriétaire ne correspond.
+   */
+  async anonymiser(id: string, donnees: { nom: string; email: string; motDePasseHash: string }) {
+    return prisma.$transaction(async (tx) => {
+      const resultat = await tx.utilisateur.updateMany({
+        where: { id, typeCompte: 'COPROPRIETAIRE' },
+        data: {
+          nom: donnees.nom,
+          email: donnees.email,
+          motDePasseHash: donnees.motDePasseHash,
+          estMembreConseilSyndical: false,
+          themeTeinte: null,
+          themeIntensite: null,
+          notificationsEmail: false,
+          sessionsValidesDepuis: new Date(),
+        },
+      });
+      if (resultat.count === 0) {
+        return null;
+      }
+      await tx.reinitialisationMotDePasse.deleteMany({ where: { idUtilisateur: id } });
+      return tx.utilisateur.findUnique({ where: { id } });
+    });
+  },
+
   listerCoproprietaires() {
     return prisma.utilisateur.findMany({
       where: { typeCompte: 'COPROPRIETAIRE' },

@@ -1,5 +1,6 @@
 import { utilisateurRepository } from '../repositories/utilisateur.repository.js';
 import { lotRepository } from '../repositories/lot.repository.js';
+import { randomBytes } from 'node:crypto';
 import { motDePasseService } from './mot-de-passe.service.js';
 
 /**
@@ -50,6 +51,19 @@ export class CompteNonCoproprietaireError extends Error {
     this.name = 'CompteNonCoproprietaireError';
   }
 }
+
+export class LotsEncoreRattachesError extends Error {
+  constructor() {
+    super("Ce copropriétaire possède encore des lots : transférez-les avant d'anonymiser le compte.");
+    this.name = 'LotsEncoreRattachesError';
+  }
+}
+
+/** Nom affiché à la place de celui d'un copropriétaire anonymisé. */
+export const NOM_ANONYMISE = 'Copropriétaire anonymisé';
+
+/** Domaine réservé (RFC 2606) : aucun e-mail ne peut y être délivré. */
+const DOMAINE_ANONYMISE = 'anonymise.invalid';
 
 export const utilisateurService = {
   async listerSyndics() {
@@ -157,5 +171,39 @@ export const utilisateurService = {
       throw new RattachementConcurrentError();
     }
     return cree;
+  },
+
+  /**
+   * Droit à l'effacement (RGPD) : le syndic anonymise un ancien
+   * copropriétaire. Le nom et l'e-mail sont remplacés, le mot de passe
+   * devient une empreinte d'un secret aléatoire jamais conservé et toutes
+   * les sessions sont invalidées : le compte ne peut plus servir. Les votes
+   * sont conservés, sans lien avec une personne identifiable, car ils
+   * fondent les résultats des AG déjà clôturées. Un copropriétaire qui
+   * possède encore un lot ne peut pas être anonymisé (409) : le lot doit
+   * d'abord être rattaché à son nouveau propriétaire.
+   */
+  async anonymiserCoproprietaire(idUtilisateur: string) {
+    const utilisateur = await utilisateurRepository.parId(idUtilisateur);
+    if (!utilisateur) {
+      throw new UtilisateurIntrouvableError();
+    }
+    if (utilisateur.typeCompte !== 'COPROPRIETAIRE') {
+      throw new CompteNonCoproprietaireError();
+    }
+    const lots = await lotRepository.lotsRattachesAUtilisateur(idUtilisateur);
+    if (lots.length > 0) {
+      throw new LotsEncoreRattachesError();
+    }
+    const motDePasseHash = await motDePasseService.hacher(randomBytes(32).toString('hex'));
+    const anonymise = await utilisateurRepository.anonymiser(idUtilisateur, {
+      nom: NOM_ANONYMISE,
+      email: `anonyme-${idUtilisateur}@${DOMAINE_ANONYMISE}`,
+      motDePasseHash,
+    });
+    if (!anonymise) {
+      throw new UtilisateurIntrouvableError();
+    }
+    return anonymise;
   },
 };

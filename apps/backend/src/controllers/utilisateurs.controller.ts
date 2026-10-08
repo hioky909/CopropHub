@@ -8,6 +8,7 @@ import {
   UtilisateurIntrouvableError,
   RattachementConcurrentError,
   CompteNonCoproprietaireError,
+  LotsEncoreRattachesError,
 } from '../services/utilisateur.service.js';
 import {
   lotService,
@@ -317,6 +318,41 @@ utilisateursRouter.patch(
       }
       if (erreur instanceof CompteNonCoproprietaireError) {
         res.status(422).json({ erreur: erreur.message });
+        return;
+      }
+      throw erreur;
+    }
+  }),
+);
+
+/**
+ * Droit à l'effacement (RGPD) : anonymise un ancien copropriétaire et ferme
+ * son compte. Ses votes restent comptés dans les AG clôturées.
+ */
+utilisateursRouter.post(
+  '/:idUtilisateur/anonymisation',
+  asyncHandler(async (req, res) => {
+    const params = paramsUtilisateurSchema.safeParse(req.params);
+    if (!params.success) {
+      res.status(422).json({ erreur: 'Requête invalide.' });
+      return;
+    }
+
+    try {
+      const utilisateur = await utilisateurService.anonymiserCoproprietaire(params.data.idUtilisateur);
+      journalService.journaliser('COPROPRIETAIRE_ANONYMISE', req.utilisateur!.id, utilisateur.id);
+      res.status(200).json({ utilisateur: { id: utilisateur.id, nom: utilisateur.nom } });
+    } catch (erreur) {
+      if (erreur instanceof UtilisateurIntrouvableError) {
+        res.status(404).json({ erreur: erreur.message });
+        return;
+      }
+      if (erreur instanceof CompteNonCoproprietaireError) {
+        res.status(422).json({ erreur: 'Seul un compte copropriétaire peut être anonymisé.' });
+        return;
+      }
+      if (erreur instanceof LotsEncoreRattachesError) {
+        res.status(409).json({ erreur: erreur.message });
         return;
       }
       throw erreur;
