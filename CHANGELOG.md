@@ -10,6 +10,7 @@ Format basé sur [Keep a Changelog](https://keepachangelog.com/fr/1.1.0/), versi
 
 ### Added
 
+- **Tests XSS automatisés** (NF-04, jusqu'ici vérifié à la main) : `securite-xss.test.tsx` (composant : charges utiles venues de l'API affichées comme du texte, aucune balise créée ; analyse de tout le code frontend : aucune API qui contourne l'échappement de React) et `e2e/xss.spec.ts` (Playwright : charge utile dans l'intitulé d'une résolution affichée sans exécution chez le copropriétaire ; titre d'incident balisé refusé). Les deux échouent bien si le rendu passe par `dangerouslySetInnerHTML`. 152 tests de composants, 39 scénarios E2E, tous au vert.
 - **Droit à l'effacement (RGPD)** : `POST /utilisateurs/:idUtilisateur/anonymisation` (syndic) anonymise un ancien copropriétaire (nom, e-mail, mot de passe remplacés ; sessions fermées ; notifications coupées ; demandes de réinitialisation supprimées) en conservant ses votes, nécessaires aux résultats des AG clôturées. 409 si le copropriétaire possède encore un lot. Journalisé (`COPROPRIETAIRE_ANONYMISE`). Tests : 12 unitaires, 3 d'intégration sur base réelle.
 
 ### Docs
