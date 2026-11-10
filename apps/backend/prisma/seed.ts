@@ -40,7 +40,9 @@ async function main() {
       typeCompte: 'SYNDIC',
     },
   });
-  console.log(`Compte syndic créé : ${syndic.email}${process.env.NODE_ENV === 'production' ? '' : ' (mot de passe de développement, à changer)'}.`);
+  console.log(
+    `Compte syndic créé : ${syndic.email}${process.env.NODE_ENV === 'production' ? '' : ' (mot de passe de développement, à changer)'}.`,
+  );
 }
 
 main()
