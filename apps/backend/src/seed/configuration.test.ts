@@ -6,7 +6,7 @@ const COMPLETE = {
   SEED_IMMEUBLE_NOM: 'Résidence des Tilleuls',
   SEED_IMMEUBLE_ADRESSE: '12 rue des Lilas, 75011 Paris',
   SEED_SYNDIC_NOM: 'Cabinet Martin',
-  SEED_SYNDIC_EMAIL: 'Contact@Cabinet-Martin.fr',
+  SEED_SYNDIC_EMAIL: 'Contact@Cabinet-Martin.example',
   SEED_SYNDIC_MOT_DE_PASSE: 'un-mot-de-passe-vraiment-solide',
 };
 
@@ -44,7 +44,7 @@ describe('lireConfigurationSeed — production', () => {
       ...COMPLETE,
       SEED_IMMEUBLE_NOM: '  Résidence des Tilleuls  ',
     });
-    expect(c.syndic.email).toBe('contact@cabinet-martin.fr');
+    expect(c.syndic.email).toBe('contact@cabinet-martin.example');
     expect(c.immeuble.nom).toBe('Résidence des Tilleuls');
     expect(c.syndic.motDePasse).toBe('un-mot-de-passe-vraiment-solide');
   });
