@@ -133,3 +133,7 @@ npm run test:integration
 ```
 
 La CI (`.github/workflows/ci.yml`) exécute ces étapes (intégration et E2E comprises, sur un service PostgreSQL) plus un audit de dépendances à chaque pull request, et déploie depuis `main` après leur succès.
+
+## Licence
+
+Code distribué sous licence [MIT](LICENSE).
